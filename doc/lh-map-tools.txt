@@ -1,8 +1,8 @@
 *lh-map-tools.txt*	Tools for helping mappings-definitions
-			For Vim version 5.7.+	Last change: 16th Apr 2006
+			For Vim version 5.7.+	Last change: 19th Feb 2008
 
 		   Map Tools MANUAL	by Luc Hermitte
-		    Version 0.6.0
+		    Version 0.6.1
 
 
 ------------------------------------------------------------------------------
@@ -486,6 +486,19 @@ I have also added some other features:
     'jump backward' mechanism will select the current marker (the cursor is
     within) if applicable.  Otherwise, we jump to the marker before the one
     the cursor is within.
+
+		    *b:marker_select_current_fwd* *g:marker_select_current_fwd*
+(*) When the option |g:marker_select_current_fwd| (default 1) is set to 1, the
+    'jump forward' mechanism will select the current marker (the cursor is
+    within) if applicable.  Otherwise, we jump to the marker after the one the
+    cursor is within.
+    Notes:
+    - Even if set, and if a marker is currectly selected, we jump to the next
+      before.
+    - A template-expander plugin may need to set momentarilly this option to 1
+      (this is what |mu-template| does to avoid ignoring the first marker)
+    - The last character of a marker is not considered as part of the marker
+      regarding this option.
 
 					*b:marker_center* *g:marker_center*
 (*) When this option is set to 1 (default 1), the line of the marker (we jump
