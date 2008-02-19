@@ -4,7 +4,7 @@
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://hermitte.free.fr/vim/>
 " Last Update:	$Date$
-" Version:	0.6.0
+" Version:	0.6.1
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
@@ -12,6 +12,9 @@
 "URL: http://hermitte.free.fr/vim/ressources/vimfiles/plugin/bracketing.base.vim
 " ======================================================================
 " History:	{{{1
+"	15th Feb 2008   by LH
+"		* g:marker_select_current_fwd to select the current marker when
+"		the cursor on anywhere on it (but the last character)
 "	25th May 2006	by LH
 "		* Workaround for UTF-8.
 "		  Never defined a !imapping! as a call to a script-local
@@ -247,6 +250,7 @@ function! Marker_Jump(...) " {{{2
 
   " if within a marker, and going backward, {{{3
   if (direction == 'b') && !s:Option('marker_select_current', 0)
+    " echomsg 'B, !C'
     let position = line('.') . "normal! ".virtcol('.').'|'
     " then: go to the start of the marker.
     " Principle: {{{
@@ -266,9 +270,31 @@ function! Marker_Jump(...) " {{{2
     "    of "blah «" which is not the beginning of a marker. 
     " }}}
     if searchpair('\V'.emo, '', '\V'.substitute(emc, '.$', '\\zs\0', ''), 'b')
+      echo '1-'.string(getpos('.'))
       if ! searchpair('\V'.emo, '', '\V'.emc, 'n')
+	echo '2-'.string(getpos('.'))
 	" restore cursor position as we are not within a marker.
 	exe position
+	" echomsg position
+      endif
+    endif
+  endif
+  " if within a marker, and going forward, {{{3
+  if (direction == '') && s:Option('marker_select_current_fwd', 1)
+    " This option must be reserved to 
+    " echomsg 'F, C'
+    let position = line('.') . "normal! ".virtcol('.').'|'
+    " then: go to the start of the marker.
+    if searchpair('\V'.emo, '', '\V'.emc, 'w')
+      " echomsg '1-'.string(getpos('.'))
+      if ! searchpair('\V'.emo, '', '\V'.emc, 'b')
+      " echomsg '2-'.string(getpos('.'))
+	" restore cursor position as we are not within a marker.
+	exe position
+	" echomsg position
+      else
+	" echomsg "premature found"
+	return s:DoSelect(emo, emc, delete)
       endif
     endif
   endif
@@ -279,40 +305,45 @@ function! Marker_Jump(...) " {{{2
     " Traitment:	None
     return ""
   else " found! {{{3
-    silent! foldopen!
-    if s:Option('marker_center', 1)
-      exe "normal! zz" 
-    endif
-    if s:Select_or_Echo() " select! {{{4
-      "OldAndVerby: let select = "v/".Marker_Close()."/e\<cr>"
-      let select = 'v'.virtcol('.').'|o'
-      if &selection == 'exclusive' | let select = select . 'l' | endif
-      let c = col('.')
-      " search for the last character of the closing string.
-      call search('\V'.substitute(emc, '.$', '\\zs\0', ''))
-      "Old: let select = 'v!mark_close!'
-      "Old: if s:Select_Empty_Mark() || (getline('.')[col('.')]!=mc)
-      " let se = '\%'.c.'c\zs'.emo.'.\{-}'.emc.'\ze'
-      " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
-      if !delete && 
-	    \ (s:Select_Empty_Mark() || 
-	    \ (matchstr(getline('.'),'\V\%'.c.'c'.emo.'\zs\.\{-}\ze'.emc)!= ''))
-	" Case:		Marker containing a tag, e.g.: «tag»
-	" Traitment:	The marker is selected, going into SELECT-mode
-	return select."\<c-g>"
-      else
-	" Case:		Empty marker, i.e. not containing a tag, e.g.: «»
-	" Traitment:	The marker is deleted, going into INSERT-mode.
-	return select.'"_c'
-      endif
-    else " Echo! {{{4
-      " Case:		g:marker_prefers_select == 0
-      " Traitment:	Echo the tag within the marker
-      return "a:\<c-v>\"\<esc>h\"my/".Marker_Close() . "/\<cr>" .
-	    \ "h@m\<cr>!Cmark_close!"
-    endif
+    return s:DoSelect(emo, emc, delete)
   endif
 endfunction " }}}2
+
+
+function! s:DoSelect(emo, emc, delete)
+  silent! foldopen!
+  if s:Option('marker_center', 1)
+    exe "normal! zz" 
+  endif
+  if s:Select_or_Echo() " select! {{{4
+    "OldAndVerby: let select = "v/".Marker_Close()."/e\<cr>"
+    let select = 'v'.virtcol('.').'|o'
+    if &selection == 'exclusive' | let select = select . 'l' | endif
+    let c = col('.')
+    " search for the last character of the closing string.
+    call search('\V'.substitute(a:emc, '.$', '\\zs\0', ''))
+    "Old: let select = 'v!mark_close!'
+    "Old: if s:Select_Empty_Mark() || (getline('.')[col('.')]!=mc)
+    " let se = '\%'.c.'c\zs'.a:emo.'.\{-}'.a:emc.'\ze'
+    " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
+    if !a:delete && 
+	  \ (s:Select_Empty_Mark() || 
+	  \ (matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''))
+      " Case:		Marker containing a tag, e.g.: «tag»
+      " Traitment:	The marker is selected, going into SELECT-mode
+      return select."\<c-g>"
+    else
+      " Case:		Empty marker, i.e. not containing a tag, e.g.: «»
+      " Traitment:	The marker is deleted, going into INSERT-mode.
+      return select.'"_c'
+    endif
+  else " Echo! {{{4
+    " Case:		g:marker_prefers_select == 0
+    " Traitment:	Echo the tag within the marker
+    return "a:\<c-v>\"\<esc>h\"my/".Marker_Close() . "/\<cr>" .
+	  \ "h@m\<cr>!Cmark_close!"
+  endif
+endfunction
 
 "Old: " Thanks to this trick, we can silently select with "v/pattern/e<cr>"
 "Old: vnoremap <silent> !mark_close! /<c-r>=Marker_Close()<cr>/e<cr>
