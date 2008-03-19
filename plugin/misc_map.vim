@@ -469,8 +469,8 @@ function! InsertSeq(key,seq, ...)
   let seq = ReinterpretEscapedChar(a:seq)
   let seq = seq . (mark ? '!movecursor!' : '')
   " internal mappings
-  inoremap !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
-  inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
+  inoremap <silent> !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
+  inoremap <silent> !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
   "inoremap !cursorhere! <c-\><c-n>:call <sid>CursorHere()<cr>a
   "inoremap !movecursor! <c-\><c-n>:call <sid>GotoMark()<cr>a
   " Build the sequence to insert

@@ -4,7 +4,7 @@
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://hermitte.free.fr/vim/>
 " Last Update:	$Date$
-" Version:	0.6.0
+" Version:	1.0.0
 " Purpose:      {{{1
 " 		This file defines a function (Brackets) that brings
 " 		together several macros dedicated to insert pairs of
@@ -22,6 +22,9 @@
 " 		Hence the trick with the intermediary functions.
 "
 " History:      {{{1
+" Version 1.0.0:
+" 		* Vim 7 required!
+" 		* New way to configure the desired brackets
 " Version 0.6.0:
 " 		* UTF-8 bug fix in Brkt_lt(), Brkt_gt(), Brkt_Dquote()
 " 		* New numerotation used in versionning
@@ -142,6 +145,9 @@ set cpo&vim
 if !exists("*IMAP")
   runtime plugin/imaps.vim
 endif
+
+command! -nargs=+ Brackets call lh#brackets#Define(<f-args>)
+
 " ------------------------------------------------------------------
 " The main function that defines all the key-bindings. " {{{
 function! Brackets()
@@ -180,9 +186,6 @@ function! Brackets()
   if exists('b:cb_cmp') && b:cb_cmp
     if exists('*IMAP')
       call IMAP('<', "\<c-r>=Brkt_lt()\<cr>", &ft)
-      " if !exists('b:cb_ltFn') || 0==b:cb_ltFn
-	" call IMAP('\<', "\<c-r>=Insert_lt_gt(1)\<cr>", &ft)
-      " endif
       call IMAP('>', "\<c-r>=Brkt_gt()\<cr>", &ft)
     else
       imap <buffer> < <c-r>=Brkt_lt()<cr>
@@ -411,13 +414,11 @@ endfunction "}}}
 function! Brkt_lt() " {{{
   if exists('b:cb_ltFn')
     return "\<C-R>=InsertSeq('<'," . b:cb_ltFn . ")\<CR>"
+  elseif exists('*IMAP')
+    return Insert_lt_gt(0)
   else
-    if exists('*IMAP')
-      return Insert_lt_gt(0)
-    else
-      " Is it even useful ?
-      return <SID>EscapableBrackets('<', '\<C-V\><', '\<C-V\>>')
-    endif
+    " Is it even useful ?
+    return <SID>EscapableBrackets('<', '\<C-V\><', '\<C-V\>>')
   endif
 endfunction " }}}
 
