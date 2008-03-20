@@ -1,6 +1,6 @@
 "=============================================================================
 " $Id$
-" File:         map-tools#brackets.vim                                 {{{1
+" File:         map-tools::lh#brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://hermitte.free.fr/vim/>
 " Version:      1.0.0
@@ -12,131 +12,158 @@
 "------------------------------------------------------------------------
 " Installation: «install details»
 " History:      «history»
-" TODO:         «missing features»
+" TODO:         
+" * Update doc
+" * -close= option
+"   --> ">" in HTML
+" * update all the {ft}_brackets.vim ftplugins
+" * :Bracket -list to know all the brackets definitions
+" * :Bracket -clear to remove brackets definitions
+" * Move brackets manipulation functions in this autoload plugin
+" * -surround=function('xxx') option
+" * Try to use it to insert stuff like "while() {}" ?
 " }}}1
 "=============================================================================
 
 let s:cpo_save=&cpo
 set cpo&vim
 
-"------------------------------------------------------------------------
-function! s:IsSet(what) " -> vim-lib (avec IsEmpty)
-  if     type(a:what) == type(0)               | return a:what != 0
-  elseif type(a:what) == type('string')        | return strlen(a:what) != 0
-  elseif type(a:what) == type(function('has')) | return 1
-  elseif type(a:what) == type({}) || type(a:what) == type([])
-    return len(a:what) != 0
-  else                                         | return 0
-  endif
-endfunction
+
+"# Options {{{1
+" Defines the surrounding mappings:
+" - for both VISUAL and select mode -> "v"
+" - for both VISUAL mode only -> "x"
+" NB: can be defined in the .vimrc only
+" todo: find people using the select mode and never the visual mode
+let s:k_vmap_type = lh#option#Get('bracket_surround_in', 'x', 'g')
 
 "------------------------------------------------------------------------
+"# Mappings Toggling {{{1
+"
+"# Globals {{{2
+if !exists('s:definitions') || exists('brackets_clear_definitions')
+  let s:definitions = {}
+endif
 
-function! s:DefineMappings(kind)
-  if exists('b:cb_'.a:kind)
-    let how = b:cb_{a:kind}
-    if type(how) == type(1)
-      " backward compatibility
-      call s:DoDefine(a:kind, {'i':how, 'n':how, 'v':how}) 
-    elseif type(how) == type('string')
-      " backward compatibility
-      call s:DoDefine(a:kind, {'i':how, 'n':1, 'v':1}) 
-    elseif type(how) == type({})
-      call s:DoDefine(a:kind, how)
-    endif
+let s:active = 1
+
+"# Functions {{{2
+
+" Function: Fetch the brackets defined for the current buffer. {{{3
+function! s:GetDefinitions()
+  let bid = bufnr('%')
+  if !has_key(s:definitions, bid)
+    let s:definitions[bid] = []
   endif
-endfunction
-"------------------------------------------------------------------------
-function! s:DoDefineInsertOpen(kind, Open)
-  if s:IsSet(a:Open)
-    if type(a:kind) == type({})
-      let trigger = string({a:kind}.open)
-    else
-      let trigger = string(a:kind)
-    endif
-    let inserter = "<sid>Opener(".trigger.','.string (a:Open). ")"
-    echomsg inserter
-    call s:DoMap(trigger, inserter)
-  endif
+  let crt_definitions = s:definitions[bid]
+  return crt_definitions
 endfunction
 
-function! s:DoDefine(kind, modes)
-  " I- Insert mode mappings
-  if has_key(a:modes, 'i')
-    " 1- determine if we need open and/or close mappings
-    let Choice = a:modes.i
-    if type(Choice) == type(0)
-      let Open  = Choice
-      let Close = Choice
-    elseif type(Choice) == type('string')
-      let Open  = Choice
-      let Close = 1
-    elseif type(Choice) == type({})
-      let Open  = Choice.open
-      let Close = Choice.close
-    elseif type(Choice) == type([])
-      let Open  = Choice[0]
-      let Close = Choice[1]
-    else
-      throw "lh#bracket: unexpected type (".type(Choice).') for '.a:kind.' brackets.'
-    endif
-
-    " 2- define everything
-    let kind = 's:kind_'.a:kind
-    " if s:IsSet(Open)
-      " let inserter = "<sid>Opener(".string({kind}.open).','.string (Open). ")"
-      " call s:DoMap({kind}.open, inserter)
-    " endif
-    if type(Open) == type({})
-      for [trigger,Op] in items(Open)
-        call s:DoDefineInsertOpen(trigger, Op)
-      endfor
-    else
-      call s:DoDefineInsertOpen(kind, Open)
-    endif
-
-    if s:IsSet(Close)
-      " let inserter = s:Closer({kind}.close, Close)
-      let inserter = "<sid>Closer(".string({kind}.close).','.string (Close). ")"
-      call s:DoMap({kind}.close, inserter)
-    endif
-  endif " End: Insert mode
-endfunction
-
-function! s:DoMap(trigger, inserter)
-  if exists('*IMAP')
-    call IMAP(a:trigger,  "\<c-r>=".a:inserter."()\<cr>", &ft)
+" Function: Main function called to toogle bracket mappings. {{{3
+function! lh#brackets#Toggle()
+  " todo: when entering a buffer, update the mappings depending on whether it
+  " has been toggled
+  let crt_definitions = s:GetDefinitions()
+  if s:active
+    for m in crt_definitions
+      call s:UnMap(m)
+    endfor
+    call lh#common#WarningMsg("Brakets mappings deactivated")
   else
-    echomsg 'inoremap <buffer> '.a:trigger.' <c-r>='.a:inserter.'<cr>'
-    exe 'inoremap <buffer> '.a:trigger." \<c-r>=".(a:inserter)."\<cr>"
+    for m in crt_definitions
+      call s:Map(m)
+    endfor
+    call lh#common#WarningMsg("Brakets mappings (re)activated")
+  endif
+  let s:active = 1 - s:active
+endfunction
+
+"# Mappings {{{2
+"todo: move it to common_brackets.vim
+nnoremap <silent> <F9> :call lh#brackets#Toggle()<cr>
+
+"------------------------------------------------------------------------
+
+"# Brackets definition functions {{{1
+"------------------------------------------------------------------------
+
+function! s:UnMap(m)
+  let cmd = a:m.mode[0].'unmap <buffer> '.a:m.trigger
+  if &verbose >= 1 | echomsg cmd | endif
+  exe cmd
+endfunction
+
+function! s:Map(m)
+  let cmd = a:m.mode.'map <buffer> <silent> '.a:m.trigger.' '.a:m.action
+  if &verbose >= 1 | echomsg cmd | endif
+  exe cmd
+endfunction
+
+function! s:DefineMap(mode, trigger, action)
+  let crt_definitions = s:GetDefinitions()
+  let crt_mapping = {}
+  let crt_mapping.trigger = a:trigger
+  let crt_mapping.mode    = a:mode
+  let crt_mapping.action  = a:action
+  if s:active
+    call s:Map(crt_mapping)
+  endif
+  let p = lh#list#Find_if(crt_definitions,
+        \ 'v:val.mode==v:1_.mode && v:val.trigger==v:1_.trigger',
+        \ [crt_mapping])
+  if p == -1
+    call add(crt_definitions, crt_mapping)
+  else
+    if crt_mapping.action != a:action
+      call lh#common#WarningMsg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action."  with ".a:action)
+    elseif &verbose >= 2
+      echomsg "(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action." with ".a:action
+    endif
+    let crt_definitions[p] = crt_mapping
+    endif
+endfunction
+
+function! s:DefineImap(trigger, inserter)
+  if exists('*IMAP')
+    call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
+  else
+    call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>")
   endif
 endfunction
 
-
-function! s:Opener(trigger, Action)
-  if type(a:Action) == type(function('has'))
-    " return "InsertSeq(".a:trigger.",".string(a:Action).")"
-    return InsertSeq(a:trigger,a:Action())
+"------------------------------------------------------------------------
+" NB: this function is made public because IMAPs.vim need it to not be private
+" (s:)
+function! lh#brackets#Opener(trigger, escapable, nl, Open, Close)
+  if type(a:Open) == type(function('has'))
+    return InsertSeq(a:trigger, a:Open())
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
-  elseif a:Action == '\'
-    echomsg "esc"
-    " return "\<c-r>=".s:EscapableBrackets0(a:trigger, '\<c-v\>'.a:trigger,  '\<c-v\>'.s:close[a:trigger])."\<cr>"
-    return s:EscapableBrackets2(a:trigger, '\<c-v\>'.a:trigger,  '\<c-v\>'.s:close[a:trigger])
-  elseif a:Action == "\n"
-    echomsg "nl"
-    return Smart_insert_seq1(a:trigger,
-          \ a:trigger.'\<cr\>'.s:close[a:trigger].'\<esc\>O',
-          \ a:trigger.'\<cr\>'.s:close[a:trigger].Marker_Txt().'\<esc\>O')
+  elseif a:escapable
+    let e = ((getline('.')[col('.')-2] == '\') ? '\\' : "")
+    " todo: support \%(\) with vim
+    " let open = '\<c-v\>'.a:Open
+    " let close = e.'\<c-v\>'.a:Close
+    let open = a:Open
+    let close = e.a:Close
   else
-    echomsg "smart"
-    return Smart_insert_seq1(a:trigger,
-          \ a:trigger.s:close[a:trigger].'\<esc\>i',
-          \ a:trigger.s:close[a:trigger].Marker_Txt().'\<esc\>F'.a:trigger.'a')
+    let open = a:Open
+    let close = a:Close
   endif
+
+  if strlen(a:nl) > 0
+    " Cannot use the following generic line because &cinkey does not always
+    " work and !cursorhere! does not provokes a reindentation
+    "  :return InsertSeq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
+    " hence the following solution
+    return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
+  else
+    return InsertSeq(a:trigger, open.'!cursorhere!'.close.'!mark!')
 endfunction
 
-function! s:Closer(trigger, Action)
+
+"------------------------------------------------------------------------
+function!lh#brackets#Closer(trigger, Action)
   if type(a:Action) == type(function('has'))
     return InsertSeq(a:trigger,a:Action())
   elseif has('*IMAP')
@@ -146,6 +173,7 @@ function! s:Closer(trigger, Action)
   endif
 endfunction
 
+"------------------------------------------------------------------------
 function! s:JumpOrClose(trigger)
   if b:cb_jump_on_close && lh#position#CharAtMark('.') == a:trigger
     " todo: detect even if there is a newline in between
@@ -154,6 +182,7 @@ function! s:JumpOrClose(trigger)
     return a:trigger
   endif
 endfunction
+
 "------------------------------------------------------------------------
 " Function: s:ImapBrackets(obrkt, cbrkt, esc, nl)  {{{
 " Internal function.
@@ -179,102 +208,16 @@ function! s:ImapBrackets(obrkt, cbrkt, esc, nl)
   endif
 endfunction "}}}
 "------------------------------------------------------------------------
-let s:kind_round = {
-      \ 'open': '(', 'close': ')'
-      \ }
-let s:kind_square = {
-      \ 'open': '[', 'close': ']'
-      \ }
-let s:kind_curly = {
-      \ 'open': '{', 'close': '}'
-      \ }
-let s:kind_angle = {
-      \ 'open': '<', 'close': '>'
-      \ }
-let s:inserters = {
-      \ '<': 'Brkt_lt()'         , '>': 'gt',
-      \ '[': 'square_open', ']': 'square_close'
-      \ }
-let s:close = {
-      \ '[': ']' ,
-      \ '(': ')' ,
-      \ '{': '}' ,
-      \ '<': '>' ,
-      \ "'": "'" ,
-      \ '"': '"' }
 
-" s:EscapableBrackets, and s:EscapableBracketsLn are two different functions
-" in order to acheive a little optimisation
-function! s:EscapableBrackets0(key, left, right) " {{{
-  let r = ((getline('.')[col('.')-2] == '\') ? '\\\\' : "") . a:right
-  let expr1 = a:left.r.'\<esc\>i'
-  let expr2 = a:left.r.'!mark!\<esc\>F'.a:key.'a'
-  if exists('b:usemarks') && b:usemarks
-    return "MapNoContext('".a:key."',BuildMapSeq('".expr2."'))"
-  else
-    return "MapNoContext('".a:key."', '".expr1."')"
-  endif
-endfunction " }}}
-
-function! s:EscapableBrackets2(key, left, right) " {{{
-  let r = ((getline('.')[col('.')-2] == '\') ? '\\' : "") . a:right
-  let expr = InsertSeq(a:key, a:left.'!cursorhere!'.r.'!mark!')
-  return expr
-endfunction " }}}
-
-function! s:EscapableBracketsLn(key, left, right) " {{{
-  let r = ((getline('.')[col('.')-2] == '\') ? '\\\\' : "") . a:right
-  let expr1 = a:left.'\<cr\>'.r.'\<esc\>O'
-  let expr2 = a:left.'\<cr\>'.r.'!mark!\<esc\>O'
-  if exists('b:usemarks') && b:usemarks
-    return "MapNoContext('".a:key."',BuildMapSeq('".expr2."'))"
-  else
-    return "MapNoContext('".a:key."', '".expr1."')"
-  endif
-endfunction " }}}
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
-function! s:DefineImap(trigger, inserter)
-  if exists('*IMAP')
-    call IMAP(a:trigger,  "\<c-r>=".a:inserter."()\<cr>", &ft)
-  else
-    echomsg 'inoremap <buffer> '.a:trigger.' <c-r>='.a:inserter.'<cr>'
-    exe 'inoremap <buffer> '.a:trigger." \<c-r>=".(a:inserter)."\<cr>"
-  endif
-endfunction
-
-function! s:Open(trigger, escapable, nl, Open, Close)
-  if type(a:Open) == type(function('has'))
-    return InsertSeq(a:trigger, a:Open())
-  elseif has('*IMAP')
-    return s:ImapBrackets(a:trigger)
-  elseif a:escapable
-    let e = ((getline('.')[col('.')-2] == '\') ? '\\' : "")
-    " let open = '\<c-v\>'.a:Open
-    " let close = e.'\<c-v\>'.a:Close
-    let open = a:Open
-    let close = e.a:Close
-    " return s:EscapableBrackets2(a:trigger, open,  close)
-  else
-    let open = a:Open
-    let close = a:Close
-  endif
-
-  if strlen(a:nl) > 0
-    " cannot use the following because &cinkey does not always work and
-    " !cursorhere! does not provokes a reindentation
-    " return InsertSeq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
-    return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
-  else
-    return InsertSeq(a:trigger, open.'!cursorhere!'.close.'!mark!')
-endfunction
-
 function! lh#brackets#Define(...)
   let nl = ''
   let insert = 1
   let visual = 1
+  let normal = 'default=1'
   let options = []
   for p in a:000
     if     p =~ '-n\%[l]'        | let nl        = '\n'
@@ -282,6 +225,7 @@ function! lh#brackets#Define(...)
     elseif p =~ '-t\%[rigger]'   | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
     elseif p =~ '-i\%[nsert]'    | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
     elseif p =~ '-v\%[isual]'    | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
+    elseif p =~ '-n\%[ormal]'    | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
     elseif p =~ '-o\%[open]'     
       let open = matchstr(p, '-o\%[pen]=\zs.*')
       if open =~ "^function"
@@ -304,34 +248,45 @@ function! lh#brackets#Define(...)
 
   " INSERT-mode open
   if insert
-    let inserter = "<sid>Open(".string(trigger).','. exists('escapable').','.string(nl).
+    let inserter = "lh#brackets#Opener(".string(trigger).','. exists('escapable').','.string(nl).
           \','. string(Open).','.string(Close).")"
     call s:DefineImap(trigger, inserter )
     " INSERT-mode close
     if options[0] != options[1]
-      let inserter = "<sid>Closer(".string(options[1]).','.string (Close). ")"
-      call s:DoMap(options[1], inserter)
+      let inserter = "lh#brackets#Closer(".string(options[1]).','.string (Close). ")"
+      call s:DefineImap(options[1], inserter)
     endif
   endif
 
   " VISUAL-mode surrounding
   if visual
     if strlen(nl) > 0
-      let cmd = 'vnoremap <buffer> '.trigger.' <c-\><c-n>@=Surround('.
-            \ string(options[0].'!cursorhere!').', '.string(options[1].'!mark!').", 1, 1, '', 1, ".string(trigger).")\<cr>"
+      let action = ' <c-\><c-n>@=Surround('.
+            \ string(options[0].'!cursorhere!').', '.
+            \ string(options[1].'!mark!').", 1, 1, '', 1, ".string(trigger).")\<cr>"
     else
-      let cmd = 'vnoremap <buffer> '.trigger.' <c-\><c-n>@=Surround('.
+      let action = ' <c-\><c-n>@=Surround('.
             \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 0)\<cr>"
     endif
-    echomsg cmd
-    exe cmd
+    call s:DefineMap(s:k_vmap_type.'nore', trigger, action)
+
+    if type(normal)==type('string') && normal=="default=1"
+      let normal = 1
+    endif
+  elseif type(normal)==type('string') && normal=="default=1"
+    let normal = 0
   endif
 
-  " call s:DefineMappings('square')
-  " call s:DefineMappings('angle')
-  " call s:DefineMappings('curly')
-  " call s:DefineMappings('round')
+  " NORMAL-mode surrounding
+  if type(normal)==type(1) && normal == 1
+    let normal = strlen(nl)>0 ? 'V' : 'viw'
+  endif
+  if type(normal)!=type(0) || normal != 0
+    call s:DefineMap('n', trigger, normal.trigger)
+  endif
 endfunction
+
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

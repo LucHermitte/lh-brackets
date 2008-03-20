@@ -62,17 +62,19 @@ if exists('*Brackets')
   let b:cb_jump_on_close = 1
   " Re-run brackets() in order to update the mappings regarding the different
   " options.
-  :Brackets -nl { } -visual=0
-  :Brackets -trigger=#{ { } -visual=0
-  :Brackets -nl -trigger=<localleader>{ { } -visual=1 -insert=0
+    :Brackets { } -visual=0 -nl
+    :Brackets { } -visual=0 -trigger=#{ 
+    :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+    :Brackets { } -visual=1 -insert=0
 
-  :Brackets ( )
-  :Brackets [ ]
-  :Brackets -escapable " " -visual=0 -insert=1
-  :Brackets -trigger="" " " -visual=1 -insert=0
-  :Brackets ' ' -visual=0 -insert=1
-  :Brackets -trigger='' ' ' -visual=1 -insert=0
-  :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
+    :Brackets ( )
+    :Brackets [ ] -visual=0
+    :Brackets [ ] -insert=0 -trigger=,[
+    :Brackets " " -visual=0 -insert=1 -escapable
+    :Brackets " " -visual=1 -insert=0 -trigger=""
+    :Brackets ' ' -visual=0 -insert=1
+    :Brackets ' ' -visual=1 -insert=0 -trigger=''
+    :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
 endif
 
 "=============================================================================

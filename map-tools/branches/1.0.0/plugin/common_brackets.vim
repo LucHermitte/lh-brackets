@@ -640,7 +640,7 @@ endfunction " }}}
 " Implementation and other remarks : {{{
 " (*) Whitin the vnoremaps, `>ll at the end put the cursor at the
 "     previously last character of the selected area and slide left twice
-"     (ll) to compensate the addition of the sourrounding characters.
+"     (ll) to compensate the addition of the surrounding characters.
 " (*) The <M-xxx> key-binding used in insert mode apply on the word
 "     currently under the cursor. There also exist the normal mode version
 "     of these macros.
