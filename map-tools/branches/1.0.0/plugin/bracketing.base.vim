@@ -4,7 +4,7 @@
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://hermitte.free.fr/vim/>
 " Last Update:	$Date$
-" Version:	0.6.1
+" Version:	1.0.0
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
@@ -12,6 +12,11 @@
 "URL: http://hermitte.free.fr/vim/ressources/vimfiles/plugin/bracketing.base.vim
 " ======================================================================
 " History:	{{{1
+"	20th Mar 2008:  by LH
+"		* Defect #1 : It is possible to configure the colour used to
+"		highlight the marker
+"	22nd Feb 2008:  by LH
+"		* :SetMarker could accept one argument
 "	15th Feb 2008   by LH
 "		* g:marker_select_current_fwd to select the current marker when
 "		the cursor on anywhere on it (but the last character)
@@ -373,6 +378,9 @@ function! s:ICONV(expr, from, to)  " {{{3
 endfunction
 
 function! s:SetMarker(open, close, ...) " {{{3
+  if a:close == &enc
+    throw ":SetMarker: two arguments expected"
+  endif
   let from = (a:0!=0) ? a:1 : 'latin1'
   " :call Dfunc('s:SetMarker('.a:open.','.a:close.','.from.')')
   
@@ -387,7 +395,7 @@ function! s:SetMarker(open, close, ...) " {{{3
   endif
   " :call Dret("s:SetMarker".ret) 
 endfunction
-command! -nargs=* SetMarker :call <sid>SetMarker(<f-args>, &enc)
+command! -nargs=+ SetMarker :call <sid>SetMarker(<f-args>, &enc)<bar>:call <sid>UpdateHighlight()
 
 function! Marker_Open()            " {{{3
   " call Dfunc('Marker_Open()')
@@ -497,19 +505,28 @@ function! s:Select_Empty_Mark() " or delete them ? {{{3
   return exists("g:marker_select_empty_marks") ? g:marker_select_empty_marks : 1
 endfunction
 
+function! s:Highlight()
+  let default = (&bg == 'dark')
+	\ ? 'guibg=#0d0d0d ctermbg=darkgray'
+	\ : 'guibg=#d0d0d0 ctermbg=lightgray'
+  return s:Option('marker_highlight', default)
+endfunction
+
 " Syntax highlighting of markers   {{{2
 function! s:UpdateHighlight()
+  " echomsg "Update marker color"
   silent! syn clear marker
-  if s:Option('marker_highlight', 1)
+  let hl = s:Highlight()
+  if strlen(hl) > 0
     exe 'syn match marker /'.Marker_Txt('.\{-}').'/ containedin=ALL'
-    hi marker guibg=#d0d0d0 ctermbg=lightgray
+    exe 'hi marker '.hl
   endif
 endfunction
 
-if s:Option('marker_highlight', 1)
+if strlen(s:Highlight()) > 0
   aug markerHL
     au!
-    au BufWinEnter,EncodingChanged * :call s:UpdateHighlight()
+    au BufWinEnter,EncodingChanged,ColorScheme * :call s:UpdateHighlight()
   aug END
 endif
 
