@@ -560,19 +560,74 @@ used by quite all my consequent ftplugins.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Main features~
+
+- context-sensitive
+- insert mode bracket mapping
+- normal & visual surrounding mappings
+- toggable
+- any pair of characters can be considered as a pair of bracket-like
+  characters
+
 								*:Brackets*
 :Bracket [options] {open} {close}~
 
 The options are:
--insert=(0|[1])
--visual=(0|[1])
--normal={select-sequence}
--open=({text}|"function({function-name})"
--close=({text}|"function({function-name})"
--nl=(0|[1])
--trigger={keys-sequence}
+(*) -insert=(Boolean: 0|[1])				*:Brackets-insert*
+    Tells whether a mapping should be provided in insert mode. Default is 1.
+    A typical insert mode mapping will:
+    - be triggered on {open} (unless |:Brackets-trigger| is specified)
+    - insert {open}{close}!mark! and put the cusor between {open} and {close}.
 
-Examples: >
+    A mapping will also be provided on {close}. If *b:cb_jump_on_close* is
+    set, it will insert the {close} sequence, or jump after the {close}
+    sequence under the cursor.
+    NB: not tested with sequences of several characters
+
+(*) -visual=(Boolean: 0|[1])				*:Brackets-visual*
+    Tells whether a mapping should be provided in visual mode. Default is 1.
+    A typical visual mode mapping will:
+    - be triggered on {open} (unless |:Brackets-trigger| is specified)
+    - insert {open} and {close} around the text selected,
+    - and leave the cursor in NORMAL-mode on the {close} sequence.
+
+(*) -normal={select-sequence}				*:Brackets-normal*
+    Tells how the surrounding mapping is applied from the normal mode.
+    If |:Brackets-visual|, or |:Brackets-normal|, is set to 0, no NORMAL-mode
+    mapping will be provided.
+    If |:Brackets-nl| is set to 1, the {select-sequence} defaults to |V|
+    If |:Brackets-nl| is set to 0, the {select-sequence} defaults to "viw" (:h
+    |v_iw|)
+    Otherwise it can be anything as long as it selects text in VISUAL-mode
+    ("vap", "vi(", "|vi,|", etc.)
+
+
+(*) -open=({text}|"function({function-name})"		*:Brackets-open*
+    This option overrides the sequence to insert in the INSERT-mode mapping.
+    The forced value can be any {text} other than {open}, or even a
+    |function()| that can return one string or another depending on the
+    context.
+
+(*) -close=({text}|"function({function-name})"		*:Brackets-close*
+    To be decided/defined
+
+(*) -nl=(0|[1])						*:Brackets-nl*
+    This option tells the mappings will insert newline characters between the
+    {open}, the cursor or the surrounded text, and {close}.
+    In VISUAL-mode, it will set the cursor on the line after {open}, and leave
+    a |marker| after {close}
+    In NORMAL-mode, it will use |V|, by default, to select the current line.
+
+(*) -trigger={keys-sequence}				*:Brackets-trigger*
+    This option permit to trigger the mapping on anything but {open}.
+    This is particulary usefull to have simultanously different mappings, on a
+    same pair of brackets, that surround with newlines, and without.
+
+(*) -escapable=(Boolean: [0]|1)				*:Brackets-escapable*
+    This option tells that INSERT-mode mappings may expand into 
+    {open}<cursor>\{close} is there is a "\" before the cursor.
+    This does not mean anything in VISUAL- and NORMAL-modes.
+
+Examples from {rtp}/ftplugin/c/c_brackets.vim: >
     :Brackets { } -visual=0 -nl
     :Brackets { } -visual=0 -trigger=#{ 
     :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
@@ -586,6 +641,16 @@ Examples: >
     :Brackets ' ' -visual=0 -insert=1
     :Brackets ' ' -visual=1 -insert=0 -trigger=''
     :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
+
+Examples from {rtp}/ftplugin/html/html_brackets.vim: >
+    :Brackets < > -ope=function('lh#html#brackets#lt')
+      \           -clo=function('lh#html#brackets#gt')
+      \           -vis=0
+    :Brackets < > -ins=0 -trig=<localleader><
+
+Examples from {rtp}/ftplugin/tex/tex_brackets.vim: >
+    :Brackets $ $ -visual=0 -insert=1 -escapable
+    :Brackets $ $ -visual=1 -insert=0 -trigger=$$
 
 bla...
 
