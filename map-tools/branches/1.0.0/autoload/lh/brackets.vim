@@ -14,11 +14,9 @@
 " History:      «history»
 " TODO:         
 " * Update doc
-" * -close= option
-"   --> ">" in HTML
-" * update all the {ft}_brackets.vim ftplugins
-" * :Bracket -list to know all the brackets definitions
-" * :Bracket -clear to remove brackets definitions
+" * :Brackets -list to know all the brackets definitions
+" * :Brackets -clear to remove brackets definitions
+" * -context= option
 " * Move brackets manipulation functions in this autoload plugin
 " * -surround=function('xxx') option
 " * Try to use it to insert stuff like "while() {}" ?
@@ -120,7 +118,7 @@ function! s:DefineMap(mode, trigger, action)
       echomsg "(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action." with ".a:action
     endif
     let crt_definitions[p] = crt_mapping
-    endif
+  endif
 endfunction
 
 function! s:DefineImap(trigger, inserter)
@@ -136,7 +134,8 @@ endfunction
 " (s:)
 function! lh#brackets#Opener(trigger, escapable, nl, Open, Close)
   if type(a:Open) == type(function('has'))
-    return InsertSeq(a:trigger, a:Open())
+    let res = InsertSeq(a:trigger, a:Open())
+    return res
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
   elseif a:escapable
@@ -175,7 +174,7 @@ endfunction
 
 "------------------------------------------------------------------------
 function! s:JumpOrClose(trigger)
-  if b:cb_jump_on_close && lh#position#CharAtMark('.') == a:trigger
+  if lh#option#Get('cb_jump_on_close',1) && lh#position#CharAtMark('.') == a:trigger
     " todo: detect even if there is a newline in between
     return "\<right>"
   else
@@ -234,6 +233,14 @@ function! lh#brackets#Define(...)
         let Open = open
       endif
       " let Open = open =~ "^function" ? {open} : open   ## don't work with function()
+    elseif p =~ '-c\%[lose]'     
+      let close = matchstr(p, '-c\%[lose]=\zs.*')
+      if close =~ "^function"
+        exe 'let Close =' . close
+      else
+        let Close = close
+      endif
+      " let Close = close =~ "^function" ? {close} : close   ## don't work with function()
     else 
       call add(options, p)
     endif
