@@ -1,18 +1,24 @@
 "=============================================================================
 " $Id$
-" File:		brackets.vim                                           {{{1
+" File:		autoload/lh/cpp/brackets.vim                             {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://hermitte.free.fr/vim/>
-" Version:	«version»
+" Version:	1.0.0
 " Created:	17th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	«description»
+" Description:	
+" 	Functions that tune how some bracket characters should expand in C&C++
 " 
 "------------------------------------------------------------------------
-" Installation:	«install details»
-" History:	«history»
-" TODO:		«missing features»
+" Installation:	
+" 	Requires Vim7+ and lh-map-tools
+" 	Used by {ftp}/ftplugin/c/c_brackets.vim
+" 	Drop this file into {rtp}/autoload/lh/cpp
+"
+" History:	
+" 	v1.0.0: First version
+" TODO:	
 " }}}1
 "=============================================================================
 
