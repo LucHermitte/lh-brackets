@@ -378,7 +378,7 @@ function! s:ICONV(expr, from, to)  " {{{3
 endfunction
 
 function! s:SetMarker(open, close, ...) " {{{3
-  if a:close == &enc
+  if a:close != '' && a:close == &enc
     throw ":SetMarker: two arguments expected"
   endif
   let from = (a:0!=0) ? a:1 : 'latin1'
