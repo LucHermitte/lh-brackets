@@ -219,12 +219,12 @@ function! lh#brackets#Define(...)
   let normal = 'default=1'
   let options = []
   for p in a:000
-    if     p =~ '-n\%[l]'        | let nl        = '\n'
-    elseif p =~ '-e\%[scapable]' | let escapable = 1
-    elseif p =~ '-t\%[rigger]'   | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
-    elseif p =~ '-i\%[nsert]'    | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
-    elseif p =~ '-v\%[isual]'    | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
-    elseif p =~ '-n\%[ormal]'    | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
+    if     p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
+    elseif p =~ '-e\%[scapable]'    | let escapable = 1
+    elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
+    elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
+    elseif p =~ '-v\%[isual]'       | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
+    elseif p =~ '-no\%[rmal]'       | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
     elseif p =~ '-o\%[open]'     
       let open = matchstr(p, '-o\%[pen]=\zs.*')
       if open =~ "^function"
@@ -273,7 +273,7 @@ function! lh#brackets#Define(...)
             \ string(options[1].'!mark!').", 1, 1, '', 1, ".string(trigger).")\<cr>"
     else
       let action = ' <c-\><c-n>@=Surround('.
-            \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 0)\<cr>"
+            \ string(options[0]).', '.string(options[1]).", 1, 0, '`>ll', 1)\<cr>"
     endif
     call s:DefineMap(s:k_vmap_type.'nore', trigger, action)
 
