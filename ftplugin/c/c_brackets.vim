@@ -59,7 +59,7 @@ if !exists('lh#cpp#brackets#lt')
   runtime autoload/lh/cpp/brackets.vim
 endif
 
-if exists('*Brackets')
+if exists(':Brackets')
   let b:usemarks         = 1
   let b:cb_jump_on_close = 1
   " Re-run brackets() in order to update the mappings regarding the different
