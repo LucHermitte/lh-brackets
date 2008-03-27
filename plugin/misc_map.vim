@@ -4,7 +4,7 @@
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://hermitte.free.fr/vim/>
 " Last Update:	$Date$
-" Version:	0.6.0
+" Version:	1.0.0
 "
 " Purpose:	API plugin: Several mapping-oriented functions
 "
@@ -427,18 +427,27 @@ function! LHCursorHere(...)
   if a:0 > 0
     let s:goto_lin_{a:1} = line('.')
     let s:goto_col_{a:1} = virtcol('.')
-    " let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
+    let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
   else
     let s:goto_lin = line('.')
     let s:goto_col = virtcol('.')
-    " let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
+    let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
   endif
   let s:old_indent = indent(line('.'))
+  let g:repos .= "   indent=".s:old_indent
   " return ''
 endfunction
 
 function! LHGotoMark()
-  let s:old_indent = indent(s:goto_lin) - s:old_indent 
+  " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
+  let crt_indent = indent(s:goto_lin)
+  if crt_indent < s:old_indent
+    let s:fix_indent = s:old_indent - crt_indent
+  else
+    let s:old_indent = crt_indent - s:old_indent 
+    let s:fix_indent = 0
+  endif
+  let g:fix_indent = s:fix_indent
   if s:old_indent != 0
     let s:goto_col = s:goto_col + s:old_indent
   endif
@@ -447,7 +456,14 @@ function! LHGotoMark()
   " return ''
 endfunction
 function! LHGotoEndMark()
-  let s:old_indent = indent(s:goto_lin) - s:old_indent 
+  " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
+  let crt_indent = indent(s:goto_lin)
+  if crt_indent < s:old_indent
+    let s:fix_indent = s:old_indent - crt_indent
+  else
+    let s:old_indent = crt_indent - s:old_indent 
+    let s:fix_indent = 0
+  endif
   if s:old_indent != 0
     let s:goto_col = s:goto_col + s:old_indent
   endif
@@ -459,6 +475,9 @@ function! LHGotoEndMark()
   " uses {lig}'normal! {col}|' because of the possible reindent
   execute s:goto_lin . 'normal! ' . s:goto_col . '|'
   " return ''
+endfunction
+function! LHFixIndent()
+  return repeat( ' ', s:fix_indent)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
@@ -538,8 +557,8 @@ function! Surround(
     inoremap !cursorpos2! <c-o>:call LHCursorHere(2)<cr>
     " <c-\><c-n>....a is better for !movecursor! as it leaves the cursor `in'
     " insert-mode... <c-o> does not; that's odd.
-    inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
-    inoremap !movecursor2! <c-\><c-n>:call LHGotoEndMark()<cr>a
+    inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
+    inoremap !movecursor2! <c-\><c-n>:call LHGotoEndMark()<cr>a<c-r>=LHFixIndent()<cr>
     " inoremap !movecursor! <sid>GotoMark().'a'
 
     " Check whether markers must be used
