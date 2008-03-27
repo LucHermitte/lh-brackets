@@ -273,7 +273,7 @@ function! lh#brackets#Define(...)
             \ string(options[1].'!mark!').", 1, 1, '', 1, ".string(trigger).")\<cr>"
     else
       let action = ' <c-\><c-n>@=Surround('.
-            \ string(options[0]).', '.string(options[1]).", 1, 0, '`>ll', 1)\<cr>"
+            \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 1)\<cr>"
     endif
     call s:DefineMap(s:k_vmap_type.'nore', trigger, action)
 
