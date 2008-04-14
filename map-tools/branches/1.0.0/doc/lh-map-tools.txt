@@ -1,5 +1,5 @@
 *lh-map-tools.txt*	Tools for helping mappings-definitions
-			For Vim version 7.+	Last change: 20th Mar 2008
+			For Vim version 7.+	Last change: 11th Apr 2008
 
 		   Map Tools MANUAL	by Luc Hermitte
 		    Version 1.0.0
@@ -602,13 +602,11 @@ The options are:
 
 
 (*) -open=({text}|"function({function-name})"		*:Brackets-open*
-    This option overrides the sequence to insert in the INSERT-mode mapping.
-    The forced value can be any {text} other than {open}, or even a
-    |function()| that can return one string or another depending on the
-    context.
-
 (*) -close=({text}|"function({function-name})"		*:Brackets-close*
-    To be decided/defined
+    These options override the sequence to insert in the INSERT-mode mapping.
+    The forced value can be any {text} other than {open} (/resp {close}, or
+    even a |function()| that can return one string or another depending on the
+    context.
 
 (*) -nl=(0|[1])						*:Brackets-nl*
     This option tells the mappings will insert newline characters between the
@@ -627,7 +625,7 @@ The options are:
     {open}<cursor>\{close} is there is a "\" before the cursor.
     This does not mean anything in VISUAL- and NORMAL-modes.
 
-Examples from {rtp}/ftplugin/c/c_brackets.vim: >
+Examples from {rtp}/after/ftplugin/c/c_brackets.vim: >
     :Brackets { } -visual=0 -nl
     :Brackets { } -visual=0 -trigger=#{ 
     :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
@@ -642,45 +640,48 @@ Examples from {rtp}/ftplugin/c/c_brackets.vim: >
     :Brackets ' ' -visual=1 -insert=0 -trigger=''
     :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
 
-Examples from {rtp}/ftplugin/html/html_brackets.vim: >
+Examples from {rtp}/after/ftplugin/html/html_brackets.vim: >
     :Brackets < > -ope=function('lh#html#brackets#lt')
       \           -clo=function('lh#html#brackets#gt')
       \           -vis=0
     :Brackets < > -ins=0 -trig=<localleader><
 
-Examples from {rtp}/ftplugin/tex/tex_brackets.vim: >
+Examples from {rtp}/after/ftplugin/tex/tex_brackets.vim: >
     :Brackets $ $ -visual=0 -insert=1 -escapable
     :Brackets $ $ -visual=1 -insert=0 -trigger=$$
 
-bla...
+Notes~
+These examples are in the atfer/ sub-hierarchy for several reasons:
+- this enables to set custom |localleader| before |:Bracket| is called.
+- my ftplugins can be seen as "official" ftplugins, particulary the
+  c_brackets.vim. By being stored into atfer/ftplugin/c/, this enables you,
+  end-user of my C&C++ ftplugin suite, to override my definitions with yours
+  with a: >
+    " .vim/ftplugin/c/c_your_brackets.vim
+    " 0- anti-reinclusion
+    if exists('b:loaded_your_c_brackets') && !exists('g:force_reload_your_c_brackets')
+       finish
+    endif
 
-<DEPRECATED>
-								*b:cb_*
-Through a set of buffer-relative options -- cf. the implementation and the
-different other language ftplugins of mine -- , it enables and configures
-bracketing mappings. 
+    " 1- load default definitions
+    runtime after/ftplugin/c/c_brackets.vim
+    "   or set b:loaded_ftplug_c_brackets to 1 to prevent the default
+    "   definitions from being loaded.
 
-The bracket-like pairs supported are: 
-* parenthesis:      ( and ), 		*b:cb_parent*
-* brackets:         [ and ],  		*b:cb_bracket*
-* curly-brackets:   { and }, 		*b:cb_acco*
-* comparison signs: < and >, 		*b:cb_cmp* *b:cb_ltFn* *b:cb_gtFn*
-* single-quotes:    ' and ', 		*b:cb_quotes*
-* double-quotes:    " and ",		*b:cb_Dquotes* *b:cb_DqFn*
-* and dollars: $ and $ for LaTeX mathematical mode.	*b:cb_mathMode*
+    " 2- overriden definitions (for instance)
+    Brackets { } -i=0 -nl
+    Brackets { } -i=0 -t=<localleader>0
 
-The different mappings, described in the following paragraphs, are activated
-only when the corresponding buffer-relative options |b:cb_| are set to 1.
-These options are not meant to be changed dynamically, but to be set once
-within |ftplugins|.
+    " 3- new definitions
+    Brackets /* */ -v=0
+    Brackets /* */ -i=0 -t=* -nl
+    Brackets /* */ -i=0 -t=<m-v> 
 
-Some behaviors can be tuned much more finely with callback functions:
-|b:cb_DqFn| for double quotes, |b:cb_ltFn| for '<' and |b:cb_gtFn| for '>'.
-Cf. ML_set.vim and vim_set.vim for examples.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 How it works~
 
+<DEPRECATED>
 When we hit (in |insert-mode|) the starting character of a pair, the second
 one is automatically inserted. In |visual-mode| (resp. |normal-mode|) the
 opening character can be hit once [1,2] in order to insert the pair around the
@@ -699,12 +700,16 @@ ftplugins.
 </DEPRECATED>
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+						*<Plug>ToggleBrackets*
 Dynamic (de-)activations~
 
 The macros defined here can be activated and deactivated as a whole by
-pressing <F9>. 
+pressing <F9>. In order to use another keybinding for this feature, add the
+following lines into your .vimrc:
+   nmap <leader>TB <Plug>ToggleBrackets
+   imap <leader>TB <Plug>ToggleBrackets
+
 NB: Triggers.vim is not longer required to provide this feature.
-TODO: make this configurable with <Plug>ToggleBrackets
 
 								*b:usemarks*
 In |insert-mode|, two operating modes are provided: one very classic, and one
@@ -713,6 +718,7 @@ option |b:usemarks| is set to 1. In that latter case, markers are inserted at
 the end of the pair of brakets.  
 The option can be toggled by hitting the trigger <M-F9> -- if |Trigger.vim| is
 installed. 
+TODO: reimplement this feature with lh#menu#DefToggleItem
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Accessibility~
@@ -794,7 +800,7 @@ These plugins can be obtained ...
   NB: I may not update the archive on SF every time I fix something or enhance
   the plugins.
 
-- ... as a tarball archive available on my web site:
+- ... as a complete tarball archive available on my web site:
       <http://hermitte.free.fr/vim/ressources/lh-map-tools.tar.gz>
 
 - ... as part of other (ft)plugins I maintain and share like |lh-cpp|,
