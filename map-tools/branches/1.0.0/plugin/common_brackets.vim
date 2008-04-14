@@ -24,7 +24,8 @@
 " History:      {{{1
 " Version 1.0.0:
 " 		* Vim 7 required!
-" 		* New way to configure the desired brackets
+" 		* New way to configure the desired brackets, the previous
+" 		approach has been deprecated
 " Version 0.6.0:
 " 		* UTF-8 bug fix in Brkt_lt(), Brkt_gt(), Brkt_Dquote()
 " 		* New numerotation used in versionning
@@ -141,346 +142,40 @@
 let s:cpo_save = &cpo
 set cpo&vim
 
-" Make sure imaps.vim, if installed, is loaded before this plugin
-if !exists("*IMAP")
-  runtime plugin/imaps.vim
-endif
-
-command! -nargs=+ Brackets call lh#brackets#Define(<f-args>)
-
-" ------------------------------------------------------------------
-" The main function that defines all the key-bindings. " {{{
-function! Brackets()
-  " Code to toggle brackets-mappings if imaps.vim is installed {{{
-  " This permits to toogle the brackets-mappings when imap.vim is present on
-  " the system
-  if exists('*IMAP')
-    TRIGGER "let g:Imap_FreezeImap=0", "let g:Imap_FreezeImap=1" 
-  endif
-  " imaps.vim special }}}
-  "
-  " [ & ] {{{
-  if exists('b:cb_bracket') && b:cb_bracket
-    if exists('*IMAP')
-      if &ft == 'tex'
-	call IMAP('\[', "\<C-R>=Insert_sqbracket(1)\<cr>", &ft)
-      endif
-      call IMAP('[', "\<C-R>=Insert_sqbracket(0)\<cr>", &ft)
-    else
-      inoremap <buffer> [ <C-R>=<sid>EscapableBrackets('[','\<C-V\>[','\<C-V\>]')<cr>
-    endif
-    if     1 == b:cb_bracket
-      vnoremap <buffer> <localleader>[ <c-\><c-n>@=Surround('[', ']', 0, 0, '%', 0)<cr>
-	  nmap <buffer> <localleader>[ viw<localleader>[
-	  nmap <buffer> <M-[> viw<localleader>[
-    elseif 2 == b:cb_bracket
-      vnoremap <buffer> [ <c-\><c-n>@=Surround('[', ']', 0, 0, '%', 0)<cr>
-	  nmap <buffer> [ viw[
-	  nmap <buffer> <M-[> viw[
-    endif
-	imap <buffer> <M-[> <esc><M-[>a
-  endif
-  " [ & ] }}}
-  "
-  " < & > {{{
-  if exists('b:cb_cmp') && b:cb_cmp
-    if exists('*IMAP')
-      call IMAP('<', "\<c-r>=Brkt_lt()\<cr>", &ft)
-      call IMAP('>', "\<c-r>=Brkt_gt()\<cr>", &ft)
-    else
-      imap <buffer> < <c-r>=Brkt_lt()<cr>
-      imap <buffer> > <c-r>=Brkt_gt()<cr>
-    endif
-    vnoremap <buffer> < <c-\><c-n>@=Surround('<', '>', 0, 0, '`>ll', 0)<CR>
-        "nmap <buffer> < viw<
-	nmap <buffer> <M-<> viw<
-	imap <buffer> <M-<> <esc><M-<>a
-  endif
-  " < & > }}}
-  "
-  " { & } {{{
-  if exists('b:cb_acco') && b:cb_acco
-    if exists('*IMAP')
-      if &ft == 'tex'
-	call IMAP('{', "\<C-R>=Insert_clbracket(0,0)\<cr>", &ft)
-	" Required or not ?
-	" call IMAP('\{', "\<C-R>=Insert_clbracket(1,0)\<cr>", &ft)
-      else
-	call IMAP('{', "\<C-R>=Insert_clbracket(0,1)\<cr>", &ft)
-	call IMAP('#{', "\<C-R>=Insert_clbracket(0,0)\<cr>", &ft)
-      endif
-    else
-      if &syntax == "tex"
-	inoremap <buffer> { <C-R>=<sid>EscapableBrackets('{','{','}')<cr>
-      else
-	" inoremap <buffer> { <C-R>=<sid>EscapableBracketsLn('{','{','}')<cr>
-	inoremap <buffer>  { <C-R>=Smart_insert_seq1( '{','{\<cr\>}\<esc\>O','{\<cr\>}!mark!\<esc\>O')<cr>
-	inoremap <buffer> #{ <C-R>=Smart_insert_seq1('#{','{}\<esc\>i','{}!mark!\<esc\>F{a')<cr>
-      endif
-    endif
-    vnoremap <buffer> { <c-\><c-n>@=Surround('{', '}', 0, 0, '%', 0)<cr>
-        nmap <buffer> { viw{
-    if !exists('b:cb_jump_on_close') || b:cb_jump_on_close
-      nnoremap <buffer> } :call search('}\\|\.\\|&\\|]\\|\$')<CR>a
-      ""inoremap <buffer> } <c-r>=MapNoContext('}',BuildMapSeq('!find}!'))<cr>
-      " Next line does not work well (vim 6.1.362)
-      inoremap <buffer> } <C-R>=MapNoContext('}', '\<c-o\>}\<left\>')<CR>
-    endif
-  endif
-  " { & } }}}
-  "
-  " ( & ) {{{
-  if exists('b:cb_parent') && b:cb_parent
-    if exists('*IMAP')
-      if &ft == 'vim'
-	" context à bloquer comments only
-	call IMAP('\(', "\<C-R>=Insert_rdbracket(1)\<cr>", &ft)
-	call IMAP('\%(', "\<C-R>=Insert_rdbracket(2)\<cr>", &ft)
-      elseif &ft == 'tex'
-	call IMAP('\(', "\<C-R>=Insert_rdbracket(1)\<cr>", &ft)
-      endif
-      call IMAP('(', "\<C-R>=Insert_rdbracket(0)\<cr>", &ft)
-    else
-      inoremap <buffer> ( <C-R>=<sid>EscapableBrackets('(','(',')')<cr>
-    endif
-    if !exists('b:cb_jump_on_close') || b:cb_jump_on_close
-      noremap <buffer> ) :call search(')')<cr>a
-	 imap <buffer> ) <C-R>=MapNoContext(')', '\<c-o\>/)/e+1/\<cr\>')<CR>
-	 " inoremap <buffer> ) <C-R>=MapNoContext(')', '\<esc\>:call search(")")\<cr\>a')<CR>
-    endif
-    vnoremap <buffer> (        <c-\><c-n>@=Surround('(', ')', 0, 0, '%', 0)<cr>
-    nnoremap <buffer> (     viw<c-\><c-n>@=Surround('(', ')', 0, 0, '%', 0)<cr>
-    nnoremap <buffer> <M-(> viw<c-\><c-n>@=Surround('(', ')', 0, 0, '%', 0)<cr>
-        imap <buffer> <M-(>    <esc><M-(>a
-  endif
-  " ( & ) }}}
-
-  " $ & $ {{{
-  if exists('b:cb_mathMode') && b:cb_mathMode
-    if exists('*IMAP')
-      call IMAP( '$', "\<c-r>=Insert_LaTeX_TwoDollars()\<cr>", &ft)
-      call IMAP( '\$', '\$', &ft)
-    else
-      inoremap <buffer> $ <c-r>=Insert_LaTeX_Dollar()<cr>
-    endif
-    vnoremap <buffer> $$ <c-\><c-n>@=Surround('$', '$', 0, 0, '`>ll', 0)<cr>
-	nmap <buffer> $$ viw$$
-	nmap <buffer> <M-$> viw$$
-	imap <buffer> <M-$> <esc><M-$>
-  endif
-  " $ & $ }}}
-  "
-  " quotes {{{
-  if exists('b:cb_quotes') && b:cb_quotes
-    inoremap <buffer> ' <c-r>=Brkt_quote()<cr>
-    vnoremap <buffer> '' <c-\><c-n>@=Surround("'", "'", 0, 0, '`>ll', 0)<cr>
-        nmap <buffer> ''    viw''
-	nmap <buffer> <M-'> viw''
-	" add quotes around the word under the cursor
-	imap <buffer> <M-'> <esc><M-'>a
-  endif
-  " quotes }}}
-  "
-  " double-quotes {{{
-  if exists('b:cb_Dquotes') && b:cb_Dquotes
-    inoremap <buffer> " <c-r>=Brkt_Dquote()<cr>
-    vnoremap <buffer> "" <c-\><c-n>@=Surround('"', '"', 0, 0, '`>ll', 0)<cr>
-	nmap <buffer> ""    viw""
-	nmap <buffer> <M-"> viw""
-	" add dquotes around the word under the cursor
-	imap <buffer> <M-"> <esc><M-">a
-  endif
-  " double-quotes }}}
-endfunction " }}}
-
-if !exists('b:usemarks') | let b:usemarks=1 | endif
-
-" Defines a command and the mode switching mappings (with <F9>) {{{
-if !exists("*Trigger_Function")
-  runtime plugin/Triggers.vim macros/Triggers.vim
-endif
-if exists("*Trigger_Function")
-  au Bufenter * :call <SID>LoadBrackets()
-  let s:scriptname = expand("<sfile>:p")
-
-  function! s:LoadBrackets()
-    if !exists('b:usemarks') | let b:usemarks=1 | endif
-    if exists("b:loaded_common_bracket_buff") | return | endif
-    let b:loaded_common_bracket_buff = 1
-    silent call Trigger_Function('<F9>', 'Brackets', s:scriptname,1,1)
-    imap <buffer> <F9> <SPACE><ESC><F9>a<BS>
-    silent call Trigger_DoSwitch('<M-F9>',
-	  \ ':let b:usemarks='.b:usemarks,':let b:usemarks='.(1-b:usemarks),1,1)
-    imap <buffer> <M-F9> <SPACE><ESC><M-F9>a<BS>
-  endfunction
-endif
-" }}}
 "======================================================================
-" Global definitions : functions & mappings
-if exists("g:loaded_common_brackets") 
-      \ && !exists('g:force_reload_common_brackets')
+"# Anti-reinclusion & dependencies {{{1
+if exists("g:loaded_common_brackets") && !exists('g:force_reload_common_brackets')
   let &cpo = s:cpo_save
   finish 
 endif
 let g:loaded_common_brackets = 1
 
-" ===========================================================================
-" Tool functions {{{
-
-" s:EscapableBrackets, and s:EscapableBracketsLn are two different functions
-" in order to acheive a little optimisation
-function! s:EscapableBrackets(key, left, right) " {{{
-  let r = ((getline('.')[col('.')-2] == '\') ? '\\\\' : "") . a:right
-  let expr1 = a:left.r.'\<esc\>i'
-  let expr2 = a:left.r.'!mark!\<esc\>F'.a:key.'a'
-  if exists('b:usemarks') && b:usemarks
-    return "\<c-r>=MapNoContext('".a:key."',BuildMapSeq('".expr2."'))\<cr>"
-  else
-    return "\<c-r>=MapNoContext('".a:key."', '".expr1."')\<cr>"
-  endif
-endfunction " }}}
-
-function! s:EscapableBracketsLn(key, left, right) " {{{
-  let r = ((getline('.')[col('.')-2] == '\') ? '\\\\' : "") . a:right
-  let expr1 = a:left.'\<cr\>'.r.'\<esc\>O'
-  let expr2 = a:left.'\<cr\>'.r.'!mark!\<esc\>O'
-  if exists('b:usemarks') && b:usemarks
-    return "\<c-r>=MapNoContext('".a:key."',BuildMapSeq('".expr2."'))\<cr>"
-  else
-    return "\<c-r>=MapNoContext('".a:key."', '".expr1."')\<cr>"
-  endif
-endfunction " }}}
-
-" Tool functions }}}
-" ===========================================================================
-" The core functions for the previous mappings {{{
-" If a backslash precede the current cursor position, insert one dollar,
-" and two otherwise.
-function! Insert_LaTeX_TwoDollars() " {{{
-  " return "\<c-v>$\<c-v>$\<c-r>=Marker_Txt()\<cr>\<esc>F$i"
-  return IMAP_PutTextWithMovement(Smart_insert_seq2('$', '$<++>$!mark!'))
-endfunction " }}}
-function! Insert_LaTeX_Dollar() " {{{
-  if getline('.')[col('.')-2] == '\'
-    return '$'
-  else
-    return "\<c-v>$\<c-v>$\<c-r>=Marker_Txt()\<cr>\<esc>F$i"
-  endif
-endfunction " }}}
-
-" Insert the various kind of brackets {{{
-function! Insert_rdbracket(esc)
-  return s:Insert_bracket('(', ')', a:esc, 0)
-endfunction
-
-function! Insert_sqbracket(esc)
-  return s:Insert_bracket('[', ']', a:esc, 0)
-endfunction
-
-function! Insert_clbracket(esc, nl)
-  return s:Insert_bracket('{', '}', a:esc, a:nl)
-endfunction
-
-function! Insert_lt_gt(esc)
-  return s:Insert_bracket('<', '>', a:esc, 0)
-endfunction
-" }}}
-
-" Function: s:Insert_bracket(obrkt, cbrkt, esc, nl)  {{{
-" Internal function.
-" {obrkt}:	open bracket
-" {cbrkt}:	close bracket
-" {esc}:	escaped version 0:none, 1:\, 2:\%
-" {nm}:		new line between {obrkt} and {cbrkt}
-function! s:Insert_bracket(obrkt, cbrkt, esc, nl) 
-  " Generic function used by the others
-  if     a:esc == 0 | let open = ''   | let close = ''
-  elseif a:esc == 1 | let open = '\'  | let close = '\'
-  elseif a:esc == 2 | let open = '\%' | let close = '\'
-  else
-    echoerr "Case not handled (yet)!"
-  endif
-  let key = open . a:obrkt
-  let middle = a:nl ? "\<cr><++>\<cr>" : '<++>'
-  let expr = key . middle . close . a:cbrkt .'!mark!'
-  if &ft == "vim" && a:esc " expand only within strings
-    return IMAP_PutTextWithMovement(Smart_insert_seq2(key,expr, 'string\|PatSep'))
-  else
-    return IMAP_PutTextWithMovement(Smart_insert_seq2(key,expr))
-  endif
-endfunction "}}}
-
-" Calls a custom function or returns <> regarding the options
-function! Brkt_lt() " {{{
-  if exists('b:cb_ltFn')
-    return "\<C-R>=InsertSeq('<'," . b:cb_ltFn . ")\<CR>"
-  elseif exists('*IMAP')
-    return Insert_lt_gt(0)
-  else
-    " Is it even useful ?
-    return <SID>EscapableBrackets('<', '\<C-V\><', '\<C-V\>>')
-  endif
-endfunction " }}}
-
-" Calls a custom function, or search for the next '>', or return '>'
-" regarding the options.
-function! Brkt_gt() " {{{
-  if exists('b:cb_gtFn')        | return "\<C-R>=InsertSeq('>', " . b:cb_gtFn . ")\<CR>"
-                                " return "\<C-R>=" . b:cb_gtFn . "\<CR>"
-  elseif exists('b:cb_gtFind')  | return "\<esc>/>/\<cr>a"
-  else                          | return ">"
-  endif
-endfunction " }}}
-
-" Centralize all the INSERT-mode mappings associated to quotes
-function! Brkt_quote() " {{{
-  if b:cb_quotes == 2
-    if exists("b:usemarks") && b:usemarks == 1
-      return "\<c-r>=MapNoContext(\"'\", " .
-	\    "\"''\\<C-R\>=Marker_Txt()\\<CR\>\\<esc\>F'i\")\<cr>"
-    else 
-      return "\<c-r>=MapNoContext(\"'\", \"''\\<Left\>\")\<cr>"
-    endif
-  else
-    if exists("b:usemarks") && b:usemarks == 1
-      return "\<C-V>'\<C-V>'\<c-r>=Marker_Txt()\<cr>\<ESC>F'i"
-    else 
-      return "''\<left>"
-    endif
-  endif
-endfunction " }}}
-
-" Centralize all the INSERT-mode mappings associated to double-quotes
-function! Brkt_Dquote() " {{{
-  if b:cb_Dquotes == 2
-    if exists("b:usemarks") && b:usemarks == 1
-      return "\<c-r>=MapNoContext('\"', '" . '\"\"' . "'." . 
-       \ '"\\<C-R\>=Marker_Txt()\\<CR\>\\<esc\>F\\\"i")' . "\<cr>"
-    else 
-      return "\<c-r>=MapNoContext('\"', '" . 
-	\    '\"\"' . "'." . '"\\<Left\>")' . "\<cr>"
-    endif
-  else
-    if exists('b:cb_DqFn')
-      " TEST: OK sans imaps.vim
-      return "\<C-R>=InsertSeq('\"', escape(" . b:cb_DqFn . ", '\'))\<CR>"
-    elseif exists("b:usemarks") && b:usemarks == 1
-      return "\<C-V>\"\<C-V>\"\<c-r>=Marker_Txt()\<cr>\<ESC>F\"i"
-    else 
-      return "\"\"\<left>"
-    endif
-  endif
-endfunction " }}}
-
-" The core functions for the previous mappings }}}
-"======================================================================
+" Make sure imaps.vim, if installed, is loaded before this plugin
+if !exists("*IMAP")
+  runtime plugin/imaps.vim
+endif
 
 "======================================================================
-" Matching Brackets Macros, From AuCTeX.vim (due to Saul Lubkin).   {{{
+"# Brackets definitions {{{1
+"# :Brackets Command {{{2
+command! -nargs=+ Brackets call lh#brackets#Define(<f-args>)
+
+"# <Plug>ToggleBrackets Mappings {{{2
+nnoremap <silent> <Plug>ToggleBrackets :call lh#brackets#Toggle()<cr>
+if !hasmapto('<Plug>ToggleBrackets', 'n') && (mapcheck("<F9>", "n") == "")
+  nmap <silent> <F9> <Plug>ToggleBrackets
+endif
+inoremap <silent> <Plug>ToggleBrackets <c-o>:call lh#brackets#Toggle()<cr>
+if !hasmapto('<Plug>ToggleBrackets', 'i') && (mapcheck("<F9>", "i") == "")
+  imap <silent> <F9> <Plug>ToggleBrackets
+endif
+
+"======================================================================
+"# Matching Brackets Macros, From AuCTeX.vim (due to Saul Lubkin).   {{{1
 " Except, that I use differently the chanching-brackets functions.
 " For normal mode.
 
-" Bindings for the Bracket Macros {{{
+"# Bindings for the Bracket Macros {{{2
 if !exists('g:cb_want_mode ') | let g:cb_want_mode = 1 | endif
 if g:cb_want_mode " {{{
   if !hasmapto('BracketsManipMode')
@@ -519,12 +214,12 @@ else " {{{
   endif
   noremap <silent> <Plug>ToggleBackslash	:call <SID>ToggleBackslash()<CR>
 endif " }}}
-" Bindings for the Bracket Macros }}}
+" Bindings for the Bracket Macros
 
 "inoremap <C-Del> :call <SID>DeleteBrackets()<CR>
 "inoremap <C-BS> <Left><C-O>:call <SID>DeleteBrackets()<CR>
 
-" Then the procedures. {{{
+"# Then the procedures. {{{2
 function! s:DeleteBrackets() " {{{
   let s:b = getline(line("."))[col(".") - 2]
   let s:c = getline(line("."))[col(".") - 1]
@@ -591,7 +286,7 @@ function! s:ToggleBackslash() " {{{
     endif
   endif
 endfunction " }}}
- 
+
 function! BracketsManipMode(starting_key) " {{{
   redraw! " clear the msg line
   while 1
@@ -622,7 +317,7 @@ function! BracketsManipMode(starting_key) " {{{
       elseif bracketsManip == "q"
 	redraw! " clear the msg line
 	return ''
-      " else
+	" else
       endif
       redraw! " clear the msg line
     else
@@ -631,11 +326,11 @@ function! BracketsManipMode(starting_key) " {{{
     endif
   endwhile
 endfunction " }}}
-" Then the procedures. }}}
+" Then the procedures.
 
-" Matching Brackets Macros, From AuCTeX.vim (due to Saul Lubkin).   }}}
+" Matching Brackets Macros, From AuCTeX.vim (due to Saul Lubkin).   }}}1
 " ===========================================================================
-  let &cpo = s:cpo_save
+let &cpo = s:cpo_save
 " ===========================================================================
 " Implementation and other remarks : {{{
 " (*) Whitin the vnoremaps, `>ll at the end put the cursor at the

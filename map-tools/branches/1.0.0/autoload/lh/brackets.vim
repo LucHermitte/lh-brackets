@@ -61,24 +61,24 @@ endfunction
 function! lh#brackets#Toggle()
   " todo: when entering a buffer, update the mappings depending on whether it
   " has been toggled
-  let crt_definitions = s:GetDefinitions()
-  if s:active
-    for m in crt_definitions
-      call s:UnMap(m)
-    endfor
-    call lh#common#WarningMsg("Brakets mappings deactivated")
+  if exists('*IMAP')
+    let g:Imap_FreezeImap = 1 - s:active
   else
-    for m in crt_definitions
-      call s:Map(m)
-    endfor
-    call lh#common#WarningMsg("Brakets mappings (re)activated")
-  endif
+    let crt_definitions = s:GetDefinitions()
+    if s:active " active -> inactive
+      for m in crt_definitions
+	call s:UnMap(m)
+      endfor
+      call lh#common#WarningMsg("Brackets mappings deactivated")
+    else " inactive -> active
+      for m in crt_definitions
+	call s:Map(m)
+      endfor
+      call lh#common#WarningMsg("Brackets mappings (re)activated")
+    endif
+  endif " No imaps.vim
   let s:active = 1 - s:active
 endfunction
-
-"# Mappings {{{2
-"todo: move it to common_brackets.vim
-nnoremap <silent> <F9> :call lh#brackets#Toggle()<cr>
 
 "------------------------------------------------------------------------
 
