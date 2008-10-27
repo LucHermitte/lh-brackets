@@ -7,15 +7,33 @@
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
-" Description:  «description»
+" Description:  
+" 		This autoload plugin defines the functions behind the command
+" 		:Brackets that simplifies the definition of mappings that
+" 		insert pairs of caracters when the first one is typed. Typical
+" 		examples are the parenthesis, brackets, <,>, etc. 
+" 		The definitions can be buffer-relative or global.
+"
+" 		This commands is used by different ftplugins:
+" 		<vim_brackets.vim>, <c_brackets.vim> <ML_brackets.vim>,
+" 		<html_brackets.vim>, <php_brackets.vim> and <tex_brackets.vim>
+" 		-- available on my VIM web site.
+"
+" 		BTW, they can be activated or desactivated by pressing <F9>
 " 
 "------------------------------------------------------------------------
-" Installation: «install details»
-" History:      «history»
+" Installation: 
+" * vim7+ required
+" * lh-vim-lib required
+" * drop into {rtp}/autoload/lh/brackets.vim
+"
+" History:
+" Version 1.0.0:
+" 		* Vim 7 required!
+" 		* New way to configure the desired brackets, the previous
+" 		approach has been deprecated
 " TODO:         
 " * Update doc
-" * :Brackets -list to know all the brackets definitions
-" * :Brackets -clear to remove brackets definitions
 " * -context= option
 " * Move brackets manipulation functions in this autoload plugin
 " * -surround=function('xxx') option
@@ -39,17 +57,59 @@ let s:k_vmap_type = lh#option#Get('bracket_surround_in', 'x', 'g')
 "# Mappings Toggling {{{1
 "
 "# Globals {{{2
+"# Definitions {{{3
 if !exists('s:definitions') || exists('brackets_clear_definitions')
   let s:definitions = {}
 endif
 
-let s:active = 1
+"# Activation State {{{3
+" let s:active = 1
+let s:state = {
+      \ 'isActive': 1,
+      \ 'isActiveInBuffer': {},
+      \}
+
+function! s:state.toggle() dict
+  let self.isActive = 1 - self.isActive
+  let bid = bufnr('%')
+  let self.isActiveInBuffer[bid] = self.isActive
+endfunction
+
+function! s:state.mustActivate() dict
+  let bid = bufnr('%')
+  if has_key(self.isActiveInBuffer, bid)
+    let must = !self.isActiveInBuffer[bid]
+    let why = must." <= has key, global=". (self.isActive) . ", local=".self.isActiveInBuffer[bid]
+  else " first time in the buffer
+    " throw "lh#Brackets#mustActivate() assertion failed: unknown local activation state"
+    let must = 0
+    let why = must." <= has not key, global=". (self.isActive)
+  endif
+  let self.isActiveInBuffer[bid] = self.isActive
+  " echomsg "mustActivate[".bid."]: ".why
+  return must
+endfunction
+
+function! s:state.mustDeactivate() dict
+  let bid = bufnr('%')
+  if has_key(self.isActiveInBuffer, bid)
+    let must = self.isActiveInBuffer[bid]
+    let why = must." <= has key, global=". (self.isActive) . ", local=".self.isActiveInBuffer[bid]
+  else " first time in the buffer
+    " throw "lh#Brackets#mustDeactivate() assertion failed: unknown local activation state"
+    let must = 0
+    let why = must." <= has not key, global=". (self.isActive)
+  endif
+  let self.isActiveInBuffer[bid] = self.isActive
+  " echomsg "mustDeactivate[".bid."]: ".why
+  return must
+endfunction
 
 "# Functions {{{2
 
 " Function: Fetch the brackets defined for the current buffer. {{{3
-function! s:GetDefinitions()
-  let bid = bufnr('%')
+function! s:GetDefinitions(isLocal)
+  let bid = a:isLocal ? bufnr('%') : -1
   if !has_key(s:definitions, bid)
     let s:definitions[bid] = []
   endif
@@ -57,15 +117,15 @@ function! s:GetDefinitions()
   return crt_definitions
 endfunction
 
-" Function: Main function called to toogle bracket mappings. {{{3
+" Function: Main function called to toggle bracket mappings. {{{3
 function! lh#brackets#Toggle()
   " todo: when entering a buffer, update the mappings depending on whether it
   " has been toggled
   if exists('*IMAP')
-    let g:Imap_FreezeImap = 1 - s:active
+    let g:Imap_FreezeImap = 1 - s:state.isActive
   else
-    let crt_definitions = s:GetDefinitions()
-    if s:active " active -> inactive
+    let crt_definitions = s:GetDefinitions(0) + s:GetDefinitions(1)
+    if s:state.isActive " active -> inactive
       for m in crt_definitions
 	call s:UnMap(m)
       endfor
@@ -77,8 +137,41 @@ function! lh#brackets#Toggle()
       call lh#common#WarningMsg("Brackets mappings (re)activated")
     endif
   endif " No imaps.vim
-  let s:active = 1 - s:active
+  call s:state.toggle()
 endfunction
+
+" Function: Activate or deactivate the mappings in the current buffer. {{{3
+function! s:UpdateMappingsActivationE()
+  if s:state.isActive
+    if s:state.mustActivate()
+      let crt_definitions = s:GetDefinitions(1)
+      for m in crt_definitions
+	call s:Map(m)
+      endfor
+    endif " active && must activate
+  else " not active
+    let crt_definitions = s:GetDefinitions(1)
+    if s:state.mustDeactivate()
+    for m in crt_definitions
+	call s:UnMap(m)
+      endfor
+    endif
+  endif
+endfunction
+
+function! s:UpdateMappingsActivationL()
+  let bid = bufnr('%')
+  let s:state.isActiveInBuffer[bid] = s:state.isActive
+  " echomsg "updateL[".bid."]: <- ". s:state.isActive
+  " call confirm( "updateL[".bid."]: <- ". s:state.isActive, '&Ok', 1)
+endfunction
+
+"# Autocommands {{{2
+augroup LHBrackets
+  au!
+  au BufEnter * call s:UpdateMappingsActivationE()
+  au BufLeave * call s:UpdateMappingsActivationL()
+augroup END
 
 "------------------------------------------------------------------------
 
@@ -86,24 +179,25 @@ endfunction
 "------------------------------------------------------------------------
 
 function! s:UnMap(m)
-  let cmd = a:m.mode[0].'unmap <buffer> '.a:m.trigger
+  let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
   if &verbose >= 1 | echomsg cmd | endif
   exe cmd
 endfunction
 
 function! s:Map(m)
-  let cmd = a:m.mode.'map <buffer> <silent> '.a:m.trigger.' '.a:m.action
+  let cmd = a:m.mode.'map <silent> ' . a:m.buffer . a:m.trigger .' '.a:m.action
   if &verbose >= 1 | echomsg cmd | endif
   exe cmd
 endfunction
 
-function! s:DefineMap(mode, trigger, action)
-  let crt_definitions = s:GetDefinitions()
+function! s:DefineMap(mode, trigger, action, isLocal)
+  let crt_definitions = s:GetDefinitions(a:isLocal)
   let crt_mapping = {}
   let crt_mapping.trigger = a:trigger
   let crt_mapping.mode    = a:mode
   let crt_mapping.action  = a:action
-  if s:active
+  let crt_mapping.buffer  = a:isLocal ? '<buffer> ' : ''
+  if s:state.isActive
     call s:Map(crt_mapping)
   endif
   let p = lh#list#Find_if(crt_definitions,
@@ -121,30 +215,57 @@ function! s:DefineMap(mode, trigger, action)
   endif
 endfunction
 
-function! s:DefineImap(trigger, inserter)
+function! s:DefineImap(trigger, inserter, isLocal)
   if exists('*IMAP')
-    call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
+    if a:isLocal
+      call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
+    else
+      call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>")
+    endif
   else
-    call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>")
+    call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>", a:isLocal)
   endif
+endfunction
+
+function! s:ListMappings(isLocal)
+  let crt_definitions = s:GetDefinitions(a:isLocal)
+  for m in crt_definitions
+    let cmd = m.mode.'map <silent> ' . m.buffer . m.trigger .' '.m.action
+    echomsg cmd
+  endfor
+endfunction
+
+function! s:ClearMappings(isLocal)
+  let crt_definitions = s:GetDefinitions(a:isLocal)
+  if s:state.isActive
+    for m in crt_definitions
+      call s:UnMap(m)
+    endfor
+  endif
+  unlet crt_definitions[:]
 endfunction
 
 "------------------------------------------------------------------------
 " NB: this function is made public because IMAPs.vim need it to not be private
 " (s:)
-function! lh#brackets#Opener(trigger, escapable, nl, Open, Close)
+function! lh#brackets#Opener(trigger, escapable, nl, Open, Close, areSameTriggers)
+  let escaped = getline('.')[col('.')-2] == '\'
   if type(a:Open) == type(function('has'))
     let res = InsertSeq(a:trigger, a:Open())
     return res
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
   elseif a:escapable
-    let e = ((getline('.')[col('.')-2] == '\') ? '\\' : "")
+    let e = (escaped ? '\\' : "")
     " todo: support \%(\) with vim
     " let open = '\<c-v\>'.a:Open
     " let close = e.'\<c-v\>'.a:Close
     let open = a:Open
     let close = e.a:Close
+  elseif escaped
+    return a:trigger
+  elseif a:areSameTriggers && lh#option#Get('cb_jump_on_close',1) && lh#position#CharAtMark('.') == a:trigger
+    return s:Jump()
   else
     let open = a:Open
     let close = a:Close
@@ -159,7 +280,6 @@ function! lh#brackets#Opener(trigger, escapable, nl, Open, Close)
   else
     return InsertSeq(a:trigger, open.'!cursorhere!'.close.'!mark!')
 endfunction
-
 
 "------------------------------------------------------------------------
 function!lh#brackets#Closer(trigger, Action)
@@ -176,10 +296,16 @@ endfunction
 function! s:JumpOrClose(trigger)
   if lh#option#Get('cb_jump_on_close',1) && lh#position#CharAtMark('.') == a:trigger
     " todo: detect even if there is a newline in between
-    return "\<right>"
+    return s:Jump()
   else
     return a:trigger
   endif
+endfunction
+
+"------------------------------------------------------------------------
+function! s:Jump()
+  " todo: get rid of the marker as well
+  return "\<right>"
 endfunction
 
 "------------------------------------------------------------------------
@@ -212,14 +338,17 @@ endfunction "}}}
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
-function! lh#brackets#Define(...)
-  let nl = ''
-  let insert = 1
-  let visual = 1
-  let normal = 'default=1'
-  let options = []
+function! lh#brackets#Define(bang, ...)
+  let isLocal  = a:bang != "!"
+  let nl       = ''
+  let insert   = 1
+  let visual   = 1
+  let normal   = 'default=1'
+  let options  = []
   for p in a:000
-    if     p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
+    if     p =~ '-l\%[list]'         | call s:ListMappings(isLocal)  | return
+    elseif p =~ '-c\%[lear]'         | call s:ClearMappings(isLocal) | return
+    elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
@@ -246,7 +375,7 @@ function! lh#brackets#Define(...)
     endif
   endfor
   if len(options) != 2
-    throw ":Brackets: incorrect numner of arguments"
+    throw ":Brackets: incorrect number of arguments"
   endif
   
   if !exists('trigger') | let trigger = options[0] | endif
@@ -255,13 +384,14 @@ function! lh#brackets#Define(...)
 
   " INSERT-mode open
   if insert
-    let inserter = "lh#brackets#Opener(".string(trigger).','. exists('escapable').','.string(nl).
-          \','. string(Open).','.string(Close).")"
-    call s:DefineImap(trigger, inserter )
     " INSERT-mode close
-    if options[0] != options[1]
+    let areSameTriggers = options[0] == options[1]
+    let inserter = "lh#brackets#Opener(".string(trigger).','. exists('escapable').','.string(nl).
+	  \','. string(Open).','.string(Close).','.string(areSameTriggers).")"
+    call s:DefineImap(trigger, inserter, isLocal)
+    if ! areSameTriggers
       let inserter = "lh#brackets#Closer(".string(options[1]).','.string (Close). ")"
-      call s:DefineImap(options[1], inserter)
+      call s:DefineImap(options[1], inserter, isLocal)
     endif
   endif
 
@@ -275,7 +405,7 @@ function! lh#brackets#Define(...)
       let action = ' <c-\><c-n>@=Surround('.
             \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 1)\<cr>"
     endif
-    call s:DefineMap(s:k_vmap_type.'nore', trigger, action)
+    call s:DefineMap(s:k_vmap_type.'nore', trigger, action, isLocal)
 
     if type(normal)==type('string') && normal=="default=1"
       let normal = 1
@@ -289,7 +419,7 @@ function! lh#brackets#Define(...)
     let normal = strlen(nl)>0 ? 'V' : 'viw'
   endif
   if type(normal)!=type(0) || normal != 0
-    call s:DefineMap('n', trigger, normal.trigger)
+    call s:DefineMap('n', trigger, normal.trigger, isLocal)
   endif
 endfunction
 

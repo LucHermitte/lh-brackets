@@ -72,11 +72,15 @@ if exists(':Brackets')
   :Brackets ( )
   :Brackets [ ] -visual=0
   :Brackets [ ] -insert=0 -trigger=<localleader>[
-  :Brackets " " -visual=0 -insert=1 -escapable
+  :Brackets " " -visual=0 -insert=1
   :Brackets " " -visual=1 -insert=0 -trigger=""
   :Brackets ' ' -visual=0 -insert=1
   :Brackets ' ' -visual=1 -insert=0 -trigger=''
   :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
+
+  " :Brackets /* */ -visual=0
+  " :Brackets /** */ -visual=0 -trigger=/!
+  "
 endif
 
 "=============================================================================
