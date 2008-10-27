@@ -6,20 +6,18 @@
 " Last Update:	$Date$
 " Version:	1.0.0
 " Purpose:      {{{1
-" 		This file defines a function (Brackets) that brings
-" 		together several macros dedicated to insert pairs of
-" 		caracters when the first one is typed. Typical examples are
-" 		the parenthesis, brackets, <,>, etc. 
-" 		One can choose the macro he wants to activate thanks to the
-" 		buffer-relative options listed below.
+" 		This file defines a command (:Brackets) that simplifies
+" 		the definition of mappings that insert pairs of caracters when
+" 		the first one is typed. Typical examples are the parenthesis,
+" 		brackets, <,>, etc. 
+" 		The definitions can be buffer-relative or global.
 "
-" 		This function is used by different ftplugins: <vim_set.vim>,
-" 		<ML_set.vim>, <html_set.vim>, <php_set.vim> and <tex_set.vim>
+" 		This commands is used by different ftplugins:
+" 		<vim_brackets.vim>, <c_brackets.vim> <ML_brackets.vim>,
+" 		<html_brackets.vim>, <php_brackets.vim> and <tex_brackets.vim>
 " 		-- available on my VIM web site.
 "
 " 		BTW, they can be activated or desactivated by pressing <F9>
-" 		Rem.: exe "noremap" is not yet supported by Triggers.vim
-" 		Hence the trick with the intermediary functions.
 "
 " History:      {{{1
 " Version 1.0.0:
@@ -141,6 +139,7 @@
 " line continuation used here ??
 let s:cpo_save = &cpo
 set cpo&vim
+let s:version = 100
 
 "======================================================================
 "# Anti-reinclusion & dependencies {{{1
@@ -148,7 +147,7 @@ if exists("g:loaded_common_brackets") && !exists('g:force_reload_common_brackets
   let &cpo = s:cpo_save
   finish 
 endif
-let g:loaded_common_brackets = 1
+let g:loaded_common_brackets = s:version
 
 " Make sure imaps.vim, if installed, is loaded before this plugin
 if !exists("*IMAP")
@@ -158,7 +157,7 @@ endif
 "======================================================================
 "# Brackets definitions {{{1
 "# :Brackets Command {{{2
-command! -nargs=+ Brackets call lh#brackets#Define(<f-args>)
+command! -nargs=+ -bang Brackets call lh#brackets#Define("<bang>", <f-args>)
 
 "# <Plug>ToggleBrackets Mappings {{{2
 nnoremap <silent> <Plug>ToggleBrackets :call lh#brackets#Toggle()<cr>

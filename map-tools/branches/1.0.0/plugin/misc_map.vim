@@ -190,7 +190,7 @@
 "---------------------------------------------------------------------------
 " Avoid reinclusion
 if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
-  let g:misc_map_loaded = 1
+  let g:misc_map_loaded = 100
   let cpop = &cpoptions
   set cpoptions-=C
   scriptencoding latin1
@@ -529,6 +529,50 @@ endfunction
 
 " Surround any visual selection but not a marker! 
 " Function: Surround(begin,end, isIndented, goback, mustInterpret [, imSeq] ) {{{
+function! SurroundBySubstitute(
+      \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
+  " @Overload that does not rely on '>a + '<i, but on s
+  if IsAMarker()
+      return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
+  endif
+
+  let save_a = @a
+  try
+    let begin = a:begin
+    let end = a:end
+    if a:isLine
+      let begin .= "\n"
+      let end   = "\n" . end
+    endif
+    " Hack to know what is selected without altering any register
+    normal! gv"ay
+    let seq = begin . @a . end
+    let goback = ''
+
+    if a:mustInterpret
+      inoremap !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
+      " inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
+      inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
+
+      if (!exists('b:usemarks') || !b:usemarks)
+	let seq = substitute(seq, '!mark!', '', 'g')
+      endif
+      if (begin =~ '!cursorhere!') 
+	let goback = BuildMapSeq('!movecursor!')
+      endif
+      let seq = BuildMapSeq(seq)
+    endif
+    let res = 'gv"_c'.seq
+    exe "normal! ".res
+    return goback
+  finally
+    let @a = save_a
+    " purge the internal mappings
+    silent! iunmap !cursorhere!
+    silent! iunmap !movecursor!
+  endtry
+endfunction
+
 function! Surround(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
   if IsAMarker()

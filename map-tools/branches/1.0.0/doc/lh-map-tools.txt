@@ -34,7 +34,7 @@ Contents~
 
 ------------------------------------------------------------------------------
 							*misc_map.vim*
-misc_map.vim~
+API: misc_map.vim~
 			For Vim version 5.7. and more
 
 This plugin defines several functions and commands to use when you want to
@@ -421,7 +421,7 @@ the implementation of |Surround()| and |InsertSeq()|.
 
 ------------------------------------------------------------------------------
 							*bracketing.base.vim*
-bracketing.base.vim ~
+Placeholder subsystem: bracketing.base.vim ~
 			For Vim version 6.0.+ only
 
 						*markers* 
@@ -552,26 +552,54 @@ You will have to:
 
 ------------------------------------------------------------------------------
 							*common_brackets.vim*
-common_brackets.vim ~
+Bracketing subsystem: common_brackets.vim ~
 			    For Vim version 7.1.+ only
 
-This script eases the definition of mappings that insert brackets pairs. It is
-used by quite all my consequent ftplugins. 
+This subsystem provides a command that helps define INSERT-, NORMAL-, and
+VISUAL-mode mappings to insert any pairs of brackets-like characters.
+* The INSERT-mode mappings will
+  o insert the pair of brackets-like characters when the opening one is
+    triggered, add a placeholder after the closing character, and move the
+    cursor between the two characters;
+  o insert the closing character when pressed, or move after it if it is the
+    next character after the cursor ; 
+
+* The VISUAL-mode mapping will surround the current selection with the pair of
+bracket-like characters ;
+
+* The NORMAL-mode mapping will select the current word (or the current line
+depending on the use of the newline (-nl) option), and then surround this
+selection with the pair of bracket-like characters. 
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Main features~
+Additional features~
 
-- context-sensitive
-- insert mode bracket mapping
-- normal & visual surrounding mappings
-- toggable
-- any pair of characters can be considered as a pair of bracket-like
-  characters
+* The INSERT-mode mappings are context-sensitive: they won't expand within
+  comment or string context ;
+* Any pair of characters can be considered as a pair of bracket-like
+  characters: it is possible to tune what is exactly inserted in INSERT-mode
+  (thanks to the |:Brackets-open| and |:Brackets-close| options) ;
+* The key sequence that actually trigger the mappings defined can be specified
+  thanks to |:Brackets-trigger| option.
+* The placeholder won't be inserted depeding on |b:usemark| value ;
+* The mappings can be made line-wise (see |:Brackets-nl|) ;
+* The definitions of all bracket-pair mappings can be toggled by pressing
+  <F9> (see |<Plug>ToggleBrackets|), even if several buffers are used ;
+* The mappings can be defined only in some modes (thanks to the options
+ |:Brackets-insert|, |:Brackets-visual|, and also |:Brackets-normal|) ;
+* It is possible to tune how the NORMAL-mode mapping select a current anything
+  (thanks to the |:Brackets-normal| option).
 
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 								*:Brackets*
-:Bracket [options] {open} {close}~
+:Bracket[!] [options] {open} {close}~
 
 The options are:
+(*) When the command is called with a {bang}[!], the mappings defined will be
+    global. Otherwise, the mappings will be local to the current buffer.
+    Banged calls are expected to be done in the |.vimrc|, while the non-banged
+    ones are expected to be done in a ftplugin (see |:Brackets-notes|).
+
 (*) -insert=(Boolean: 0|[1])				*:Brackets-insert*
     Tells whether a mapping should be provided in insert mode. Default is 1.
     A typical insert mode mapping will:
@@ -649,11 +677,12 @@ Examples from {rtp}/after/ftplugin/html/html_brackets.vim: >
 Examples from {rtp}/after/ftplugin/tex/tex_brackets.vim: >
     :Brackets $ $ -visual=0 -insert=1 -escapable
     :Brackets $ $ -visual=1 -insert=0 -trigger=$$
-
+<
+							*:Brackets-notes*
 Notes~
-These examples are in the atfer/ sub-hierarchy for several reasons:
+These examples are in the |after-directory| for several reasons:
 - this enables to set custom |localleader| before |:Bracket| is called.
-- my ftplugins can be seen as "official" ftplugins, particulary the
+- my |ftplugins| can be seen as "official" ftplugins, particulary the
   c_brackets.vim. By being stored into atfer/ftplugin/c/, this enables you,
   end-user of my C&C++ ftplugin suite, to override my definitions with yours
   with a: >
@@ -676,28 +705,18 @@ These examples are in the atfer/ sub-hierarchy for several reasons:
     Brackets /* */ -v=0
     Brackets /* */ -i=0 -t=* -nl
     Brackets /* */ -i=0 -t=<m-v> 
+<
+							*:Brackets-list*
+:Brackets[!] -list~
 
+Lists the brackets mappings defined in the current buffer, or the one globally
+defined if banged.
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-How it works~
+							*:Brackets-clear*
+:Brackets[!] -clear~
 
-<DEPRECATED>
-When we hit (in |insert-mode|) the starting character of a pair, the second
-one is automatically inserted. In |visual-mode| (resp. |normal-mode|) the
-opening character can be hit once [1,2] in order to insert the pair around the
-visual area (resp.  current word).  
-
-[1] except for quotes and dollars that have to be hit twice
-[2] if |b:cb_bracket| is set to 1, we must hit '<localleader>['. If it is set
-    to 2, we can simply hit '['. However, it will hide every standard Vim
-    keybindings starting with an open square bracket (|[c|, |[{|, |[z|, ...).
-
-If *b:cb_jump_on_close* is not set to false (0), pressing the second character
-from the pair puts the cursor just after the next occurrence of this character
-(and in |insert-mode|). But you'd better use |!jump!| in conjunction with the
-|markers|. This must be set _before_ Brackets() is called by the various
-ftplugins.
-</DEPRECATED>
+Clears the brackets mappings defined in the current buffer, or the one globally
+defined if banged. If the mappings are active, they are |:unmap|-ped first.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 						*<Plug>ToggleBrackets*
