@@ -2,7 +2,7 @@
 " $Id$
 " File:		bracketing.base.vim
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
-" 		<URL:http://hermitte.free.fr/vim/>
+"		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
 " Version:	1.0.0
 "

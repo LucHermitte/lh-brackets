@@ -737,7 +737,7 @@ option |b:usemarks| is set to 1. In that latter case, markers are inserted at
 the end of the pair of brakets.  
 The option can be toggled by hitting the trigger <M-F9> -- if |Trigger.vim| is
 installed. 
-TODO: reimplement this feature with lh#menu#DefToggleItem
+TODO: reimplement this feature with lh#menu#def_toggle_item
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Accessibility~
@@ -827,7 +827,7 @@ These plugins can be obtained ...
 
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2008 <http://hermitte.free.fr/vim/>
+ © Luc Hermitte, 2001-2010, <http://code.google.com/p/lh-vim/>       {{{1
  $Id$
  VIM: let b:VS_language = 'american' 
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:
