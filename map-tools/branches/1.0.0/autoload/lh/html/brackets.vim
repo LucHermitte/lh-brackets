@@ -1,8 +1,8 @@
 "=============================================================================
 " $Id$
-" File:		lh/html/brackets.vim                                     {{{1
+" File:		autoload/lh/html/brackets.vim                             {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://hermitte.free.fr/vim/>
+"		<URL:http://code.google.com/p/lh-vim/>
 " Version:	1.0.0
 " Created:	24th Mar 2008
 " Last Update:	$Date$
@@ -23,7 +23,24 @@
 
 let s:cpo_save=&cpo
 set cpo&vim
+
+" ## Debug {{{1
+function! lh#html#brackets#verbose(level)
+  let s:verbose = a:level
+endfunction
+
+function! s:Verbose(expr)
+  if exists('s:verbose') && s:verbose
+    echomsg a:expr
+  endif
+endfunction
+
+function! lh#html#brackets#debug(expr)
+  return eval(a:expr)
+endfunction
+
 "------------------------------------------------------------------------
+" ## Hooks {{{1
 function! lh#html#brackets#lt()
   return s:Insert(0)
 endfunction

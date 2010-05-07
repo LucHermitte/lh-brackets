@@ -2,7 +2,7 @@
 " $Id$
 " File:         map-tools::lh#brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://hermitte.free.fr/vim/>
+"               <URL:http://code.google.com/p/lh-vim/>
 " Version:      1.0.0
 " Created:      28th Feb 2008
 " Last Update:  $Date$
@@ -44,17 +44,32 @@
 let s:cpo_save=&cpo
 set cpo&vim
 
+" ## Debug {{{1
+function! lh#brackets#verbose(level)
+  let s:verbose = a:level
+endfunction
 
-"# Options {{{1
+function! s:Verbose(expr)
+  if exists('s:verbose') && s:verbose
+    echomsg a:expr
+  endif
+endfunction
+
+function! lh#brackets#debug(expr)
+  return eval(a:expr)
+endfunction
+
+
+" ## Options {{{1
 " Defines the surrounding mappings:
 " - for both VISUAL and select mode -> "v"
 " - for both VISUAL mode only -> "x"
 " NB: can be defined in the .vimrc only
 " todo: find people using the select mode and never the visual mode
-let s:k_vmap_type = lh#option#Get('bracket_surround_in', 'x', 'g')
+let s:k_vmap_type = lh#option#get('bracket_surround_in', 'x', 'g')
 
 "------------------------------------------------------------------------
-"# Mappings Toggling {{{1
+" ## Mappings Toggling {{{1
 "
 "# Globals {{{2
 "# Definitions {{{3
@@ -118,7 +133,7 @@ function! s:GetDefinitions(isLocal)
 endfunction
 
 " Function: Main function called to toggle bracket mappings. {{{3
-function! lh#brackets#Toggle()
+function! lh#brackets#toggle()
   " todo: when entering a buffer, update the mappings depending on whether it
   " has been toggled
   if exists('*IMAP')
@@ -129,12 +144,12 @@ function! lh#brackets#Toggle()
       for m in crt_definitions
 	call s:UnMap(m)
       endfor
-      call lh#common#WarningMsg("Brackets mappings deactivated")
+      call lh#common#warning_msg("Brackets mappings deactivated")
     else " inactive -> active
       for m in crt_definitions
 	call s:Map(m)
       endfor
-      call lh#common#WarningMsg("Brackets mappings (re)activated")
+      call lh#common#warning_msg("Brackets mappings (re)activated")
     endif
   endif " No imaps.vim
   call s:state.toggle()
@@ -175,7 +190,7 @@ augroup END
 
 "------------------------------------------------------------------------
 
-"# Brackets definition functions {{{1
+" ## Brackets definition functions {{{1
 "------------------------------------------------------------------------
 
 function! s:UnMap(m)
@@ -207,7 +222,7 @@ function! s:DefineMap(mode, trigger, action, isLocal)
     call add(crt_definitions, crt_mapping)
   else
     if crt_mapping.action != a:action
-      call lh#common#WarningMsg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action."  with ".a:action)
+      call lh#common#warning_msg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action."  with ".a:action)
     elseif &verbose >= 2
       echomsg "(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action." with ".a:action
     endif
@@ -248,7 +263,7 @@ endfunction
 "------------------------------------------------------------------------
 " NB: this function is made public because IMAPs.vim need it to not be private
 " (s:)
-function! lh#brackets#Opener(trigger, escapable, nl, Open, Close, areSameTriggers)
+function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers)
   let escaped = getline('.')[col('.')-2] == '\'
   if type(a:Open) == type(function('has'))
     let res = InsertSeq(a:trigger, a:Open())
@@ -264,7 +279,7 @@ function! lh#brackets#Opener(trigger, escapable, nl, Open, Close, areSameTrigger
     let close = e.a:Close
   elseif escaped
     return a:trigger
-  elseif a:areSameTriggers && lh#option#Get('cb_jump_on_close',1) && lh#position#CharAtMark('.') == a:trigger
+  elseif a:areSameTriggers && lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
     return s:Jump()
   else
     let open = a:Open
@@ -282,7 +297,7 @@ function! lh#brackets#Opener(trigger, escapable, nl, Open, Close, areSameTrigger
 endfunction
 
 "------------------------------------------------------------------------
-function!lh#brackets#Closer(trigger, Action)
+function!lh#brackets#closer(trigger, Action)
   if type(a:Action) == type(function('has'))
     return InsertSeq(a:trigger,a:Action())
   elseif has('*IMAP')
@@ -294,7 +309,7 @@ endfunction
 
 "------------------------------------------------------------------------
 function! s:JumpOrClose(trigger)
-  if lh#option#Get('cb_jump_on_close',1) && lh#position#CharAtMark('.') == a:trigger
+  if lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
     " todo: detect even if there is a newline in between
     return s:Jump()
   else
@@ -338,7 +353,7 @@ endfunction "}}}
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
-function! lh#brackets#Define(bang, ...)
+function! lh#brackets#define(bang, ...)
   let isLocal  = a:bang != "!"
   let nl       = ''
   let insert   = 1
@@ -386,11 +401,11 @@ function! lh#brackets#Define(bang, ...)
   if insert
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
-    let inserter = "lh#brackets#Opener(".string(trigger).','. exists('escapable').','.string(nl).
+    let inserter = "lh#brackets#opener(".string(trigger).','. exists('escapable').','.string(nl).
 	  \','. string(Open).','.string(Close).','.string(areSameTriggers).")"
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
-      let inserter = "lh#brackets#Closer(".string(options[1]).','.string (Close). ")"
+      let inserter = "lh#brackets#closer(".string(options[1]).','.string (Close). ")"
       call s:DefineImap(options[1], inserter, isLocal)
     endif
   endif

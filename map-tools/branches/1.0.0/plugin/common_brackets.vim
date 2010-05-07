@@ -2,7 +2,7 @@
 " $Id$
 " File:		common_brackets.vim
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
-" 		<URL:http://hermitte.free.fr/vim/>
+" 		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
 " Version:	1.0.0
 " Purpose:      {{{1
@@ -157,14 +157,14 @@ endif
 "======================================================================
 "# Brackets definitions {{{1
 "# :Brackets Command {{{2
-command! -nargs=+ -bang Brackets call lh#brackets#Define("<bang>", <f-args>)
+command! -nargs=+ -bang Brackets call lh#brackets#define("<bang>", <f-args>)
 
 "# <Plug>ToggleBrackets Mappings {{{2
-nnoremap <silent> <Plug>ToggleBrackets :call lh#brackets#Toggle()<cr>
+nnoremap <silent> <Plug>ToggleBrackets :call lh#brackets#toggle()<cr>
 if !hasmapto('<Plug>ToggleBrackets', 'n') && (mapcheck("<F9>", "n") == "")
   nmap <silent> <F9> <Plug>ToggleBrackets
 endif
-inoremap <silent> <Plug>ToggleBrackets <c-o>:call lh#brackets#Toggle()<cr>
+inoremap <silent> <Plug>ToggleBrackets <c-o>:call lh#brackets#toggle()<cr>
 if !hasmapto('<Plug>ToggleBrackets', 'i') && (mapcheck("<F9>", "i") == "")
   imap <silent> <F9> <Plug>ToggleBrackets
 endif
