@@ -2,9 +2,9 @@
 " $Id$
 " File:		bracketing.base.vim
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
-" 		<URL:http://hermitte.free.fr/vim/>
+"		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	0.6.1
+" Version:	1.0.0
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
@@ -378,7 +378,7 @@ function! s:ICONV(expr, from, to)  " {{{3
 endfunction
 
 function! s:SetMarker(open, close, ...) " {{{3
-  if a:close == &enc
+  if a:close != '' && a:close == &enc
     throw ":SetMarker: two arguments expected"
   endif
   let from = (a:0!=0) ? a:1 : 'latin1'
@@ -395,7 +395,7 @@ function! s:SetMarker(open, close, ...) " {{{3
   endif
   " :call Dret("s:SetMarker".ret) 
 endfunction
-command! -nargs=+ SetMarker :call <sid>SetMarker(<f-args>, &enc)
+command! -nargs=+ SetMarker :call <sid>SetMarker(<f-args>, &enc)<bar>:call <sid>UpdateHighlight()
 
 function! Marker_Open()            " {{{3
   " call Dfunc('Marker_Open()')

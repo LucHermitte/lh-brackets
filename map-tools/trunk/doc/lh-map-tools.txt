@@ -1,8 +1,8 @@
 *lh-map-tools.txt*	Tools for helping mappings-definitions
-			For Vim version 5.7.+	Last change: 19th Feb 2008
+			For Vim version 7.+	Last change: 11th Apr 2008
 
 		   Map Tools MANUAL	by Luc Hermitte
-		    Version 0.6.1
+		    Version 1.0.0
 
 
 ------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ Contents~
 
 ------------------------------------------------------------------------------
 							*misc_map.vim*
-misc_map.vim~
+API: misc_map.vim~
 			For Vim version 5.7. and more
 
 This plugin defines several functions and commands to use when you want to
@@ -325,8 +325,8 @@ Unlike |!mark!|, there is no mapping associated to !cursorhere!.
 							    *IsAMarker()*
 IsAMarker()~
 This function tells whether the currently selected text is actually a
-|marker|. It helps to compensate the fact Vim does not provide select-mode
-mappings (with something like :smap for instance).
+|marker|. It helped to compensate the fact Vim did not provide select-mode
+mappings (later versions of vim support the |:smap| command).
 
 Why is this needed ? 
 Well. |!jump!| (and similar mappings) selects the next |marker| and goes into
@@ -354,8 +354,7 @@ Example: g= that evaluates the current selection~
     endfunction
     vnoremap <silent> g= <c-\><c-n>@=<sid>Evaluate()<cr>
 
-Of course, select-mode mappings would have been better. But there is no such
-thing (yet?).
+Of course, select-mode mappings are a better choice.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 							    *mm-How-To*
@@ -422,7 +421,7 @@ the implementation of |Surround()| and |InsertSeq()|.
 
 ------------------------------------------------------------------------------
 							*bracketing.base.vim*
-bracketing.base.vim ~
+Placeholder subsystem: bracketing.base.vim ~
 			For Vim version 6.0.+ only
 
 						*markers* 
@@ -535,73 +534,201 @@ next/previous marker and delete it whatever the options are. It ensures that
 the (ft)plugins that depend on these mappings will always do the same thing.
 
 						*g:marker_highlight*
-By default markers will be highlighted in a lightgray background.
-To disable this feature, set |g:marker_highlight| to 0 in your |.vimrc|.
+By default markers will be highlighted in a darkdray background when 'bg'
+values "dark" ("guibg=#0d0d0d ctermbg=darkgray"), and in a lightgray
+background otherwise ("guibg=#d0d0d0 ctermbg=lightgray").
+To disable this feature, set |g:marker_highlight| to "" in your |.vimrc|.
+You can also set this option to highlight the marker in any other colour you
+prefer ; its value will be given to the |:hi| command.
 
 The dynamic toggling of this feature is tricky at this moment.
 You will have to:
 - first change the value of |g:marker_highlight|,
 - and then do something like >
     :let &encoding=&encoding
+- or change the |:colorscheme|,
+- or reset the markers with |:SetMarker|.
 
 
 ------------------------------------------------------------------------------
 							*common_brackets.vim*
-common_brackets.vim ~
-			    For Vim version 6.0.+ only
+Bracketing subsystem: common_brackets.vim ~
+			    For Vim version 7.1.+ only
 
-This file eases the insertion of brackets pairs. It is used by quite all my
-consequent ftplugins. 
+This subsystem provides a command that helps define INSERT-, NORMAL-, and
+VISUAL-mode mappings to insert any pairs of brackets-like characters.
+* The INSERT-mode mappings will
+  o insert the pair of brackets-like characters when the opening one is
+    triggered, add a placeholder after the closing character, and move the
+    cursor between the two characters;
+  o insert the closing character when pressed, or move after it if it is the
+    next character after the cursor ; 
 
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Main features~
-								*b:cb_*
-Through a set of buffer-relative options -- cf. the implementation and the
-different other language ftplugins of mine -- , it enables and configures
-bracketing mappings. 
+* The VISUAL-mode mapping will surround the current selection with the pair of
+bracket-like characters ;
 
-The bracket-like pairs supported are: 
-* parenthesis:      ( and ), 		*b:cb_parent*
-* brackets:         [ and ],  		*b:cb_bracket*
-* curly-brackets:   { and }, 		*b:cb_acco*
-* comparison signs: < and >, 		*b:cb_cmp* *b:cb_ltFn* *b:cb_gtFn*
-* single-quotes:    ' and ', 		*b:cb_quotes*
-* double-quotes:    " and ",		*b:cb_Dquotes* *b:cb_DqFn*
-* and dollars: $ and $ for LaTeX mathematical mode.	*b:cb_mathMode*
-
-The different mappings, described in the following paragraphs, are activated
-only when the corresponding buffer-relative options |b:cb_| are set to 1.
-These options are not meant to be changed dynamically, but to be set once
-within |ftplugins|.
-
-Some behaviors can be tuned much more finely with callback functions:
-|b:cb_DqFn| for double quotes, |b:cb_ltFn| for '<' and |b:cb_gtFn| for '>'.
-Cf. ML_set.vim and vim_set.vim for examples.
+* The NORMAL-mode mapping will select the current word (or the current line
+depending on the use of the newline (-nl) option), and then surround this
+selection with the pair of bracket-like characters. 
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-How it works~
+Additional features~
 
-When we hit (in |insert-mode|) the starting character of a pair, the second
-one is automatically inserted. In |visual-mode| (resp. |normal-mode|) the
-opening character can be hit once [1,2] in order to insert the pair around the
-visual area (resp.  current word).  
-
-[1] except for quotes and dollars that have to be hit twice
-[2] if |b:cb_bracket| is set to 1, we must hit '<localleader>['. If it is set
-    to 2, we can simply hit '['. However, it will hide every standard Vim
-    keybindings starting with an open square bracket (|[c|, |[{|, |[z|, ...).
-
-If *b:cb_jump_on_close* is not set to false (0), pressing the second character
-from the pair puts the cursor just after the next occurrence of this character
-(and in |insert-mode|). But you'd better use |!jump!| in conjunction with the
-|markers|. This must be set _before_ Brackets() is called by the various
-ftplugins.
+* The INSERT-mode mappings are context-sensitive: they won't expand within
+  comment or string context ;
+* Any pair of characters can be considered as a pair of bracket-like
+  characters: it is possible to tune what is exactly inserted in INSERT-mode
+  (thanks to the |:Brackets-open| and |:Brackets-close| options) ;
+* The key sequence that actually trigger the mappings defined can be specified
+  thanks to |:Brackets-trigger| option.
+* The placeholder won't be inserted depeding on |b:usemark| value ;
+* The mappings can be made line-wise (see |:Brackets-nl|) ;
+* The definitions of all bracket-pair mappings can be toggled by pressing
+  <F9> (see |<Plug>ToggleBrackets|), even if several buffers are used ;
+* The mappings can be defined only in some modes (thanks to the options
+ |:Brackets-insert|, |:Brackets-visual|, and also |:Brackets-normal|) ;
+* It is possible to tune how the NORMAL-mode mapping select a current anything
+  (thanks to the |:Brackets-normal| option).
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+								*:Brackets*
+:Bracket[!] [options] {open} {close}~
+
+The options are:
+(*) When the command is called with a {bang}[!], the mappings defined will be
+    global. Otherwise, the mappings will be local to the current buffer.
+    Banged calls are expected to be done in the |.vimrc|, while the non-banged
+    ones are expected to be done in a ftplugin (see |:Brackets-notes|).
+
+(*) -insert=(Boolean: 0|[1])				*:Brackets-insert*
+    Tells whether a mapping should be provided in insert mode. Default is 1.
+    A typical insert mode mapping will:
+    - be triggered on {open} (unless |:Brackets-trigger| is specified)
+    - insert {open}{close}!mark! and put the cusor between {open} and {close}.
+
+    A mapping will also be provided on {close}. If *b:cb_jump_on_close* is
+    set, it will insert the {close} sequence, or jump after the {close}
+    sequence under the cursor.
+    NB: not tested with sequences of several characters
+
+(*) -visual=(Boolean: 0|[1])				*:Brackets-visual*
+    Tells whether a mapping should be provided in visual mode. Default is 1.
+    A typical visual mode mapping will:
+    - be triggered on {open} (unless |:Brackets-trigger| is specified)
+    - insert {open} and {close} around the text selected,
+    - and leave the cursor in NORMAL-mode on the {close} sequence.
+
+(*) -normal={select-sequence}				*:Brackets-normal*
+    Tells how the surrounding mapping is applied from the normal mode.
+    If |:Brackets-visual|, or |:Brackets-normal|, is set to 0, no NORMAL-mode
+    mapping will be provided.
+    If |:Brackets-nl| is set to 1, the {select-sequence} defaults to |V|
+    If |:Brackets-nl| is set to 0, the {select-sequence} defaults to "viw" (:h
+    |v_iw|)
+    Otherwise it can be anything as long as it selects text in VISUAL-mode
+    ("vap", "vi(", "|vi,|", etc.)
+
+
+(*) -open=({text}|"function({function-name})"		*:Brackets-open*
+(*) -close=({text}|"function({function-name})"		*:Brackets-close*
+    These options override the sequence to insert in the INSERT-mode mapping.
+    The forced value can be any {text} other than {open} (/resp {close}, or
+    even a |function()| that can return one string or another depending on the
+    context.
+
+(*) -nl=(0|[1])						*:Brackets-nl*
+    This option tells the mappings will insert newline characters between the
+    {open}, the cursor or the surrounded text, and {close}.
+    In VISUAL-mode, it will set the cursor on the line after {open}, and leave
+    a |marker| after {close}
+    In NORMAL-mode, it will use |V|, by default, to select the current line.
+
+(*) -trigger={keys-sequence}				*:Brackets-trigger*
+    This option permit to trigger the mapping on anything but {open}.
+    This is particulary usefull to have simultanously different mappings, on a
+    same pair of brackets, that surround with newlines, and without.
+
+(*) -escapable=(Boolean: [0]|1)				*:Brackets-escapable*
+    This option tells that INSERT-mode mappings may expand into 
+    {open}<cursor>\{close} is there is a "\" before the cursor.
+    This does not mean anything in VISUAL- and NORMAL-modes.
+
+Examples from {rtp}/after/ftplugin/c/c_brackets.vim: >
+    :Brackets { } -visual=0 -nl
+    :Brackets { } -visual=0 -trigger=#{ 
+    :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+    :Brackets { } -visual=1 -insert=0
+
+    :Brackets ( )
+    :Brackets [ ] -visual=0
+    :Brackets [ ] -insert=0 -trigger=,[
+    :Brackets " " -visual=0 -insert=1 -escapable
+    :Brackets " " -visual=1 -insert=0 -trigger=""
+    :Brackets ' ' -visual=0 -insert=1
+    :Brackets ' ' -visual=1 -insert=0 -trigger=''
+    :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
+
+Examples from {rtp}/after/ftplugin/html/html_brackets.vim: >
+    :Brackets < > -ope=function('lh#html#brackets#lt')
+      \           -clo=function('lh#html#brackets#gt')
+      \           -vis=0
+    :Brackets < > -ins=0 -trig=<localleader><
+
+Examples from {rtp}/after/ftplugin/tex/tex_brackets.vim: >
+    :Brackets $ $ -visual=0 -insert=1 -escapable
+    :Brackets $ $ -visual=1 -insert=0 -trigger=$$
+<
+							*:Brackets-notes*
+Notes~
+These examples are in the |after-directory| for several reasons:
+- this enables to set custom |localleader| before |:Bracket| is called.
+- my |ftplugins| can be seen as "official" ftplugins, particulary the
+  c_brackets.vim. By being stored into atfer/ftplugin/c/, this enables you,
+  end-user of my C&C++ ftplugin suite, to override my definitions with yours
+  with a: >
+    " .vim/ftplugin/c/c_your_brackets.vim
+    " 0- anti-reinclusion
+    if exists('b:loaded_your_c_brackets') && !exists('g:force_reload_your_c_brackets')
+       finish
+    endif
+
+    " 1- load default definitions
+    runtime after/ftplugin/c/c_brackets.vim
+    "   or set b:loaded_ftplug_c_brackets to 1 to prevent the default
+    "   definitions from being loaded.
+
+    " 2- overriden definitions (for instance)
+    Brackets { } -i=0 -nl
+    Brackets { } -i=0 -t=<localleader>0
+
+    " 3- new definitions
+    Brackets /* */ -v=0
+    Brackets /* */ -i=0 -t=* -nl
+    Brackets /* */ -i=0 -t=<m-v> 
+<
+							*:Brackets-list*
+:Brackets[!] -list~
+
+Lists the brackets mappings defined in the current buffer, or the one globally
+defined if banged.
+
+							*:Brackets-clear*
+:Brackets[!] -clear~
+
+Clears the brackets mappings defined in the current buffer, or the one globally
+defined if banged. If the mappings are active, they are |:unmap|-ped first.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+						*<Plug>ToggleBrackets*
 Dynamic (de-)activations~
 
-When |Trigger.vim| is installed, the macros defined here can be activated and
-deactivated as a whole by pressing <F9>.
+The macros defined here can be activated and deactivated as a whole by
+pressing <F9>. In order to use another keybinding for this feature, add the
+following lines into your .vimrc:
+   nmap <leader>TB <Plug>ToggleBrackets
+   imap <leader>TB <Plug>ToggleBrackets
+
+NB: Triggers.vim is not longer required to provide this feature.
 
 								*b:usemarks*
 In |insert-mode|, two operating modes are provided: one very classic, and one
@@ -610,18 +737,21 @@ option |b:usemarks| is set to 1. In that latter case, markers are inserted at
 the end of the pair of brakets.  
 The option can be toggled by hitting the trigger <M-F9> -- if |Trigger.vim| is
 installed. 
+TODO: reimplement this feature with lh#menu#def_toggle_item
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Accessibility~
 
-For personal and technical (the meta-mappings do not suit to the layout of my
-French keyboard) reasons, I prefer to use the opening character of a
+For personal and technical reasons (the meta-mappings do not suit to the
+layout of my French keyboard), I prefer to use the opening character of a
 bracket-like structure in order to insert the whole structure. 
 
-In insert and normal modes, it is also possible to hit <Meta> + the opening
-character to insert the corresponding structure around the current/previous
-word -- this is not fully supported on French keyboards and is incompatible
-with Stephen Riehm's default meta-mappings. 
+Since version 1.0.0, mappings to <Meta> + the opening character, to insert the
+corresponding structure around the current/previous word, are no longer
+provided.
+It you'd rather have such mappings, use the |:Brackets-trigger| option to
+specify the activiation keys of the mappings.
+
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 						    *brackets_manipulations*
@@ -672,24 +802,32 @@ otherwise, if |g:cb_want_mode| is left to 1, define: >
 							*mt-Download*
 Where to obtain these files ?~
 
-These plugins can be obtained ...
-- ... independently from each other directly on my web site ; browse from:
-      <http://hermitte.free.fr/vim/ressources/>
-  I advice against proceeding that way because of dependencies.
+First don't forget to obtain |lh-vim-lib| as lh-map-tools depends on it since
+its version 1.0.0.
+      <http://code.google.com/p/lh-vim/wiki/lhVimLib>
+      <http://vim.sourceforge.net/scripts/script.php?script_id=214>
 
-- ... as a tarball archive available on my web site:
-      <http://hermitte.free.fr/vim/ressources/lh-map-tools.tar.gz>
+These plugins can be obtained ...
+- ... independently from each other directly on google-code ; browse from:
+      <http://code.google.com/p/lh-vim/source/browse>
+  However, I advice against proceeding that way because of dependencies.
+
+- ... as a vimball archive available on google-code:
+      <http://code.google.com/p/lh-vim/downloads/list>
   or on Vim's web site on sourceforge:
       <http://vim.sourceforge.net/scripts/script.php?script_id=50>
   NB: I may not update the archive on SF every time I fix something or enhance
   the plugins.
+
+- ... as a complete tarball archive available on my web site:
+      <http://hermitte.free.fr/vim/ressources/lh-map-tools.tar.gz>
 
 - ... as part of other (ft)plugins I maintain and share like |lh-cpp|,
   |mu-template|, ....
 
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2005 <http://hermitte.free.fr/vim/>
+ © Luc Hermitte, 2001-2010, <http://code.google.com/p/lh-vim/>       {{{1
  $Id$
  VIM: let b:VS_language = 'american' 
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:

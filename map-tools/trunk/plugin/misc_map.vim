@@ -2,9 +2,9 @@
 " $Id$
 " File:		misc_map.vim
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
-" 		<URL:http://hermitte.free.fr/vim/>
+"               <URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	0.6.0
+" Version:	1.0.0
 "
 " Purpose:	API plugin: Several mapping-oriented functions
 "
@@ -190,7 +190,7 @@
 "---------------------------------------------------------------------------
 " Avoid reinclusion
 if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
-  let g:misc_map_loaded = 1
+  let g:misc_map_loaded = 100
   let cpop = &cpoptions
   set cpoptions-=C
   scriptencoding latin1
@@ -427,18 +427,27 @@ function! LHCursorHere(...)
   if a:0 > 0
     let s:goto_lin_{a:1} = line('.')
     let s:goto_col_{a:1} = virtcol('.')
-    " let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
+    let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
   else
     let s:goto_lin = line('.')
     let s:goto_col = virtcol('.')
-    " let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
+    let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
   endif
   let s:old_indent = indent(line('.'))
+  let g:repos .= "   indent=".s:old_indent
   " return ''
 endfunction
 
 function! LHGotoMark()
-  let s:old_indent = indent(s:goto_lin) - s:old_indent 
+  " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
+  let crt_indent = indent(s:goto_lin)
+  if crt_indent < s:old_indent
+    let s:fix_indent = s:old_indent - crt_indent
+  else
+    let s:old_indent = crt_indent - s:old_indent 
+    let s:fix_indent = 0
+  endif
+  let g:fix_indent = s:fix_indent
   if s:old_indent != 0
     let s:goto_col = s:goto_col + s:old_indent
   endif
@@ -447,7 +456,14 @@ function! LHGotoMark()
   " return ''
 endfunction
 function! LHGotoEndMark()
-  let s:old_indent = indent(s:goto_lin) - s:old_indent 
+  " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
+  let crt_indent = indent(s:goto_lin)
+  if crt_indent < s:old_indent
+    let s:fix_indent = s:old_indent - crt_indent
+  else
+    let s:old_indent = crt_indent - s:old_indent 
+    let s:fix_indent = 0
+  endif
   if s:old_indent != 0
     let s:goto_col = s:goto_col + s:old_indent
   endif
@@ -460,6 +476,9 @@ function! LHGotoEndMark()
   execute s:goto_lin . 'normal! ' . s:goto_col . '|'
   " return ''
 endfunction
+function! LHFixIndent()
+  return repeat( ' ', s:fix_indent)
+endfunction
 " }}}
 "---------------------------------------------------------------------------
 " Function: InsertSeq(key, seq, [context]) {{{
@@ -469,8 +488,8 @@ function! InsertSeq(key,seq, ...)
   let seq = ReinterpretEscapedChar(a:seq)
   let seq = seq . (mark ? '!movecursor!' : '')
   " internal mappings
-  inoremap !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
-  inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
+  inoremap <silent> !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
+  inoremap <silent> !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
   "inoremap !cursorhere! <c-\><c-n>:call <sid>CursorHere()<cr>a
   "inoremap !movecursor! <c-\><c-n>:call <sid>GotoMark()<cr>a
   " Build the sequence to insert
@@ -510,6 +529,50 @@ endfunction
 
 " Surround any visual selection but not a marker! 
 " Function: Surround(begin,end, isIndented, goback, mustInterpret [, imSeq] ) {{{
+function! SurroundBySubstitute(
+      \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
+  " @Overload that does not rely on '>a + '<i, but on s
+  if IsAMarker()
+      return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
+  endif
+
+  let save_a = @a
+  try
+    let begin = a:begin
+    let end = a:end
+    if a:isLine
+      let begin .= "\n"
+      let end   = "\n" . end
+    endif
+    " Hack to know what is selected without altering any register
+    normal! gv"ay
+    let seq = begin . @a . end
+    let goback = ''
+
+    if a:mustInterpret
+      inoremap !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
+      " inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
+      inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
+
+      if (!exists('b:usemarks') || !b:usemarks)
+	let seq = substitute(seq, '!mark!', '', 'g')
+      endif
+      if (begin =~ '!cursorhere!') 
+	let goback = BuildMapSeq('!movecursor!')
+      endif
+      let seq = BuildMapSeq(seq)
+    endif
+    let res = 'gv"_c'.seq
+    exe "normal! ".res
+    return goback
+  finally
+    let @a = save_a
+    " purge the internal mappings
+    silent! iunmap !cursorhere!
+    silent! iunmap !movecursor!
+  endtry
+endfunction
+
 function! Surround(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
   if IsAMarker()
@@ -538,8 +601,8 @@ function! Surround(
     inoremap !cursorpos2! <c-o>:call LHCursorHere(2)<cr>
     " <c-\><c-n>....a is better for !movecursor! as it leaves the cursor `in'
     " insert-mode... <c-o> does not; that's odd.
-    inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
-    inoremap !movecursor2! <c-\><c-n>:call LHGotoEndMark()<cr>a
+    inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
+    inoremap !movecursor2! <c-\><c-n>:call LHGotoEndMark()<cr>a<c-r>=LHFixIndent()<cr>
     " inoremap !movecursor! <sid>GotoMark().'a'
 
     " Check whether markers must be used
