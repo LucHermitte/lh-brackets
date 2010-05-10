@@ -1,0 +1,19 @@
+			  --------------------
+			   lh-map-tools 0.6.1
+			  --------------------
+
+lh-map-tools provides three things
+- a bracketing system (mappings to jump to markers/placeholder and more)
+- a predefined, and configurable, set of mappings for inserting brackets-like
+  pairs ;
+- several VimL functions for defining smart abbreviations.
+
+For Who       : Any vim users, and ftplugins writers
+Requirements  : Vim 6, Triggers is not mandatory
+Required by   : All my (LH) ftplugins, and mu-template
+Author        : Luc Hermitte
+License       : GPL2
+More Help At  : http://code.google.com/p/lh-vim/wiki/lhMapTools
+Vim script#50 http://www.vim.org/scripts/script.php?script_id=50
+Repository    :
+	svn checkout http://lh-vim.googlecode.com/svn/map-tools/trunk lh-map-tools
