@@ -2,7 +2,7 @@
 " $Id$
 " File:		mk-lh-map-tools.vim
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://hermitte.free.fr/vim/>
+"               <URL:http://code.google.com/p/lh-vim/>
 " Version:	1.0.0
 let s:version = '1.0.0'
 " Created:	06th Nov 2007
