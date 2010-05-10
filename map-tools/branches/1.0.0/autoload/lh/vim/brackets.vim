@@ -3,16 +3,20 @@
 " File:		autoload/lh/brackets.vim                               {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:	«version»
+" Version:	1.0.0
 " Created:	20th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	«description»
+" Description:	
+" 	Functions that tune how some bracket characters should expand in VimL
 " 
 "------------------------------------------------------------------------
-" Installation:	«install details»
-" History:	«history»
-" TODO:		«missing features»
+" Installation:	
+" 	Requires Vim7+ and lh-map-tools
+" 	Used by {ftp}/ftplugin/vim/vim_brackets.vim
+" 	Drop this file into {rtp}/autoload/lh/vim
+" History:	
+" 	v1.0.0: First version
 " }}}1
 "=============================================================================
 

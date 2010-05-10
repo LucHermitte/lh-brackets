@@ -2,7 +2,7 @@
 " $Id$
 " File:		ftplugin/html/html_brackets.vim                          {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://hermitte.free.fr/vim/>
+"               <URL:http://code.google.com/p/lh-vim/>
 " Version:	1.0.0
 " Created:	24th Mar 2008
 " Last Update:	$Date$
