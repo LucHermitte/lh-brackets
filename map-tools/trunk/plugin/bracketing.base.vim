@@ -4,7 +4,7 @@
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	1.0.0
+" Version:	1.1.0
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
@@ -12,6 +12,8 @@
 "URL: http://hermitte.free.fr/vim/ressources/vimfiles/plugin/bracketing.base.vim
 " ======================================================================
 " History:	{{{1
+"	25th Nov 2010:  by LH
+"		* Aware of Tom Link's Stakeholders presence for :SetMarker
 "	20th Mar 2008:  by LH
 "		* Defect #1 : It is possible to configure the colour used to
 "		highlight the marker
@@ -158,7 +160,7 @@
 "set cpoptions=BeFs
 set cpoptions-=c
 " Avoid reinclusion
-if exists("g:loaded_bracketing_base") && !exists('g:force_load_bracketing_base')
+if exists("g:loaded_bracketing_base") && !exists('g:force_reload_bracketing_base')
   finish 
 endif
 let g:loaded_bracketing_base = 1
@@ -364,17 +366,7 @@ function! s:Option(name, default) " {{{2
 endfunction
 
 " Accessors to markers definition:  {{{2
-function! s:ICONV(expr, from, to)  " {{{3
-  " call Dfunc("s:ICONV(".a:expr.','.a:from.','.a:to.')')
-  if has('iconv') || has('iconv/dyn') ||
-	\ ((a:from=~'latin1\|utf-8') && (a:to=~'latin1\|utf-8'))
-    " call confirm('encoding: '.&enc."\nto:".a:to, "&Ok", 1)
-    " call Dret("s:ICONV convert=".iconv(a:expr, a:from, a:to))
-    return iconv(a:expr,a:from,a:to)
-  else
-    " call Dret("s:ICONV  no convert=".a:expr)
-    return a:expr
-  endif
+function! s:UpdateMarkers()
 endfunction
 
 function! s:SetMarker(open, close, ...) " {{{3
@@ -386,14 +378,22 @@ function! s:SetMarker(open, close, ...) " {{{3
   
   " let ret = ''
   if '' != a:open
-    let b:marker_open  = s:ICONV(a:open, from, &enc)
+    let b:marker_open  = lh#encoding#iconv(a:open, from, &enc)
     " let ret = ret. "  b:open=".b:marker_open
   endif
   if '' != a:close
-    let b:marker_close = s:ICONV(a:close, from, &enc)
+    let b:marker_close = lh#encoding#iconv(a:close, from, &enc)
     " let ret = ret . "  b:close=".b:marker_close
   endif
   " :call Dret("s:SetMarker".ret) 
+
+  " Exploits Tom Link Stakeholders plugin if installed
+  " http://www.vim.org/scripts/script.php?script_id=3326
+  if exists(':StakeholdersEnable') && exists('b:marker_open') && exists('b:marker_close') 
+    let g:stakeholders#def = {'rx': b:marker_open.'\(..\{-}\)'.b:marker_close}
+    " Seems to be required to update g:stakeholders#def.Replace(text)
+    runtime autoload/stakeholders.vim
+  endif
 endfunction
 command! -nargs=+ SetMarker :call <sid>SetMarker(<f-args>, &enc)<bar>:call <sid>UpdateHighlight()
 
@@ -461,7 +461,7 @@ function! LHMoveWithinMarker()     " {{{3
 " function! s:MoveWithinMarker()    
   " Purpose: move the cursor within the marker just inserted.
   " Here, b:marker_close exists
-  return "\<esc>" . strlen(s:ICONV(Marker_Close(),&enc, 'latin1')) . 'ha'
+  return "\<esc>" . strlen(lh#encoding#iconv(Marker_Close(),&enc, 'latin1')) . 'ha'
 endfunction
 
 function! LHToggleMarkerInVisual() " {{{3
@@ -526,6 +526,7 @@ endfunction
 if strlen(s:Highlight()) > 0
   aug markerHL
     au!
+    au EncodingChanged * :call s:UpdateMarkers()
     au BufWinEnter,EncodingChanged,ColorScheme * :call s:UpdateHighlight()
   aug END
 endif
