@@ -1,5 +1,5 @@
 			  --------------------
-			   lh-map-tools 1.0.0
+			   lh-map-tools 1.1.0
 			  --------------------
 
 lh-map-tools provides three things:
@@ -17,3 +17,6 @@ More Help At  : http://code.google.com/p/lh-vim/wiki/lhMapTools
 Vim script#50 http://www.vim.org/scripts/script.php?script_id=50
 Repository    :
 	svn checkout http://lh-vim.googlecode.com/svn/map-tools/trunk lh-map-tools
+VAM           :
+	http://code.google.com/p/lh-vim/source/browse/map-tools/trunk/lh-vim-lib-addon-info.txt
+
