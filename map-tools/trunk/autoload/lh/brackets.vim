@@ -3,7 +3,7 @@
 " File:         map-tools::lh#brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Version:      1.0.0
+" Version:      1.1.0
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -320,7 +320,16 @@ endfunction
 "------------------------------------------------------------------------
 function! s:Jump()
   " todo: get rid of the marker as well
-  return "\<right>"
+  let del_mark = ''
+  let p = col('.')
+
+  let ll = getline('.')[p : ]
+  let m = matchstr(ll, Marker_Txt('.*'))
+  let lm = strwidth(m)
+  if lm
+    let del_mark = repeat("\<del>", lm)
+  endif
+  return "\<right>".del_mark
 endfunction
 
 "------------------------------------------------------------------------
