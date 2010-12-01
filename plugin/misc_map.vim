@@ -214,7 +214,7 @@ function! Map4TheseContexts(key, ...) " {{{
       " exe 'return "' . 
 	    " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
     endif
-    let i = i + 2
+    let i += 2
   endwhile
   " Else: default case
   if i == a:0
@@ -240,7 +240,7 @@ function! MapContext(key, ...) " {{{
 	" exe 'return "' . 
 	      " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
       endif
-      let i = i + 2
+      let i += 2
     endwhile
     " Else: default case
     if i == a:0
@@ -286,9 +286,9 @@ function! BuildMapSeq(seq) " {{{
   let r = ''
   let s = a:seq
   while strlen(s) != 0 " For every '!.*!' pattern, extract it
-    let r = r . substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\1', '')
-    let c =     substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\3', '')
-    let s =     substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\4', '')
+    let r .= substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\1', '')
+    let c =  substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\3', '')
+    let s =  substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\4', '')
     let m = maparg(c,'i')
     if strlen(m) != 0
       silent exe 'let m="' . substitute(m, '<\(.\{-1,}\)>', '"."\\<\1>"."', 'g') . '"'
@@ -296,9 +296,9 @@ function! BuildMapSeq(seq) " {{{
 	let m = iconv(m, "latin1", &encoding)
       endif
       " let m = ReinterpretEscapedChar(m)
-      let r = r . m
+      let r .= m
     else
-      let r = r . c
+      let r .= c
     endif
   endwhile
   return ReinterpretEscapedChar(r)
@@ -335,7 +335,7 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
   " If visual-line mode macros -> jump between stuffs
   if a:isLine == 1
     let HR="\<cr>".HR
-    let BL=BL."\<cr>"
+    let BL .="\<cr>"
   endif
   " If indentation is used
   if a:isIndented == 1
@@ -344,12 +344,12 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
 	let HR="\<c-f>".HR
 	let BR="\<c-t>".BR
       else		" Otherwise like LaTeX, VIM
-	let HR=HR.":>\<cr>"
-	let BR=BR.":<\<cr>"
+	let HR .=":>\<cr>"
+	let BR .=":<\<cr>"
       endif
       let BL='>'.BL  " }}}
     else " -----------------------Version 6.xx
-      let HR=HR."gv``="
+      let HR .="gv``="
     endif
   endif
   " The substitute is here to compensate a little problem with HTML tags
@@ -404,12 +404,18 @@ function! s:Smart_insert_seq(key,expr, ...) " {{{
   let rhs = escape(a:expr, '\')
   " Strip marks (/placeholders) if they are not wanted
   if !exists('b:usemarks') || !b:usemarks
-    let rhs = substitute(rhs, '!mark!', '', 'g')
+    let rhs = substitute(rhs, '!mark!\|<+\k*+>', '', 'g')
   endif
   " Interpret the sequence if it is meant to
   if rhs =~ '\m!\(mark\%(here\)\=\|movecursor\)!'
     " may be, the regex should be '\m!\S\{-}!'
     let rhs = BuildMapSeq(escape(rhs, '\'))
+  elseif rhs =~ '<+.\{-}+>'
+    " @todo: add a move to cursor + jump/select
+    let rhs = substitute(rhs, '<+\(.\{-}\)+>', "!cursorhere!&", '')
+    let rhs = substitute(rhs, '<+\(.\{-}\)+>', "\<c-r>=Marker_Txt(".string('\1').")\<cr>", 'g')
+    let rhs .= "!movecursor!"
+    let rhs = BuildMapSeq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump(1)\<cr>"
   endif
   " Build & return the context dependent sequence to insert
   if a:0 > 0
@@ -449,7 +455,7 @@ function! LHGotoMark()
   endif
   let g:fix_indent = s:fix_indent
   if s:old_indent != 0
-    let s:goto_col = s:goto_col + s:old_indent
+    let s:goto_col += s:old_indent
   endif
   " uses {lig}'normal! {col}|' because of the possible reindent
   execute s:goto_lin . 'normal! ' . s:goto_col . '|'
@@ -465,12 +471,12 @@ function! LHGotoEndMark()
     let s:fix_indent = 0
   endif
   if s:old_indent != 0
-    let s:goto_col = s:goto_col + s:old_indent
+    let s:goto_col += s:old_indent
   endif
   if     s:goto_lin != s:goto_lin_2
     " TODO: !!
   else
-    let s:goto_col = s:goto_col + s:goto_col_2 - s:goto_col_1
+    let s:goto_col += s:goto_col_2 - s:goto_col_1
   endif
   " uses {lig}'normal! {col}|' because of the possible reindent
   execute s:goto_lin . 'normal! ' . s:goto_col . '|'
@@ -486,7 +492,7 @@ function! InsertSeq(key,seq, ...)
   let s:gotomark = ''
   let mark = a:seq =~ '!cursorhere!'
   let seq = ReinterpretEscapedChar(a:seq)
-  let seq = seq . (mark ? '!movecursor!' : '')
+  let seq .= (mark ? '!movecursor!' : '')
   " internal mappings
   inoremap <silent> !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
   inoremap <silent> !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
