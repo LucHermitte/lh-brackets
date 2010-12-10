@@ -3,7 +3,7 @@
 " File:		autoload/lh/brackets.vim                               {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:	1.1.0
+" Version:	1.1.1
 " Created:	20th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -40,7 +40,8 @@ function! lh#vim#brackets#lt()
     endif 
   endif
   if exists('b:usemarks') && b:usemarks
-    return '<>' . "!mark!\<esc>".lh#encoding#strlen(Marker_Txt())."\<left>i"
+    " return '<>' . "!mark!\<esc>".lh#encoding#strlen(Marker_Txt())."\<left>i"
+    return '<!cursorhere!>!mark!'
   else
     return '<>' . "\<Left>"
   endif
