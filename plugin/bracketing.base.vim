@@ -4,7 +4,7 @@
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	1.1.0
+" Version:	1.1.2
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
@@ -12,6 +12,8 @@
 "URL: http://hermitte.free.fr/vim/ressources/vimfiles/plugin/bracketing.base.vim
 " ======================================================================
 " History:	{{{1
+"	03rd Jan 2011:  by LH
+"		* marker_prefers_select=0 fixed
 "	25th Nov 2010:  by LH
 "		* Aware of Tom Link's Stakeholders presence for :SetMarker
 "	20th Mar 2008:  by LH
@@ -198,9 +200,9 @@ endif
 imap <Plug>MarkersMark  !mark!<C-R>=LHMoveWithinMarker()<cr>
 vmap <Plug>MarkersMark  !mark!
 nmap <Plug>MarkersMark  !mark!
- map <Plug>MarkersJumpF !jump!
+map <Plug>MarkersJumpF !jump!
 imap <Plug>MarkersJumpF !jump!
- map <Plug>MarkersJumpB !jumpB!
+map <Plug>MarkersJumpB !jumpB!
 imap <Plug>MarkersJumpB !jumpB!
 " Note: don't add "<script>" within the four previous <Plug>-mappings or else
 " they won't work anymore.
@@ -295,7 +297,7 @@ function! Marker_Jump(...) " {{{2
     if searchpair('\V'.emo, '', '\V'.emc, 'w')
       " echomsg '1-'.string(getpos('.'))
       if ! searchpair('\V'.emo, '', '\V'.emc, 'b')
-      " echomsg '2-'.string(getpos('.'))
+	" echomsg '2-'.string(getpos('.'))
 	" restore cursor position as we are not within a marker.
 	exe position
 	" echomsg position
@@ -322,17 +324,13 @@ function! s:DoSelect(emo, emc, delete)
   if s:Option('marker_center', 1)
     exe "normal! zz" 
   endif
+  let select = 'v'.virtcol('.').'|o'
+  if &selection == 'exclusive' | let select .= 'l' | endif
+  let c = col('.')
+  " search for the last character of the closing string.
+  call search('\V'.substitute(a:emc, '.$', '\\zs\0', ''))
+  " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
   if s:Select_or_Echo() " select! {{{4
-    "OldAndVerby: let select = "v/".Marker_Close()."/e\<cr>"
-    let select = 'v'.virtcol('.').'|o'
-    if &selection == 'exclusive' | let select = select . 'l' | endif
-    let c = col('.')
-    " search for the last character of the closing string.
-    call search('\V'.substitute(a:emc, '.$', '\\zs\0', ''))
-    "Old: let select = 'v!mark_close!'
-    "Old: if s:Select_Empty_Mark() || (getline('.')[col('.')]!=mc)
-    " let se = '\%'.c.'c\zs'.a:emo.'.\{-}'.a:emc.'\ze'
-    " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
     if !a:delete && 
 	  \ (s:Select_Empty_Mark() || 
 	  \ (matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''))
@@ -347,14 +345,10 @@ function! s:DoSelect(emo, emc, delete)
   else " Echo! {{{4
     " Case:		g:marker_prefers_select == 0
     " Traitment:	Echo the tag within the marker
-    return "a:\<c-v>\"\<esc>h\"my/".Marker_Close() . "/\<cr>" .
-	  \ "h@m\<cr>!Cmark_close!"
+    return select."v:echo lh#visual#selection()\<cr>gv\"_c"
   endif
 endfunction
 
-"Old: " Thanks to this trick, we can silently select with "v/pattern/e<cr>"
-"Old: vnoremap <silent> !mark_close! /<c-r>=Marker_Close()<cr>/e<cr>
-nnoremap <silent> !Cmark_close! "_c/<c-r>=Marker_Close()<cr>/e<cr>
 " ------------------------------------------------------------------------
 " Internals         {{{1
 " =================
@@ -375,7 +369,7 @@ function! s:SetMarker(open, close, ...) " {{{3
   endif
   let from = (a:0!=0) ? a:1 : 'latin1'
   " :call Dfunc('s:SetMarker('.a:open.','.a:close.','.from.')')
-  
+
   " let ret = ''
   if '' != a:open
     let b:marker_open  = lh#encoding#iconv(a:open, from, &enc)
@@ -458,14 +452,14 @@ function! Marker_Txt(...)          " {{{3
 endfunction
 
 function! LHMoveWithinMarker()     " {{{3
-" function! s:MoveWithinMarker()    
+  " function! s:MoveWithinMarker()    
   " Purpose: move the cursor within the marker just inserted.
   " Here, b:marker_close exists
   return "\<esc>" . strlen(lh#encoding#iconv(Marker_Close(),&enc, 'latin1')) . 'ha'
 endfunction
 
 function! LHToggleMarkerInVisual() " {{{3
-" function! s:ToggleMarkerInVisual()
+  " function! s:ToggleMarkerInVisual()
   " Purpose: Toggle the marker characters around a visual zone.
   " 1- Check wheither we areselecting a marker
   if line("'<") == line("'>") " I suppose markers don't spread over several lines
@@ -541,7 +535,7 @@ endif
 inoremap <silent> !mark! <c-r>=Marker_Txt()<cr>
 " vnoremap <silent> !mark! <C-\><C-N>@=<sid>ToggleMarkerInVisual()<cr>
 vnoremap <silent> !mark! <C-\><C-N>@=LHToggleMarkerInVisual()<cr>
-    nmap <silent> !mark! viw!mark!
+nmap <silent> !mark! viw!mark!
 "Old: imap !mark! <C-V>«<C-V>»
 "Old: vmap !mark! "zc<C-V>«<C-R>z<C-V>»<ESC>
 
@@ -549,18 +543,18 @@ vnoremap <silent> !mark! <C-\><C-N>@=LHToggleMarkerInVisual()<cr>
 " the current selection and go into normal mode.
 vnoremap <silent> !jump! <C-\><C-N>@=Marker_Jump(1)<cr>
 nnoremap <silent> !jump! @=Marker_Jump(1)<cr>
-    imap <silent> !jump! <C-\><C-N>!jump!
+imap <silent> !jump! <C-\><C-N>!jump!
 vnoremap <silent> !jumpB! <C-\><C-N>`<@=Marker_Jump(0)<cr>
 nnoremap <silent> !jumpB! @=Marker_Jump(0)<cr>
-    imap <silent> !jumpB! <ESC>!jumpB!
+imap <silent> !jumpB! <ESC>!jumpB!
 "Old: map !jump! /«.\{-}»/<C-M>a:"<ESC>h"myt»h@m<C-M>cf»
 
 vnoremap <silent> !jump-and-del! <C-\><C-N>@=Marker_Jump(1,1)<cr>
 nnoremap <silent> !jump-and-del! @=Marker_Jump(1,1)<cr>
-    imap <silent> !jump-and-del! <ESC>!jump-and-del!
+imap <silent> !jump-and-del! <ESC>!jump-and-del!
 vnoremap <silent> !bjump-and-del! <C-\><C-N>@=Marker_Jump(0,1)<cr>
 nnoremap <silent> !bjump-and-del! @=Marker_Jump(0,1)<cr>
-    imap <silent> !bjump-and-del! <ESC>!bjump-and-del!
+imap <silent> !bjump-and-del! <ESC>!bjump-and-del!
 
 " Help stuff        {{{1
 " check http://hermitte.free.fr/vim/
