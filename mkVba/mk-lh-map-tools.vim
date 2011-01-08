@@ -3,8 +3,8 @@
 " File:		mk-lh-map-tools.vim
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Version:	1.1.1
-let s:version = '1.1.1'
+" Version:	1.1.2
+let s:version = '1.1.2'
 " Created:	06th Nov 2007
 " Last Update:	$Date$
 "------------------------------------------------------------------------
