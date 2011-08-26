@@ -30,7 +30,7 @@
 " History:
 " Version 1.1.1:
 " 		* Issue#10 refinements: use a stricter placeholder regex to not
-" 		delete everything in ")«»)«»"
+" 		delete everything in ").Marker_Txt('.\{-}').'\)\+')"
 " Version 1.0.0:
 " 		* Vim 7 required!
 " 		* New way to configure the desired brackets, the previous
@@ -196,18 +196,21 @@ augroup END
 " ## Brackets definition functions {{{1
 "------------------------------------------------------------------------
 
+" s:UnMap(m) {{{2
 function! s:UnMap(m)
   let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
   if &verbose >= 1 | echomsg cmd | endif
   exe cmd
 endfunction
 
+" s:Map(m) {{{2
 function! s:Map(m)
   let cmd = a:m.mode.'map <silent> ' . a:m.buffer . a:m.trigger .' '.a:m.action
   if &verbose >= 1 | echomsg cmd | endif
   exe cmd
 endfunction
 
+" s:DefineMap(mode, trigger, action, isLocal) {{{2
 function! s:DefineMap(mode, trigger, action, isLocal)
   let crt_definitions = s:GetDefinitions(a:isLocal)
   let crt_mapping = {}
@@ -233,6 +236,7 @@ function! s:DefineMap(mode, trigger, action, isLocal)
   endif
 endfunction
 
+" s:DefineImap(trigger, inserter, isLocal) {{{2
 function! s:DefineImap(trigger, inserter, isLocal)
   if exists('*IMAP')
     if a:isLocal
@@ -245,6 +249,7 @@ function! s:DefineImap(trigger, inserter, isLocal)
   endif
 endfunction
 
+" s:ListMappings(isLocal) {{{2
 function! s:ListMappings(isLocal)
   let crt_definitions = s:GetDefinitions(a:isLocal)
   for m in crt_definitions
@@ -253,6 +258,7 @@ function! s:ListMappings(isLocal)
   endfor
 endfunction
 
+" s:ClearMappings(isLocal) {{{2
 function! s:ClearMappings(isLocal)
   let crt_definitions = s:GetDefinitions(a:isLocal)
   if s:state.isActive
@@ -264,6 +270,7 @@ function! s:ClearMappings(isLocal)
 endfunction
 
 "------------------------------------------------------------------------
+" lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers) {{{2
 " NB: this function is made public because IMAPs.vim need it to not be private
 " (s:)
 function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers)
@@ -300,7 +307,8 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
 endfunction
 
 "------------------------------------------------------------------------
-function!lh#brackets#closer(trigger, Action)
+" lh#brackets#closer(trigger, Action) {{{2
+function! lh#brackets#closer(trigger, Action)
   if type(a:Action) == type(function('has'))
     return InsertSeq(a:trigger,a:Action())
   elseif has('*IMAP')
@@ -311,6 +319,7 @@ function!lh#brackets#closer(trigger, Action)
 endfunction
 
 "------------------------------------------------------------------------
+" s:JumpOrClose(trigger) {{{2
 function! s:JumpOrClose(trigger)
   if lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
     " todo: detect even if there is a newline in between
@@ -321,13 +330,31 @@ function! s:JumpOrClose(trigger)
 endfunction
 
 "------------------------------------------------------------------------
+" Function: s:JumpOverAllClose(chars) {{{2
+function! s:JumpOverAllClose(chars)
+  let del_mark = ''
+  let p = col('.')
+  let ll = getline('.')[p : ] " ignore char under cursor, look after
+  let m = matchstr(ll, '^\(['.a:chars.']\|'.Marker_Txt('.\{-}').'\)\+')
+  echomsg ll.'##'.m.'##'
+  let lm = strwidth(m)
+  if lm
+    let del_mark = repeat("\<del>", lm)
+    let del_mark .= substitute(m, '[^'.a:chars.']', '', 'g')
+  endif
+  return "\<right>".del_mark
+endfunction
+
+"------------------------------------------------------------------------
+" Function: s:Jump() {{{2
 function! s:Jump()
   " todo: get rid of the marker as well
   let del_mark = ''
   let p = col('.')
 
   let ll = getline('.')[p : ]
-  let m = matchstr(ll, Marker_Txt('.\{-}'))
+  echomsg ll
+  let m = matchstr(ll, '^'.Marker_Txt('.\{-}'))
   let lm = strwidth(m)
   if lm
     let del_mark = repeat("\<del>", lm)
@@ -336,7 +363,7 @@ function! s:Jump()
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:ImapBrackets(obrkt, cbrkt, esc, nl)  {{{
+" Function: s:ImapBrackets(obrkt, cbrkt, esc, nl)  {{{2
 " Internal function.
 " {obrkt}:      open bracket
 " {cbrkt}:      close bracket
@@ -358,13 +385,43 @@ function! s:ImapBrackets(obrkt, cbrkt, esc, nl)
   else
     return IMAP_PutTextWithMovement(Smart_insert_seq2(key,expr))
   endif
-endfunction "}}}
+endfunction
 "------------------------------------------------------------------------
 
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
+" Function: lh#brackets#_switch(trigger, cases) {{{2
+function! lh#brackets#_switch(trigger, cases)
+  for c in a:cases
+    if eval(c.condition)
+      return eval(c.action)
+    endif
+  endfor
+  return ReinterpretEscapedChar(eval(a:trigger))
+endfunction
+
+" Function: lh#brackets#define_imap(trigger, cases, isLocal [,default=trigger]) {{{2
+function! lh#brackets#define_imap(trigger, cases, isLocal, ...)
+  " - Some keys, like '<bs>', cannot be used to code the default.
+  " - Double "string(" because those chars are correctly interpreted with
+  " ReinterpretEscapedChar(eval()), which requires nested strings...
+  let default = (a:0>0) ? (a:1) : (a:trigger)
+  let sCases='lh#brackets#_switch('.string(string(default)).', '.string(a:cases).')'
+  call s:DefineImap(a:trigger, sCases, a:isLocal)
+endfunction
+
+" Function: lh#brackets#enrich_imap(trigger, case, isLocal [,default=trigger]) {{{2
+function! lh#brackets#enrich_imap(trigger, case, isLocal, ...)
+  " - Some keys, like '<bs>', cannot be used to code the default.
+  " - Double "string(" because those chars are correctly interpreted with
+  " ReinterpretEscapedChar(eval()), which requires nested strings...
+  let default = (a:0>0) ? (a:1) : (a:trigger)
+  let sCase='lh#brackets#_switch('.string(string(default)).', '.string([a:case]).')'
+  call s:DefineImap(a:trigger, sCase, a:isLocal)
+endfunction
 "------------------------------------------------------------------------
+" lh#brackets#define(bang, ...) {{{2
 function! lh#brackets#define(bang, ...)
   let isLocal  = a:bang != "!"
   let nl       = ''
@@ -419,6 +476,9 @@ function! lh#brackets#define(bang, ...)
     if ! areSameTriggers
       let inserter = "lh#brackets#closer(".string(options[1]).','.string (Close). ")"
       call s:DefineImap(options[1], inserter, isLocal)
+      if len(options[1])
+        " TODO: enrich <bs> & <del> imaps for the close triggers
+      endif
     endif
   endif
 
