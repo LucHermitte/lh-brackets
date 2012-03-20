@@ -4,7 +4,9 @@
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 " 		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	1.0.0
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:	2.0.0
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -20,6 +22,8 @@
 " 		BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 2.0.0:
+" 		* GPLv3
 " Version 1.0.0:
 " 		* Vim 7 required!
 " 		* New way to configure the desired brackets, the previous
@@ -139,7 +143,7 @@
 " line continuation used here ??
 let s:cpo_save = &cpo
 set cpo&vim
-let s:version = 100
+let s:version = 200
 
 "======================================================================
 "# Anti-reinclusion & dependencies {{{1

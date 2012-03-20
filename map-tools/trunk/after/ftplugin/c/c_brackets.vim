@@ -3,7 +3,9 @@
 " File:		ftplugin/c/c_brackets.vim                                {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Version:	1.0.0
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:	2.0.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------

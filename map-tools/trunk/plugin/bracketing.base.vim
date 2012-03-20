@@ -4,14 +4,16 @@
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	1.1.2
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:	2.0.0
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
-"
-"URL: http://hermitte.free.fr/vim/ressources/vimfiles/plugin/bracketing.base.vim
 " ======================================================================
 " History:	{{{1
+"	20th Mar 2012:  by LH
+"	        * v3.0.0 -> GPLv3
 "	03rd Jan 2011:  by LH
 "		* marker_prefers_select=0 fixed
 "	25th Nov 2010:  by LH

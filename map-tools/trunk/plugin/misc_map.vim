@@ -4,7 +4,9 @@
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$
-" Version:	1.0.0
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:	2.0.0
 "
 " Purpose:	API plugin: Several mapping-oriented functions
 "
@@ -190,7 +192,7 @@
 "---------------------------------------------------------------------------
 " Avoid reinclusion
 if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
-  let g:misc_map_loaded = 100
+  let g:misc_map_loaded = 200
   let cpop = &cpoptions
   set cpoptions-=C
   scriptencoding latin1

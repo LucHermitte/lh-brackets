@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v1.1.3)
-                        For Vim version 7.+     Last change: 26th Nov 2010
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.0.0)
+                        For Vim version 7.+     Last change: 20th Mar 2012
 
                         Map Tools MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -828,9 +828,11 @@ These plugins can be obtained ...
 - ... as part of other (ft)plugins I maintain and share like |lh-cpp|,
   |mu-template|, ....
 
+- ... thanks to |vim-addon-manager|, which is the prefered technique because
+  of the dependencies.
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2012, <http://code.google.com/p/lh-vim/>       {{{1
+ © Luc Hermitte, 2001-2012 <http://code.google.com/p/lh-vim/>, CC by SA 3.0 {{{1
  $Id$
  VIM: let b:VS_language = 'american' 
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:

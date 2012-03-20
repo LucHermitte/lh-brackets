@@ -3,7 +3,9 @@
 " File:         map-tools::lh#brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.1
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:      2.0.0
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -28,6 +30,8 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.0.0:
+"               * GPLv3
 " Version 1.1.1:
 " 		* Issue#10 refinements: use a stricter placeholder regex to not
 " 		delete everything in ").Marker_Txt('.\{-}').'\)\+')"
