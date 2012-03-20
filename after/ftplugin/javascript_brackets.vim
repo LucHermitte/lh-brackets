@@ -3,7 +3,9 @@
 " File:		ftplugin/js/js_brackets.vim                                {{{1
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Version:	1.0.0
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:	2.0.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -22,6 +24,7 @@
 " 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/cpp/brackets.vim
 "
 " History:	
+"       v3.0.0  GPLv3
 "	v1.0.0	28th Jul 2009
 "		Adapted from ftplugin/c/c_brackets.vim
 " TODO:		
@@ -34,7 +37,7 @@
 if exists('b:loaded_ftplug_js_brackets') && !exists('g:force_reload_ftplug_js_brackets')
   finish
 endif
-let b:loaded_ftplug_js_brackets = '100'
+let b:loaded_ftplug_js_brackets = '200'
  
 let s:cpo_save=&cpo
 set cpo&vim

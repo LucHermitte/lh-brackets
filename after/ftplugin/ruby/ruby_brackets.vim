@@ -3,7 +3,9 @@
 " File:         ftplugin/ruby_brackets.vim                        {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
-" Version:      1.1.0
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:      2.0.0
 " Created:      17th Jun 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -14,13 +16,12 @@
 " Installation:
 "       Drop this file into {rtp}/ftplugin
 "       Requires Vim7+
-"       «install details»
 " History:      «history»
 " TODO:         «missing features»
 " }}}1
 "=============================================================================
 
-let s:k_version = 110
+let s:k_version = 200
 " Buffer-local Definitions {{{1
 " Avoid local reinclusion {{{2
 if &cp || (exists("b:loaded_ftplug_ruby_brackets")

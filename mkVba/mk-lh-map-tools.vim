@@ -1,10 +1,12 @@
 "=============================================================================
 " $Id$
-" File:		mk-lh-map-tools.vim
+" File:		mkvba/mk-lh-map-tools.vim
 " Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Version:	1.1.3
-let s:version = '1.1.3'
+" License:      GPLv3 with exceptions
+"               <URL:http://code.google.com/p/lh-vim/wiki/License>
+" Version:	2.0.0
+let s:version = '2.0.0'
 " Created:	06th Nov 2007
 " Last Update:	$Date$
 "------------------------------------------------------------------------
