@@ -24,7 +24,7 @@
 " 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/cpp/brackets.vim
 "
 " History:	
-"       v3.0.0  GPLv3
+"       v2.0.0  GPLv3
 "	v1.0.0	28th Jul 2009
 "		Adapted from ftplugin/c/c_brackets.vim
 " TODO:		

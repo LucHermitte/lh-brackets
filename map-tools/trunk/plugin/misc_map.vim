@@ -1,6 +1,6 @@
 "===========================================================================
 " $Id$
-" File:		misc_map.vim
+" File:		plugin/misc_map.vim
 " Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$

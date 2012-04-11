@@ -1,5 +1,5 @@
 *lh-map-tools.txt*      Tools for helping mappings-definitions (v2.0.0)
-                        For Vim version 7.+     Last change: 20th Mar 2012
+*lh-brackets*           For Vim version 7.+     Last change: 11th Apr 2012
 
                         Map Tools MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -7,8 +7,8 @@
 
 ------------------------------------------------------------------------------
 Presentation: ~
-lh-map-tools.tar.gz contains three |plugin|s which define many functions
-and commands that I use to program smart-|mapping|s and |abbreviations|.
+lh-backets is made of three |plugin|s which define many functions and commands
+that I use to program smart-|mapping|s and |abbreviations|.
 These definitions are not aimed at final users, but at vim (ft)plugins
 developers.
 They can be seen as API-plugins.
@@ -16,10 +16,9 @@ They can be seen as API-plugins.
 Nevertheless, the two bracketing oriented plugins can be integrated very
 easily into your system. The typical way to use them is to drop the plugin
 files into your {rtp}/plugin/ directory, and to customize/define a |ftplugin|
-for every filetype you wish to use the bracketing system with.
-You will find examples of use of this bracketing system into my ftplugin
-files: vim_set.vim, tex-smart_chars.vim, ML_set.vim, html_set.vim and
-|cpp_set.vim|.
+for every filetype you wish to use the bracketing system with.  You will find
+examples of use of this bracketing system into my ftplugin files: vim_set.vim,
+tex-smart_chars.vim, ML_set.vim, html_set.vim and |cpp_set.vim|.
 
 Contents~
 |misc_map.vim|          Addresses the definition of |insert-mode| and
@@ -479,8 +478,8 @@ I have also added some other features:
 
                                 *b:use_place_holders* *g:use_place_holders*
 (*) The option |g:use_place_holders| (default 0) determines whether the
-    marker-characters used are *[bg]:map_PlaceHolderStart* and
-    *[bg]:map_PlaceHolderEnd* instead of |b:marker_open| and |b:marker_close|.
+    marker-characters used are *(bg):map_PlaceHolderStart* and
+    *(bg):map_PlaceHolderEnd* instead of |b:marker_open| and |b:marker_close|.
     This option ensures a compatibility with Srinath Avadhanula's |imaps.vim|
     plugin.
     I meant to support Srinath's variations on my own variations ; he named
@@ -513,6 +512,9 @@ I have also added some other features:
 (*) The next markers are searched according to the 'wrapscan' option.
 
 
+                                            *M-INSERT* *M-DELETE* *M-S-DELETE*
+                                            *<M-Ins>* *<M-Del>* *<M-S-Del>*
+                    *<Plug>MarkersJumpF* *<Plug>MarkersJumpB* *<Plug>MarkersMark*
 BTW, I map |!mark!| to <M-Insert>, |!jump!| to <M-Delete>, and |!jumpB!| to
 <M-S-Del>. 
 If you'd rather use other keybindings, then add into your .vimrc something
