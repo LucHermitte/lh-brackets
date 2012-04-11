@@ -14,7 +14,7 @@ cd <sfile>:p:h
 try 
   let save_rtp = &rtp
   let &rtp = expand('<sfile>:p:h:h').','.&rtp
-  exe '22,$MkVimball! lh-map-tools-'.s:version
+  exe '24,$MkVimball! lh-map-tools-'.s:version
   set modifiable
   set buftype=
 finally

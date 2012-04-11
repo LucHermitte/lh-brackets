@@ -1,6 +1,6 @@
 " ======================================================================
 " $Id$
-" File:		bracketing.base.vim
+" File:		plugin/bracketing.base.vim
 " Maintainer:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "		<URL:http://code.google.com/p/lh-vim/>
 " Last Update:	$Date$

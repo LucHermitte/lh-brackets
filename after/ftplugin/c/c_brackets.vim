@@ -24,6 +24,7 @@
 " 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/cpp/brackets.vim
 "
 " History:	
+"	v2.0.0  GPLv3 w/ exception
 "	v1.0.0	19th Mar 2008
 "		Exploit the new kernel from map-tools v1.0.0 
 "	v0.5    26th Sep 2007
