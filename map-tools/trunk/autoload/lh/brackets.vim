@@ -335,16 +335,28 @@ endfunction
 
 "------------------------------------------------------------------------
 " Function: s:JumpOverAllClose(chars) {{{2
-function! s:JumpOverAllClose(chars)
+function! s:JumpOverAllClose(chars, ...)
   let del_mark = ''
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
   let m = matchstr(ll, '^\(['.a:chars.']\|'.Marker_Txt('.\{-}').'\)\+')
   echomsg ll.'##'.m.'##'
   let lm = strwidth(m)
+  let len_match = strlen(m)
   if lm
     let del_mark = repeat("\<del>", lm)
     let del_mark .= substitute(m, '[^'.a:chars.']', '', 'g')
+  endif
+  " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
+  if a:0 > 0
+    let remaining = ll[len_match : ]
+    echomsg "rem: <<".remaining.">>"
+    let match_rem = matchstr(remaining, '^\('.Marker_Txt('.\{-}').'\)*'.a:1.'\('.Marker_Txt('.\{-}').'\)*')
+    let len_match_rem = strwidth(match_rem)
+    if len_match_rem
+      let del_mark = repeat("\<del>", len_match_rem).del_mark
+    endif
+    let del_mark .= ';'
   endif
   return "\<right>".del_mark
 endfunction
