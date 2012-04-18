@@ -24,7 +24,8 @@
 " 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/cpp/brackets.vim
 "
 " History:	
-"	v2.0.0  GPLv3 w/ exception
+"	v2.0.0  11th Apr 2012
+"	        License GPLv3 w/ extension
 "	v1.0.0	19th Mar 2008
 "		Exploit the new kernel from map-tools v1.0.0 
 "	v0.5    26th Sep 2007
@@ -47,7 +48,7 @@
 if exists('b:loaded_ftplug_c_brackets') && !exists('g:force_reload_ftplug_c_brackets')
   finish
 endif
-let b:loaded_ftplug_c_brackets = 1
+let b:loaded_ftplug_c_brackets = 200
  
 let s:cpo_save=&cpo
 set cpo&vim
@@ -94,7 +95,7 @@ if exists(':Brackets')
         \ lh#dev#option#get('semicolon_closes_bracket', &ft, 1)
     call lh#brackets#define_imap(';',
           \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=)\\+"',
-          \   'action': 's:JumpOverAllClose(")").";"'}],
+          \   'action': 's:JumpOverAllClose(")", ";")'}],
           \1)
     call lh#brackets#enrich_imap('<bs>',
           \ { 'condition': 'getline(".")[:col(".")-2]=~".*)\\+;$"',
