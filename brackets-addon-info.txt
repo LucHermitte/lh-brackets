@@ -5,7 +5,8 @@
   "maintainer" : "Luc Hermitte <http://code.google.com/p/lh-vim/wiki/contact>",
   "repository" : {"type": "svn", "url": "http://lh-vim.googlecode.com/svn/map-tools/trunk"},
   "dependencies" : {
-      "lh-vim-lib" : {"type" : "svn", "url" : "http://lh-vim.googlecode.com/svn/vim-lib/trunk"}
+      "lh-vim-lib" : {"type" : "svn", "url" : "http://lh-vim.googlecode.com/svn/vim-lib/trunk"},
+      "lh-dev" : {"type": "svn", "url": "http://lh-vim.googlecode.com/svn/dev/trunk"}
   },
   "description" : "LH' bracketing system",
   "homepage" : "http://code.google.com/p/lh-vim/wiki/lhBrackets"
