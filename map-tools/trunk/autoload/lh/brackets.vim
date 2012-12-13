@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.0.0
+" Version:      2.0.1
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -30,6 +30,8 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.0.1:
+"               * ambiguity between Brackets-close and -Brackets-clear
 " Version 2.0.0:
 "               * GPLv3
 " Version 1.1.1:
@@ -447,7 +449,7 @@ function! lh#brackets#define(bang, ...)
   let options  = []
   for p in a:000
     if     p =~ '-l\%[list]'         | call s:ListMappings(isLocal)  | return
-    elseif p =~ '-c\%[lear]'         | call s:ClearMappings(isLocal) | return
+    elseif p =~ '-cle\%[ar]'         | call s:ClearMappings(isLocal) | return
     elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
@@ -462,8 +464,8 @@ function! lh#brackets#define(bang, ...)
         let Open = open
       endif
       " let Open = open =~ "^function" ? {open} : open   ## don't work with function()
-    elseif p =~ '-c\%[lose]'     
-      let close = matchstr(p, '-c\%[lose]=\zs.*')
+    elseif p =~ '-clo\%[se]'     
+      let close = matchstr(p, '-clo\%[se]=\zs.*')
       if close =~ "^function"
         exe 'let Close =' . close
       else
