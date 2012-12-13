@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.0.1
 " Created:	24th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -35,6 +35,7 @@ if exists("b:loaded_ftplug_vim_brackets") && !exists('g:force_reload_ftplug_vim_
 endif
 let s:cpo_save=&cpo
 set cpo&vim
+let b:loaded_ftplug_vim_brackets = 201
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------
@@ -59,7 +60,8 @@ Brackets ' ' -visual=0
 Brackets ' ' -insert=0 -trigger=''
 Brackets " " -visual=0 -open=function('lh#vim#brackets#dquotes')
 Brackets " " -insert=0 -trigger=""
-Brackets < > -open=function('lh#vim#brackets#lt')
+Brackets < > -open=function('lh#vim#brackets#lt') -visual=0
+Brackets < > -visual=1 -insert=0 -trigger=<localleader><
 
 
 "------------------------------------------------------------------------
