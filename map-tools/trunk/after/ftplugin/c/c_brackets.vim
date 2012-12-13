@@ -48,7 +48,8 @@
 if exists('b:loaded_ftplug_c_brackets') && !exists('g:force_reload_ftplug_c_brackets')
   finish
 endif
-let b:loaded_ftplug_c_brackets = 200
+let s:k_version = 200
+let b:loaded_ftplug_c_brackets = s:k_version
  
 let s:cpo_save=&cpo
 set cpo&vim
@@ -116,7 +117,7 @@ if exists('g:loaded_ftplug_c_brackets')
   set cpo&vim
   finish
 endif
-let g:loaded_ftplug_c_brackets = 1
+let g:loaded_ftplug_c_brackets = s:k_version
 "------------------------------------------------------------------------
 " Global functions {{{2
 " TODO: use <SNR> function
