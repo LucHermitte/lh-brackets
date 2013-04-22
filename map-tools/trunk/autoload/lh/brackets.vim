@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.0.1
+" Version:      2.0.2
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -30,6 +30,9 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.0.2:
+"               * JumpOverAllClose fixed to support other things than ';' when
+"               jumping
 " Version 2.0.1:
 "               * ambiguity between Brackets-close and -Brackets-clear
 " Version 2.0.0:
@@ -358,8 +361,11 @@ function! s:JumpOverAllClose(chars, ...)
     if len_match_rem
       let del_mark = repeat("\<del>", len_match_rem).del_mark
     endif
-    let del_mark .= ';'
+    let del_mark .= a:1
   endif
+  echomsg strtrans(del_mark)
+
+
   return "\<right>".del_mark
 endfunction
 
@@ -410,13 +416,18 @@ endfunction
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 " Function: lh#brackets#_switch(trigger, cases) {{{2
-function! lh#brackets#_switch(trigger, cases)
+function! lh#brackets#_switch_int(trigger, cases)
   for c in a:cases
     if eval(c.condition)
       return eval(c.action)
     endif
   endfor
   return ReinterpretEscapedChar(eval(a:trigger))
+endfunction
+
+function! lh#brackets#_switch(trigger, cases)
+  return lh#brackets#_switch_int(a:trigger, a:cases)
+  " debug return lh#brackets#_switch_int(a:trigger, a:cases)
 endfunction
 
 " Function: lh#brackets#define_imap(trigger, cases, isLocal [,default=trigger]) {{{2
