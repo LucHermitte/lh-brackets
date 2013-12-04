@@ -5,8 +5,8 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.1
-let s:version = '2.0.1'
+" Version:	2.0.2
+let s:version = '2.0.2'
 " Created:	06th Nov 2007
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -31,6 +31,7 @@ after/ftplugin/vim/vim_brackets.vim
 autoload/lh/brackets.vim
 autoload/lh/cpp/brackets.vim
 autoload/lh/html/brackets.vim
+autoload/lh/marker.vim
 autoload/lh/vim/brackets.vim
 brackets-addon-info.txt
 doc/lh-map-tools.txt
