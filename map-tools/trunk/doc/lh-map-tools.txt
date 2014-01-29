@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.0.0)
-*lh-brackets*           For Vim version 7.+     Last change: 11th Apr 2012
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.1.0)
+*lh-brackets*           For Vim version 7.+     Last change: 28th Jan 2014
 
                         Map Tools MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -7,7 +7,7 @@
 
 ------------------------------------------------------------------------------
 Presentation: ~
-lh-backets is made of three |plugin|s which define many functions and commands
+lh-brackets is made of three |plugin|s which define many functions and commands
 that I use to program smart-|mapping|s and |abbreviations|.
 These definitions are not aimed at final users, but at vim (ft)plugins
 developers.
@@ -266,7 +266,7 @@ we must surround is a |marker| or not.
 
 The point is that there is no :smap command in VimL, and that insert-mode
 mappings (imm) should have the precedence over visual-mode mappings (vmm) when
-we deals with selected markers (select-mode) ; unfortunatelly, it is the
+we deals with selected markers (select-mode) ; unfortunately, it is the
 contrary: in this context, Vim gives the priority to vmm over imm.
 
 Parameters:~
@@ -330,7 +330,7 @@ mappings (later versions of vim support the |:smap| command).
 Why is this needed ? 
 Well. |!jump!| (and similar mappings) selects the next |marker| and goes into
 select-mode. At this point anything that is typed replaces the |marker|.
-However, if a visual-mode mapping is detected, it is expanded. Unfortunatelly,
+However, if a visual-mode mapping is detected, it is expanded. Unfortunately,
 we may need visual-mode mappings to not expand. 
 
 Typically, having '{' expanded to surround the |marker| with a pair of
@@ -413,7 +413,7 @@ time, there is no function ready to use. You may have to write your own
 function that will delegate its work to |Map4TheseContexts()|.
 
 If the problem only consists in expanding other custom mappings, then define
-an adapter (like the design patern) mapping whose keybinding matches
+an adapter (like the design pattern) mapping whose keybinding matches
 '!.\{-}!'. Have a look at the definition of !cursorhere! and !gotocursor! in
 the implementation of |Surround()| and |InsertSeq()|.
 
@@ -497,9 +497,9 @@ I have also added some other features:
     within) if applicable.  Otherwise, we jump to the marker after the one the
     cursor is within.
     Notes:
-    - Even if set, and if a marker is currectly selected, we jump to the next
+    - Even if set, and if a marker is correctly selected, we jump to the next
       before.
-    - A template-expander plugin may need to set momentarilly this option to 1
+    - A template-expander plugin may need to set momentarily this option to 1
       (this is what |mu-template| does to avoid ignoring the first marker)
     - The last character of a marker is not considered as part of the marker
       regarding this option.
@@ -603,16 +603,32 @@ Additional features~
 :Bracket[!] [options] {open} {close}~
 
 The options are:
+                                                        *:Brackets-!*
 (*) When the command is called with a {bang}[!], the mappings defined will be
     global. Otherwise, the mappings will be local to the current buffer.
     Banged calls are expected to be done in the |.vimrc|, while the non-banged
     ones are expected to be done in a ftplugin (see |:Brackets-notes|).
+    A global mapping can be neutralized in filetypes thanks to the
+    |:Brackets-but| option, or by forcing the trigger to do nothing when in
+    specific filetypes. For instance, by adding the following in
+    {rtp}/ftplugin/help.vim  (:h |:map-<buffer>|) >
+        inoremap <buffer> { {
+<   the default behaviour will be enforced. We can also override a mapping
+   this way, or by using :Bracket, but un-banged. e.g. in
+   {rtp}/ftplugin/tex.vim: >
+       :Bracket ( ) -esc
+<
+   Warning: avoid using |<LocalLeader>| in global brackets definitions. When
+   the localleaders will be set, the mapping will already exist and it won't
+   be updated when |maplocalleader| will be modified. If you want to use local
+   leaders in your mappings, your will have to execute |:Brackets| from
+   |ftplugin|s placed in the |after-directory|.
 
 (*) -insert=(Boolean: 0|[1])                            *:Brackets-insert*
     Tells whether a mapping should be provided in insert mode. Default is 1.
     A typical insert mode mapping will:
     - be triggered on {open} (unless |:Brackets-trigger| is specified)
-    - insert {open}{close}!mark! and put the cusor between {open} and {close}.
+    - insert {open}{close}!mark! and put the cursor between {open} and {close}.
 
     A mapping will also be provided on {close}. If *b:cb_jump_on_close* is
     set, it will insert the {close} sequence, or jump after the {close}
@@ -637,12 +653,19 @@ The options are:
     ("vap", "vi(", "|vi,|", etc.)
 
 
-(*) -open=({text}|"function({function-name})"           *:Brackets-open*
-(*) -close=({text}|"function({function-name})"          *:Brackets-close*
+(*) -open=({text}|"function({function-name})")          *:Brackets-open*
+(*) -close=({text}|"function({function-name})")         *:Brackets-close*
     These options override the sequence to insert in the INSERT-mode mapping.
     The forced value can be any {text} other than {open} (/resp {close}, or
     even a |function()| that can return one string or another depending on the
     context.
+
+(*) -but=({text}|"function({function-name})")           *:Brackets-but*
+    This option permits to specify a filetype context for which the expansion
+    won't be triggered. It is specially designed for |:Brackets-!|.
+    Typical uses are: >
+        :Brackets! { } -insert=1 -visual=0 -but=help\\\\|^$
+        :Brackets! ' ' -insert=1 -visual=0 -but=function('lh#ft#is_text()')
 
 (*) -nl=(0|[1])                                         *:Brackets-nl*
     This option tells the mappings will insert newline characters between the
@@ -653,7 +676,7 @@ The options are:
 
 (*) -trigger={keys-sequence}                            *:Brackets-trigger*
     This option permit to trigger the mapping on anything but {open}.
-    This is particulary usefull to have simultanously different mappings, on a
+    This is particularly useful to have simultaneously different mappings, on a
     same pair of brackets, that surround with newlines, and without.
 
 (*) -escapable=(Boolean: [0]|1)                         *:Brackets-escapable*
@@ -690,7 +713,7 @@ Examples from {rtp}/after/ftplugin/tex/tex_brackets.vim: >
 Notes~
 These examples are in the |after-directory| for several reasons:
 - this enables to set custom |localleader| before |:Bracket| is called.
-- my |ftplugins| can be seen as "official" ftplugins, particulary the
+- my |ftplugins| can be seen as "official" ftplugins, particularly the
   c_brackets.vim. By being stored into atfer/ftplugin/c/, this enables you,
   end-user of my C&C++ ftplugin suite, to override my definitions with yours
   with a: >
@@ -742,7 +765,7 @@ NB: Triggers.vim is not longer required to provide this feature.
 In |insert-mode|, two operating modes are provided: one very classic, and one
 that takes advantage of Stephen Riehm's markers when the buffer-relative
 option |b:usemarks| is set to 1. In that latter case, markers are inserted at
-the end of the pair of brakets.  
+the end of the pair of brackets.  
 The option can be toggled by hitting the trigger <M-F9> -- if |Trigger.vim| is
 installed. 
 TODO: reimplement this feature with lh#menu#def_toggle_item
@@ -758,7 +781,7 @@ Since version 1.0.0, mappings to <Meta> + the opening character, to insert the
 corresponding structure around the current/previous word, are no longer
 provided.
 It you'd rather have such mappings, use the |:Brackets-trigger| option to
-specify the activiation keys of the mappings.
+specify the activation keys of the mappings.
 
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -834,7 +857,7 @@ These plugins can be obtained ...
   of the dependencies.
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2012 <http://code.google.com/p/lh-vim/>, CC by SA 3.0 {{{1
+ © Luc Hermitte, 2001-2014 <http://code.google.com/p/lh-vim/>, CC by SA 3.0 {{{1
  $Id$
  VIM: let b:VS_language = 'american' 
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:

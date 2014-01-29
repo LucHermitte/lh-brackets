@@ -5,7 +5,7 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.1.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -54,25 +54,9 @@ runtime ftplugin/perl_localleader.vim
 if exists(':Brackets')
   let b:usemarks         = 1
   let b:cb_jump_on_close = 1
-  " Re-run brackets() in order to update the mappings regarding the different
-  " options.
-  :Brackets { } -visual=0 -nl
-  :Brackets { } -visual=0 -trigger=#{ 
+  " Use the default definitions from plugin/common_brackets.vim
+  :Brackets < > -visual=1 -insert=0 -trigger=<localleader><
   :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
-  :Brackets { } -visual=1 -insert=0
-
-  :Brackets ( )
-  :Brackets [ ] -visual=0
-  :Brackets [ ] -insert=0 -trigger=<localleader>[
-  :Brackets " " -visual=0 -insert=1
-  :Brackets " " -visual=1 -insert=0 -trigger=""
-  :Brackets ' ' -visual=0 -insert=1
-  :Brackets ' ' -visual=1 -insert=0 -trigger=''
-  " :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
-
-  " :Brackets /* */ -visual=0
-  " :Brackets /** */ -visual=0 -trigger=/!
-  "
 endif
 
 "=============================================================================

@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.0.2
+" Version:      2.1.0
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -30,6 +30,11 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.1.0:
+"               * Features from lh-cpp moved to lh-brackets:
+"                 - <cr> within empty brackets; 
+"                 - <del> within empty brackets ;
+"               * New option -but to !Brackets to exclude patterns
 " Version 2.0.2:
 "               * JumpOverAllClose fixed to support other things than ';' when
 "               jumping
@@ -46,7 +51,6 @@
 " 		approach has been deprecated
 " TODO:         
 " * Update doc
-" * -context= option
 " * Move brackets manipulation functions in this autoload plugin
 " * -surround=function('xxx') option
 " * Try to use it to insert stuff like "while() {}" ?
@@ -279,10 +283,25 @@ function! s:ClearMappings(isLocal)
 endfunction
 
 "------------------------------------------------------------------------
-" lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers) {{{2
+" s:thereIsAnException(Ft_exceptions) {{{2
+function! s:thereIsAnException(Ft_exceptions)
+  if empty(a:Ft_exceptions)
+    return 0
+  elseif type(a:Ft_exceptions) == type(function('has'))
+    return a:Ft_exceptions()
+  else
+    return &ft =~ a:Ft_exceptions
+  endif
+endfunction
+
+"------------------------------------------------------------------------
+" lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers,Ft_exceptions) {{{2
 " NB: this function is made public because IMAPs.vim need it to not be private
 " (s:)
-function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers)
+function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers, Ft_exceptions)
+  if s:thereIsAnException(a:Ft_exceptions)
+    return a:trigger
+  endif
   let escaped = getline('.')[col('.')-2] == '\'
   if type(a:Open) == type(function('has'))
     let res = InsertSeq(a:trigger, a:Open())
@@ -316,8 +335,11 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
 endfunction
 
 "------------------------------------------------------------------------
-" lh#brackets#closer(trigger, Action) {{{2
-function! lh#brackets#closer(trigger, Action)
+" lh#brackets#closer(trigger, Action, Ft_exceptions) {{{2
+function! lh#brackets#closer(trigger, Action, Ft_exceptions)
+  if s:thereIsAnException(a:Ft_exceptions)
+    return a:trigger
+  endif
   if type(a:Action) == type(function('has'))
     return InsertSeq(a:trigger,a:Action())
   elseif has('*IMAP')
@@ -452,21 +474,29 @@ endfunction
 "------------------------------------------------------------------------
 " lh#brackets#define(bang, ...) {{{2
 function! lh#brackets#define(bang, ...)
-  let isLocal  = a:bang != "!"
-  let nl       = ''
-  let insert   = 1
-  let visual   = 1
-  let normal   = 'default=1'
-  let options  = []
+  " Parse Options {{{3
+  let isLocal    = a:bang != "!"
+  let nl         = ''
+  let insert     = 1
+  let visual     = 1
+  let normal     = 'default=1'
+  let options    = []
   for p in a:000
-    if     p =~ '-l\%[list]'         | call s:ListMappings(isLocal)  | return
-    elseif p =~ '-cle\%[ar]'         | call s:ClearMappings(isLocal) | return
+    if     p =~ '-l\%[list]'        | call s:ListMappings(isLocal)  | return
+    elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(isLocal) | return
     elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
     elseif p =~ '-v\%[isual]'       | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
     elseif p =~ '-no\%[rmal]'       | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
+    elseif p =~ '-b\%[ut]'
+      let exceptions= matchstr(p, '-b\%[ut]=\zs.*')
+      if exceptions =~ "^function"
+        exe 'let Exceptions='.exceptions
+      else
+        let Exceptions = exceptions
+      endif
     elseif p =~ '-o\%[open]'     
       let open = matchstr(p, '-o\%[pen]=\zs.*')
       if open =~ "^function"
@@ -491,19 +521,20 @@ function! lh#brackets#define(bang, ...)
     throw ":Brackets: incorrect number of arguments"
   endif
   
-  if !exists('trigger') | let trigger = options[0] | endif
-  if !exists('Open')    | let Open    = options[0] | endif
-  if !exists('Close')   | let Close   = options[1] | endif
+  if !exists('trigger')    | let trigger    = options[0] | endif
+  if !exists('Open')       | let Open       = options[0] | endif
+  if !exists('Close')      | let Close      = options[1] | endif
+  if !exists('Exceptions') | let Exceptions = ''         | endif
 
-  " INSERT-mode open
+  " INSERT-mode open {{{3
   if insert
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
-    let inserter = "lh#brackets#opener(".string(trigger).','. exists('escapable').','.string(nl).
-	  \','. string(Open).','.string(Close).','.string(areSameTriggers).")"
+    let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').','.string(nl).
+	  \','. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
-      let inserter = "lh#brackets#closer(".string(options[1]).','.string (Close). ")"
+      let inserter = 'lh#brackets#closer('.string(options[1]).','.string (Close).','.string(Exceptions).')'
       call s:DefineImap(options[1], inserter, isLocal)
       if len(options[1])
         " TODO: enrich <bs> & <del> imaps for the close triggers
@@ -511,7 +542,7 @@ function! lh#brackets#define(bang, ...)
     endif
   endif
 
-  " VISUAL-mode surrounding
+  " VISUAL-mode surrounding {{{3
   if visual
     if strlen(nl) > 0
       let action = ' <c-\><c-n>@=Surround('.
@@ -530,7 +561,7 @@ function! lh#brackets#define(bang, ...)
     let normal = 0
   endif
 
-  " NORMAL-mode surrounding
+  " NORMAL-mode surrounding {{{3
   if type(normal)==type(1) && normal == 1
     let normal = strlen(nl)>0 ? 'V' : 'viw'
   endif
@@ -539,6 +570,28 @@ function! lh#brackets#define(bang, ...)
   endif
 endfunction
 
+"------------------------------------------------------------------------
+" Function: lh#brackets#_match_any_bracket_pair() {{{2
+function! lh#brackets#_match_any_bracket_pair()
+  return getline(".")[col(".")-2:]=~'^\(()\|{}\|\[]\|""\|''\)'
+endfunction
+
+"------------------------------------------------------------------------
+" Function: lh#brackets#_delete_empty_bracket_pair() {{{2
+function! lh#brackets#_delete_empty_bracket_pair()
+  let l=getline('.')[col("."):]
+  let m = matchstr(l, '^'.Marker_Txt('.\{-}'))
+  let lm = lh#encoding#strlen(m)
+
+  return "\<left>".repeat("\<del>", lm+2)
+endfunction
+
+"------------------------------------------------------------------------
+" Function: lh#brackets#_add_newline_between_brackets() {{{2
+function! lh#brackets#_add_newline_between_brackets()
+  return "\<cr>\<esc>O"
+endfunction
+"
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save

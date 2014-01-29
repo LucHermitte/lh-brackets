@@ -1,5 +1,5 @@
 			  --------------------
-			   lh-map-tools 2.0.2
+			   lh-map-tools 2.1.0
 			  --------------------
 
 lh-map-tools provides three things:
@@ -9,7 +9,7 @@ lh-map-tools provides three things:
 - several VimL functions for defining smart abbreviations.
 
 Audience      : Any vim users, and ftplugins writers
-Requirements  : Vim 7 ; lh-vim-lib v3.0.0 ; Triggers is not mandatory
+Requirements  : Vim 7 ; lh-vim-lib v3.1.16 ; lh-dev ; Triggers is not mandatory
 Required by   : All my (LH) ftplugins, and mu-template
 Author        : Luc Hermitte
 License       : GPLv3 with exceptions

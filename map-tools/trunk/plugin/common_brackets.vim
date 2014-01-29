@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.1.0
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -22,6 +22,13 @@
 " 		BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 2.1.0:
+"               * Features from lh-cpp moved to lh-brackets (
+"                 - <cr> within empty brackets; 
+"                 - <del> within empty brackets ;
+"               * New option -but to !Brackets to exclude patterns
+"               * Default brackets definitions re-established
+"                 - "-but" option used for single-quote mapping
 " Version 2.0.0:
 " 		* GPLv3
 " Version 1.0.0:
@@ -125,11 +132,6 @@
 "	        == 0  => no mappings for ), ] and }
 "	        == 1  => mappings for ), ] and } (default)
 "
-" Dependancies: {{{1
-" 	Triggers.vim		(Not required)
-" 	misc_map.vim		(required)
-" 	bracketing.base.vim	(required)
-" 	help.vim for vimrc_core.vim (:VimrcHelp)     (recognized and used.)
 "
 " Todo:         {{{1
 " 	(*) Option b:cb_double that defines weither we must hit '(' or '(('
@@ -143,7 +145,7 @@
 " line continuation used here ??
 let s:cpo_save = &cpo
 set cpo&vim
-let s:version = 200
+let s:version = 210
 
 "======================================================================
 "# Anti-reinclusion & dependencies {{{1
@@ -171,6 +173,49 @@ endif
 inoremap <silent> <Plug>ToggleBrackets <c-o>:call lh#brackets#toggle()<cr>
 if !hasmapto('<Plug>ToggleBrackets', 'i') && (mapcheck("<F9>", "i") == "")
   imap <silent> <F9> <Plug>ToggleBrackets
+endif
+
+"# Delete empty brackets {{{2
+if lh#option#get('cb_delete_empty_brackets', &ft, 1)
+  call lh#brackets#define_imap('<bs>',
+        \ [{ 'condition': 'lh#brackets#_match_any_bracket_pair()',
+        \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
+        \ 0,
+        \ '\<bs\>'
+        \ )
+endif
+
+"# Add new line on <cr> within empty brackets {{{2
+" TODO: add options to tune the kind of brackets depending on the filetype
+if lh#option#get('cb_newline_within_empty_brackets', 1)
+  call lh#brackets#enrich_imap('<cr>',
+        \ {'condition': 'getline(".")[col(".")-2:col(".")-1]=="{}"',
+        \   'action': 'lh#brackets#_add_newline_between_brackets()'},
+        \ 0,
+        \ '\<cr\>'
+        \ )
+endif
+
+"# Default brackets definitions {{{2
+if ! lh#option#get('cb_no_default_brackets', 0)
+  :Brackets! ( )
+  :Brackets! [ ] -visual=0
+  :Brackets! [ ] -insert=0 -trigger=<localleader>[
+
+  :Brackets! " " -visual=0 -insert=1
+  :Brackets! " " -visual=1 -insert=0 -trigger=""
+  " :Brackets! ' ' -visual=0 -insert=1 -but=^$\\\\|text\\\\|latex
+  :Brackets! ' ' -visual=0 -insert=1 -but=function('lh#ft#is_text')
+  :Brackets! ' ' -visual=1 -insert=0 -trigger=''
+
+  :Brackets! < > -visual=1 -insert=0 -trigger=<localleader><
+
+  " :Brackets { } -visual=0 -nl
+  " :Brackets { } -visual=0 -trigger=#{ 
+  " :Brackets { } -visual=1 -insert=0
+  :Brackets! { }
+  :Brackets! { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+  "}
 endif
 
 "======================================================================
@@ -336,7 +381,7 @@ endfunction " }}}
 let &cpo = s:cpo_save
 " ===========================================================================
 " Implementation and other remarks : {{{
-" (*) Whitin the vnoremaps, `>ll at the end put the cursor at the
+" (*) Whithin the vnoremaps, `>ll at the end put the cursor at the
 "     previously last character of the selected area and slide left twice
 "     (ll) to compensate the addition of the surrounding characters.
 " (*) The <M-xxx> key-binding used in insert mode apply on the word
