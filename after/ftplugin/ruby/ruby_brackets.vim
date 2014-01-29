@@ -5,7 +5,7 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.0.0
+" Version:	2.1.0
 " Created:      17th Jun 2010
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -13,15 +13,10 @@
 "       «description»
 " 
 "------------------------------------------------------------------------
-" Installation:
-"       Drop this file into {rtp}/ftplugin
-"       Requires Vim7+
-" History:      «history»
-" TODO:         «missing features»
 " }}}1
 "=============================================================================
 
-let s:k_version = 200
+let s:k_version = 210
 " Buffer-local Definitions {{{1
 " Avoid local reinclusion {{{2
 if &cp || (exists("b:loaded_ftplug_ruby_brackets")

@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.1.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -34,10 +34,10 @@
 
 "=============================================================================
 " Avoid buffer reinclusion {{{1
-if exists('b:loaded_ftplug_js_brackets') && !exists('g:force_reload_ftplug_js_brackets')
+if exists('b:loaded_ftplug_javascript_brackets') && !exists('g:force_reload_ftplug_javascript_brackets')
   finish
 endif
-let b:loaded_ftplug_js_brackets = '200'
+let b:loaded_ftplug_js_brackets = '210'
  
 let s:cpo_save=&cpo
 set cpo&vim
@@ -52,24 +52,12 @@ endif
 if exists(':Brackets')
   let b:usemarks         = 1
   let b:cb_jump_on_close = 1
-  " Re-run brackets() in order to update the mappings regarding the different
-  " options.
-  :Brackets { } -visual=0 -nl
-  :Brackets { } -visual=0 -trigger=#{ 
-  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
-  :Brackets { } -visual=1 -insert=0
-
-  :Brackets ( )
-  :Brackets [ ] -visual=0
-  :Brackets [ ] -insert=0 -trigger=<localleader>[
-  :Brackets " " -visual=0 -insert=1
-  :Brackets " " -visual=1 -insert=0 -trigger=""
-  :Brackets ' ' -visual=0 -insert=1
-  :Brackets ' ' -visual=1 -insert=0 -trigger=''
+  " Use the default definitions from plugin/common_brackets.vim
 
   " :Brackets /* */ -visual=0
   " :Brackets /** */ -visual=0 -trigger=/!
   "
+  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
 endif
 
 "=============================================================================

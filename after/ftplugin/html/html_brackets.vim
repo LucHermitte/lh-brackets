@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.1
+" Version:	2.1.0
 " Created:	24th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -34,7 +34,7 @@ if exists("b:loaded_ftplug_html_brackets") && !exists('g:force_reload_ftplug_htm
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_html_brackets = 201
+let b:loaded_ftplug_html_brackets = 210
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------

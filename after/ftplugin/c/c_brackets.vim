@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.1.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -16,14 +16,14 @@
 "------------------------------------------------------------------------
 " Installation:	
 " 	This particular file is meant to be into {rtp}/after/ftplugin/c/
-" 	In order to overidde these default definitions, copy this file into a
+" 	In order to override these default definitions, copy this file into a
 " 	directory that comes before the {rtp}/after/ftplugin/c/ you choosed --
 " 	typically $HOME/.vim/ftplugin/c/ (:h 'rtp').
 " 	Then, replace the calls to :Brackets
 "
-" 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/cpp/brackets.vim
-"
 " History:	
+"	v2.1.0  29th Jan 2014
+"	        Mappings factorized into plugin/common_brackets.vim
 "	v2.0.1  14th Aug 2013
 "	        { now doesn't insert a new line anymore. but just "{}".
 "	        Hitting <cr> while the cursor in between "{}", will add an
@@ -52,7 +52,7 @@
 if exists('b:loaded_ftplug_c_brackets') && !exists('g:force_reload_ftplug_c_brackets')
   finish
 endif
-let s:k_version = 201
+let s:k_version = 210
 let b:loaded_ftplug_c_brackets = s:k_version
  
 let s:cpo_save=&cpo
@@ -73,21 +73,9 @@ if exists(':Brackets')
   let b:cb_jump_on_close = 1
   " Re-run brackets() in order to update the mappings regarding the different
   " options.
-  " :Brackets { } -visual=0 -nl
-  " :Brackets { } -visual=0 -trigger=#{ 
-  " :Brackets { } -visual=1 -insert=0
-  :Brackets { }
-  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
-
-  :Brackets ( )
-  :Brackets [ ] -visual=0
-  :Brackets [ ] -insert=0 -trigger=<localleader>[
-  :Brackets " " -visual=0 -insert=1
-  :Brackets " " -visual=1 -insert=0 -trigger=""
-  :Brackets ' ' -visual=0 -insert=1
-  :Brackets ' ' -visual=1 -insert=0 -trigger=''
   :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
-  :Brackets < > -visual=1 -insert=0 -trigger=<localleader><
+  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+  "}
 
   " Doxygen surround action
   :Brackets <tt> </tt> -visual=1 -insert=0 -trigger=<localleader>tt
@@ -98,27 +86,21 @@ if exists(':Brackets')
   " '(foo|«»)«»' + ';' --> '("foo");|'
   " '("foo|"«»)«»' + ';' --> '("foo");|'
   " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
-  if exists('*lh#dev#option#get') || 
-        \ lh#dev#option#get('semicolon_closes_bracket', &ft, 1)
+  if lh#dev#option#get('semicolon_closes_bracket', &ft, 1)
     call lh#brackets#define_imap(';',
           \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".Marker_Txt(".\\{-}")."\\)\\=)\\+"',
           \   'action': 's:JumpOverAllClose(")", ";")'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
           \   'action': 's:JumpOverAllClose(";", "")'}],
           \1)
+    " Override default definition from lh-brackets to take care of semi-colon
     call lh#brackets#define_imap('<bs>',
           \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
           \   'action': 'Cpp_MoveSemicolBackToStringContext()'},
-          \  { 'condition': 'Cpp_MatchAnyBracketPair()',
-          \   'action': 'Cpp_DeleteEmptyBracketPair()'}],
+          \  { 'condition': 'lh#brackets#_match_any_bracket_pair()',
+          \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
           \ 1,
           \ '\<bs\>'
-          \ )
-    call lh#brackets#enrich_imap('<cr>',
-          \ {'condition': 'getline(".")[col(".")-2:col(".")-1]=="{}"',
-          \   'action': 'Cpp_Add2NewLinesBetweenBrackets()'},
-          \ 1,
-          \ '\<cr\>'
           \ )
   endif
 endif
@@ -145,22 +127,6 @@ function! Cpp_MoveSemicolBackToStringContext()
   let lend= lh#encoding#strlen(end)
   let move = repeat("\<left>", lend)
   return "\<bs>".move.";"
-endfunction
-
-function! Cpp_MatchAnyBracketPair()
-  return getline(".")[col(".")-2:]=~'^\(()\|{}\|\[]\|""\|''\)'
-endfunction
-
-function! Cpp_DeleteEmptyBracketPair()
-  let l=getline('.')[col("."):]
-  let m = matchstr(l, '^'.Marker_Txt('.\{-}'))
-  let lm = lh#encoding#strlen(m)
-
-  return "\<left>".repeat("\<del>", lm+2)
-endfunction
-
-function! Cpp_Add2NewLinesBetweenBrackets()
-  return "\<cr>\<esc>O"
 endfunction
 
 "=============================================================================
