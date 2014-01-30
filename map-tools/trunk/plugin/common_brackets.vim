@@ -200,7 +200,7 @@ endif
 if ! lh#option#get('cb_no_default_brackets', 0)
   :Brackets! ( )
   :Brackets! [ ] -visual=0
-  :Brackets! [ ] -insert=0 -trigger=<localleader>[
+  :Brackets! [ ] -insert=0 -trigger=<leader>[
 
   :Brackets! " " -visual=0 -insert=1
   :Brackets! " " -visual=1 -insert=0 -trigger=""
@@ -214,7 +214,7 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   " :Brackets { } -visual=0 -trigger=#{ 
   " :Brackets { } -visual=1 -insert=0
   :Brackets! { }
-  :Brackets! { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+  :Brackets! { } -visual=1 -insert=0 -nl -trigger=<leader>{
   "}
 endif
 
