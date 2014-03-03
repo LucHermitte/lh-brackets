@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.1.0
+" Version:      2.1.1
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -30,6 +30,9 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.1.1:
+"               * Bug fixed regarding the mapping of special keys like <cr>,
+"               <bs>, ... while IMAP is active
 " Version 2.1.0:
 "               * Features from lh-cpp moved to lh-brackets:
 "                 - <cr> within empty brackets; 
@@ -251,11 +254,11 @@ endfunction
 
 " s:DefineImap(trigger, inserter, isLocal) {{{2
 function! s:DefineImap(trigger, inserter, isLocal)
-  if exists('*IMAP')
+  if exists('*IMAP') && a:trigger !~? '<bs>\|<cr>\|<up>\|<down>\|<left>\|<right>' 
     if a:isLocal
       call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
     else
-      call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>")
+      call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", '')
     endif
   else
     call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>", a:isLocal)
