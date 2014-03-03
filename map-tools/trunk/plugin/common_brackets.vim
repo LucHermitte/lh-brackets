@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.0
+" Version:	2.1.1
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -176,7 +176,7 @@ if !hasmapto('<Plug>ToggleBrackets', 'i') && (mapcheck("<F9>", "i") == "")
 endif
 
 "# Delete empty brackets {{{2
-if lh#option#get('cb_delete_empty_brackets', &ft, 1)
+if lh#dev#option#get('cb_delete_empty_brackets', &ft, 1)
   call lh#brackets#define_imap('<bs>',
         \ [{ 'condition': 'lh#brackets#_match_any_bracket_pair()',
         \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],

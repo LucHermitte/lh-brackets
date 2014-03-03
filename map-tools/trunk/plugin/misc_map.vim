@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.1.1
 "
 " Purpose:	API plugin: Several mapping-oriented functions
 "
@@ -93,13 +93,14 @@
 " }}}
 "---------------------------------------------------------------------------
 " Function:	ReinterpretEscapedChar(sequence)  {{{
-" Purpose:	This function transform '\<cr\>', '\<esc\>', ... '\<{keys}\>'
+" Purpose:	This function transforms '\<cr\>', '\<esc\>', ... '\<{keys}\>'
 " 		into the interpreted sequences "\<cr>", "\<esc>", ...
 " 		"\<{keys}>".
 " 		It is meant to be used by fonctions like MapNoContext(),
 " 		InsertSeq(), ... as we can not define mappings (/abbreviations)
 " 		that contain "\<{keys}>" into the sequence to insert.
 " Note:		It accepts sequences containing double-quotes.
+" Deprecated:   Use lh#dev#reinterpret_escaped_char
 " }}}
 "---------------------------------------------------------------------------
 " Function: 	InsertSeq(key, sequence, [context]) {{{
