@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.1.1
+" Version:      2.1.2
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -30,6 +30,9 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.1.2:
+"               * New internal function to remove markers:
+"               lh#brackets#_jump_text()
 " Version 2.1.1:
 "               * Bug fixed regarding the mapping of special keys like <cr>,
 "               <bs>, ... while IMAP is active
@@ -402,7 +405,7 @@ function! s:Jump()
   let p = col('.')
 
   let ll = getline('.')[p : ]
-  echomsg ll
+  " echomsg ll
   let m = matchstr(ll, '^'.Marker_Txt('.\{-}'))
   let lm = strwidth(m)
   if lm
@@ -593,6 +596,13 @@ endfunction
 " Function: lh#brackets#_add_newline_between_brackets() {{{2
 function! lh#brackets#_add_newline_between_brackets()
   return "\<cr>\<esc>O"
+endfunction
+
+" Function: lh#brackets#_jump_text(marker) {{{3
+function! lh#brackets#_jump_text(marker)
+  let m = matchstr(a:marker, '^'.lh#marker#txt('.\{-}'))
+  let l = lh#encoding#strlen(m)
+  return repeat("\<del>", l)
 endfunction
 "
 " }}}1

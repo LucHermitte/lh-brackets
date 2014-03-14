@@ -70,7 +70,7 @@ function! s:Insert(which)
     endif
     " if lig[column].lig[column+1] == Marker_Txt()
     if strpart(lig, column) =~ '\V'.escape(Marker_Txt(), '\')
-      let ret = ret . substitute(Marker_Txt(), '.', "\<del>", 'g')
+      let ret .= substitute(Marker_Txt(), '.', "\<del>", 'g')
     endif
     return ret
   else
