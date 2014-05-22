@@ -76,6 +76,7 @@ if exists(':Brackets')
   :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
   :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
   "}
+  :Brackets { } -visual=0 -insert=1 -open=function('lh#cpp#brackets#close_curly')
 
   " Doxygen surround action
   :Brackets <tt> </tt> -visual=1 -insert=0 -trigger=<localleader>tt

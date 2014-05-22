@@ -20,7 +20,7 @@
 "
 " History:	
 " 	v1.0.0: First version
-"       v2.0.0: GPLv3
+"	v2.0.0: License GPLv3 w/ extension
 " TODO:	
 " }}}1
 "=============================================================================
@@ -55,7 +55,19 @@ function! lh#cpp#brackets#lt()
 endfunction
 
 
-
+" Callback function that specializes the behaviour of '{'
+function! lh#cpp#brackets#close_curly()
+  let c = col('.') - 1
+  let l = getline('.')
+  let l = strpart(l, 0, c)
+  let close =  l =~ 'struct\|class' ? '};' : '}'
+  if exists('b:usemarks') && b:usemarks
+    return '{!cursorhere!'.close.'!mark!'
+  else
+    " return '<>' . "\<Left>"
+    return '{!cursorhere!'.close
+  endif
+endfunction
 
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
