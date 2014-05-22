@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.1
+" Version:	2.1.3
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -22,6 +22,9 @@
 " 		BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 2.1.3:
+"               * Bracket toggling mappings restricted to normal mode
+"               * Bracket toggling mode waits for no more than one action/key
 " Version 2.1.0:
 "               * Features from lh-cpp moved to lh-brackets (
 "                 - <cr> within empty brackets; 
@@ -145,7 +148,7 @@
 " line continuation used here ??
 let s:cpo_save = &cpo
 set cpo&vim
-let s:version = 210
+let s:version = 213
 
 "======================================================================
 "# Anti-reinclusion & dependencies {{{1
@@ -227,40 +230,40 @@ endif
 if !exists('g:cb_want_mode ') | let g:cb_want_mode = 1 | endif
 if g:cb_want_mode " {{{
   if !hasmapto('BracketsManipMode')
-    noremap <silent> <M-b>	:call BracketsManipMode("\<M-b>")<cr>
+    nnoremap <silent> <M-b>	:call BracketsManipMode("\<M-b>")<cr>
   endif
   " }}}
 else " {{{
   if !hasmapto('<Plug>DeleteBrackets')
-    map <M-b>x		<Plug>DeleteBrackets
-    map <M-b><Del>	<Plug>DeleteBrackets
+    nmap <M-b>x		<Plug>DeleteBrackets
+    nmap <M-b><Del>	<Plug>DeleteBrackets
   endif
   noremap <silent> <Plug>DeleteBrackets	:call <SID>DeleteBrackets()<CR>
 
   if !hasmapto('<Plug>ChangeToRoundBrackets')
-    map <M-b>(		<Plug>ChangeToRoundBrackets
+    nmap <M-b>(		<Plug>ChangeToRoundBrackets
   endif
   noremap <silent> <Plug>ChangeToRoundBrackets	:call <SID>ChangeRound()<CR>
 
   if !hasmapto('<Plug>ChangeToSquareBrackets')
-    map <M-b>[		<Plug>ChangeToSquareBrackets
+    nmap <M-b>[		<Plug>ChangeToSquareBrackets
   endif
   noremap <silent> <Plug>ChangeToSquareBrackets	:call <SID>ChangeSquare()<CR>
 
   if !hasmapto('<Plug>ChangeToCurlyBrackets')
-    map <M-b>{		<Plug>ChangeToCurlyBrackets
+    nmap <M-b>{		<Plug>ChangeToCurlyBrackets
   endif
   noremap <silent> <Plug>ChangeToCurlyBrackets	:call <SID>ChangeCurly()<CR>
 
   if !hasmapto('<Plug>ChangeToAngleBrackets')
-    map <M-b>{		<Plug>ChangeToAngleBrackets
+    nmap <M-b>{		<Plug>ChangeToAngleBrackets
   endif
   noremap <silent> <Plug>ChangeToAngleBrackets	:call <SID>ChangeAngle()<CR>
 
   if !hasmapto('<Plug>ToggleBackslash')
-    map <M-b>\		<Plug>ToggleBackslash
+    nmap <M-b>\		<Plug>ToggleBackslash
   endif
-  noremap <silent> <Plug>ToggleBackslash	:call <SID>ToggleBackslash()<CR>
+  nnoremap <silent> <Plug>ToggleBackslash	:call <SID>ToggleBackslash()<CR>
 endif " }}}
 " Bindings for the Bracket Macros
 
@@ -337,42 +340,40 @@ endfunction " }}}
 
 function! BracketsManipMode(starting_key) " {{{
   redraw! " clear the msg line
-  while 1
-    echohl StatusLineNC
-    echo "\r-- brackets manipulation mode (/x/(/[/{/</\\/<F1>/q/)"
-    echohl None
-    let key = getchar()
-    let bracketsManip=nr2char(key)
-    if (-1 != stridx("x([{<\\q",bracketsManip)) || 
-	  \ (key =~ "\\(\<F1>\\|\<Del>\\)")
-      if     bracketsManip == "x"      || key == "\<Del>" 
-	call s:DeleteBrackets() | redraw! | return ''
-      elseif bracketsManip == "("      | call s:ChangeRound()
-      elseif bracketsManip == "["      | call s:ChangeSquare()
-      elseif bracketsManip == "{"      | call s:ChangeCurly()
-      elseif bracketsManip == "<"      | call s:ChangeAngle()
-      elseif bracketsManip == "\\"     | call s:ToggleBackslash()
-      elseif key == "\<F1>"
-	redraw! " clear the msg line
-	echo "\r *x* -- delete the current brackets pair\n"
-	echo " *(* -- change the current brackets pair to round brackets ()\n"
-	echo " *[* -- change the current brackets pair to square brackets []\n"
-	echo " *{* -- change the current brackets pair to curly brackets {}\n"
-	echo " *<* -- change the current brackets pair to angle brackets <>\n"
-	echo " *\\* -- toggle a backslash before the current brackets pair\n"
-	echo " *q* -- quit the mode\n"
-	continue
-      elseif bracketsManip == "q"
-	redraw! " clear the msg line
-	return ''
-	" else
-      endif
+  echohl StatusLineNC
+  echo "\r-- brackets manipulation mode (/x/(/[/{/</\\/<F1>/q/)"
+  echohl None
+  let key = getchar()
+  let bracketsManip=nr2char(key)
+  if (-1 != stridx("x([{<\\q",bracketsManip)) || 
+        \ (key =~ "\\(\<F1>\\|\<Del>\\)")
+    if     bracketsManip == "x"      || key == "\<Del>" 
+      call s:DeleteBrackets() | redraw! | return ''
+    elseif bracketsManip == "("      | call s:ChangeRound()
+    elseif bracketsManip == "["      | call s:ChangeSquare()
+    elseif bracketsManip == "{"      | call s:ChangeCurly()
+    elseif bracketsManip == "<"      | call s:ChangeAngle()
+    elseif bracketsManip == "\\"     | call s:ToggleBackslash()
+    elseif key == "\<F1>"
       redraw! " clear the msg line
-    else
+      echo "\r *x* -- delete the current brackets pair\n"
+      echo " *(* -- change the current brackets pair to round brackets ()\n"
+      echo " *[* -- change the current brackets pair to square brackets []\n"
+      echo " *{* -- change the current brackets pair to curly brackets {}\n"
+      echo " *<* -- change the current brackets pair to angle brackets <>\n"
+      echo " *\\* -- toggle a backslash before the current brackets pair\n"
+      echo " *q* -- quit the mode\n"
+      continue
+    elseif bracketsManip == "q"
       redraw! " clear the msg line
-      return a:starting_key.bracketsManip
+      return ''
+      " else
     endif
-  endwhile
+    redraw! " clear the msg line
+  else
+    redraw! " clear the msg line
+    return a:starting_key.bracketsManip
+  endif
 endfunction " }}}
 " Then the procedures.
 
