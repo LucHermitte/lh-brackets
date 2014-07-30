@@ -5,7 +5,7 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.2.0
 " Created:	20th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -41,7 +41,7 @@ function! lh#vim#brackets#lt()
       return '<'
     endif 
   endif
-  if exists('b:usemarks') && b:usemarks
+  if lh#brackets#usemarks()
     " return '<>' . "!mark!\<esc>".lh#encoding#strlen(Marker_Txt())."\<left>i"
     return '<!cursorhere!>!mark!'
   else
@@ -60,7 +60,7 @@ function! lh#vim#brackets#dquotes()
   let l = strpart(getline(line('.')), 0, col('.')-1)
   if l =~ '\m)\s*$\|^\s*$'
     return '"'
-  elseif exists("b:usemarks") && b:usemarks == 1
+  elseif lh#brackets#usemarks()
     return '"!cursorhere!"!mark!'
   else
     return '""'. "\<Left>"

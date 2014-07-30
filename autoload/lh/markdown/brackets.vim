@@ -5,8 +5,8 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.2
-let s:k_version = 212
+" Version:	2.2.0
+let s:k_version = 220
 " Created:      14th Mar 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -90,7 +90,7 @@ function! lh#markdown#brackets#strike()
 endfunction
 
 function! s:Mark()
-  return exists("b:usemarks") && b:usemarks == 1
+  return lh#brackets#usemarks()
         \ ?  "!mark!"
         \ : ""
   endif

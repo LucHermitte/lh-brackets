@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.3
+" Version:	2.2.0
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -22,6 +22,8 @@
 " 		BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 2.2.0:
+"               * b:usemarks -> [bg]:usemarks
 " Version 2.1.3:
 "               * Bracket toggling mappings restricted to normal mode
 "               * Bracket toggling mode waits for no more than one action/key
@@ -128,7 +130,7 @@
 "	(*) b:cb_Dquotes			: " -> " & "
 "	    could be customized thanks to b:cb_DqFn ;	[vim_set.vim]
 "		== 2  => non active within comment or strings
-"	(*) b:usemarks				: 
+"	(*) [bg]:usemarks				: 
 "		indicates the wish to use the marking feature first defined by
 "		Stephan Riehm.
 "	(*) b:cb_jump_on_close			: ), ], }
@@ -140,7 +142,7 @@
 " 	(*) Option b:cb_double that defines weither we must hit '(' or '(('
 " 	(*) Support '\%(\)' for vim when imaps.vim is not installed
 " 	(*) Support '||', '\|\|' and '&&' (within eqnarray[*]) for LaTeX.
-"	(*) Systematically use b:usemarks for opening and closing
+"	(*) Systematically use [bg]:usemarks for opening and closing
 " }}}1
 "===========================================================================
 "
@@ -148,7 +150,7 @@
 " line continuation used here ??
 let s:cpo_save = &cpo
 set cpo&vim
-let s:version = 213
+let s:version = 220
 
 "======================================================================
 "# Anti-reinclusion & dependencies {{{1
@@ -176,6 +178,16 @@ endif
 inoremap <silent> <Plug>ToggleBrackets <c-o>:call lh#brackets#toggle()<cr>
 if !hasmapto('<Plug>ToggleBrackets', 'i') && (mapcheck("<F9>", "i") == "")
   imap <silent> <F9> <Plug>ToggleBrackets
+endif
+
+"# <Plug>ToggleMarkers Mappings {{{2
+nnoremap <silent> <Plug>ToggleMarkers :call lh#brackets#toggle_usemarks()<cr>
+if !hasmapto('<Plug>ToggleMarkers', 'n') && (mapcheck("<M-F9>", "n") == "")
+  nmap <silent> <M-F9> <Plug>ToggleMarkers
+endif
+inoremap <silent> <Plug>ToggleMarkers <c-o>:call lh#brackets#toggle_usemarks()<cr>
+if !hasmapto('<Plug>ToggleMarkers', 'i') && (mapcheck("<M-F9>", "i") == "")
+  imap <silent> <M-F9> <Plug>ToggleMarkers
 endif
 
 "# Delete empty brackets {{{2

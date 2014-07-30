@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.1.0)
-*lh-brackets*           For Vim version 7.+     Last change: 28th Jan 2014
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.2.0)
+*lh-brackets*           For Vim version 7.+     Last change: 30th Jul 2014
 
                         Map Tools MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -184,7 +184,7 @@ Here is an example of what I have done with some C++ constructs: >
             \   . '\<cr\>!mark!\<cr\>}!mark!\<esc\>?(\<cr\>a')<CR>
 
         function! Def_Map(key, expr1, expr2)
-          if exists('b:usemarks') && b:usemarks
+          if exists('g:usemarks') && g:usemarks
             return "\<c-r>=MapNoContext2('"
                \  . a:key."',BuildMapSeq(\"".a:expr2."\"))\<cr>"
           else
@@ -192,7 +192,7 @@ Here is an example of what I have done with some C++ constructs: >
           endif
         endfunction
 <
-Then, within normal context, when |b:usemarks| is set, "for" is expanded into: >
+Then, within normal context, when |g:usemarks| is set, "for" is expanded into: >
         for (;«»;«») {
             «»
         }«»
@@ -232,7 +232,7 @@ typed. The result will be function of several things:
   - we can embed insert-mode mappings whose keybindings match '!.\{-}!' (see
     |BuildMapSeq()|)
     A special treatment is applied on:
-    - |!mark!| : according to |b:usemarks|, it is replaced by |Marker_Txt()|
+    - |!mark!| : according to |g:usemarks|, it is replaced by |Marker_Txt()|
       or nothing
     - |!cursorhere!| : will move the cursor to that position in the sequence
       once it have been expanded.
@@ -286,7 +286,7 @@ Parameters:~
     Indicates whether we must try to find and expand mappings of the form
     "!.\{-1,}!" within {begin} and {end}
     When true:
-    - |b:usemarks| is taken into account: when |b:usemarks| is false, {begin}
+    - |g:usemarks| is taken into account: when |g:usemarks| is false, {begin}
       and {end} will be cleared from every occurrence of "|!mark!|".
     - if {begin} or {end} contain "|!cursorhere!|", {goback} will be ignored
       and replaced by a more appropriate value.
@@ -589,7 +589,7 @@ Additional features~
   (thanks to the |:Brackets-open| and |:Brackets-close| options) ;
 * The key sequence that actually trigger the mappings defined can be specified
   thanks to |:Brackets-trigger| option.
-* The placeholder won't be inserted depeding on |b:usemark| value ;
+* The placeholder won't be inserted depeding on |g:usemark| value ;
 * The mappings can be made line-wise (see |:Brackets-nl|) ;
 * The definitions of all bracket-pair mappings can be toggled by pressing
   <F9> (see |<Plug>ToggleBrackets|), even if several buffers are used ;
@@ -761,14 +761,25 @@ following lines into your .vimrc:
 
 NB: Triggers.vim is not longer required to provide this feature.
 
-                                                                *b:usemarks*
+                                       *[bg]:usemarks* *b:usemarks* *g:usemarks*
+                                       *lh#brackets#usemarks()*
 In |insert-mode|, two operating modes are provided: one very classic, and one
 that takes advantage of Stephen Riehm's markers when the buffer-relative
-option |b:usemarks| is set to 1. In that latter case, markers are inserted at
-the end of the pair of brackets.  
-The option can be toggled by hitting the trigger <M-F9> -- if |Trigger.vim| is
-installed. 
-TODO: reimplement this feature with lh#menu#def_toggle_item
+option |g:usemarks| is set to 1. In that latter case, markers are inserted at
+the end of the pair of brackets. The global option can be overridden for the current
+buffer by setting |b:usemarks|.
+Beware, when |b:usemarks| is set, |g:usemarks| is ignored. It won't be
+possible to update its value to clear the use of markers in all buffers. As a
+consequence, reserve the use of |b:usemarks| to very restricted scenarii.
+
+The current state of the option can be obtained with the function
+|lh#brackets#usemarks()|.
+
+
+                                            *<Plug>ToggleMarkers* *<M-F9>* 
+                                            *lh#brackets#toggle_brackets()*
+The option |[bg]:usemarks| can be toggled by hitting the trigger <M-F9>. This
+trigger key can be overriden thanks to the |<Plug>|-mapping |<Plug>ToggleMarkers|.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Accessibility~

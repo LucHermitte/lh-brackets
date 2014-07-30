@@ -6,14 +6,14 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.2
+" Version:	2.2.0
 "
 "	Stephen Riehm's braketing macros for vim
 "	Customizations by Luc Hermitte.
 " ======================================================================
 " History:	{{{1
 "	20th Mar 2012:  by LH
-"	        * v3.0.0 -> GPLv3
+"	        * lh-cpp-> GPLv3
 "	03rd Jan 2011:  by LH
 "		* marker_prefers_select=0 fixed
 "	25th Nov 2010:  by LH
@@ -415,7 +415,6 @@ function! LHToggleMarkerInVisual() " {{{3
 endfunction
 
 " Other options:                    {{{2
-" b:usemarks
 
 function! s:Select_or_Echo()    "                  {{{3
   return exists("g:marker_prefers_select") ? g:marker_prefers_select : 1
