@@ -5,7 +5,7 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.0
+" Version:	2.2.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -37,7 +37,7 @@
 if exists('b:loaded_ftplug_perl_brackets') && !exists('g:force_reload_ftplug_perl_brackets')
   finish
 endif
-let b:loaded_ftplug_perl_brackets = 1
+let b:loaded_ftplug_perl_brackets = 220
  
 let s:cpo_save=&cpo
 set cpo&vim
@@ -52,7 +52,6 @@ endif
 runtime ftplugin/perl_localleader.vim
 
 if exists(':Brackets')
-  let b:usemarks         = 1
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
   :Brackets < > -visual=1 -insert=0 -trigger=<localleader><

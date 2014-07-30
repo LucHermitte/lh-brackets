@@ -5,7 +5,7 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.0.0
+" Version:	2.2.0
 " Created:	24th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -75,7 +75,7 @@ function! s:Insert(which)
     return ret
   else
     if a:which == 0 
-      if exists("b:usemarks") && b:usemarks == 1
+      if lh#brackets#usemarks()
 	" return "<>\<c-r>=Marker_Txt()\<cr>\<esc>F>i"
 	return "<>!mark!\<esc>F>i"
 	"TODO: tester sans imaps.vim

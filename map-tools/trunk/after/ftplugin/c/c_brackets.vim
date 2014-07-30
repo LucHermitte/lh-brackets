@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.0
+" Version:	2.2.0
 " Created:	26th May 2004
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -52,7 +52,7 @@
 if exists('b:loaded_ftplug_c_brackets') && !exists('g:force_reload_ftplug_c_brackets')
   finish
 endif
-let s:k_version = 210
+let s:k_version = 220
 let b:loaded_ftplug_c_brackets = s:k_version
  
 let s:cpo_save=&cpo
@@ -69,7 +69,6 @@ if !exists('lh#cpp#brackets#lt')
 endif
 
 if exists(':Brackets')
-  let b:usemarks         = 1
   let b:cb_jump_on_close = 1
   " Re-run brackets() in order to update the mappings regarding the different
   " options.

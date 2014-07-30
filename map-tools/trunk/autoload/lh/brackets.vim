@@ -5,7 +5,7 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.1.2
+" Version:      2.2.0
 " Created:      28th Feb 2008
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -30,6 +30,8 @@
 " * drop into {rtp}/autoload/lh/brackets.vim
 "
 " History:
+" Version 2.2.0:
+"               * b:usemarks -> [bg]:usemarks through lh#brackets#usemarks()
 " Version 2.1.2:
 "               * New internal function to remove markers:
 "               lh#brackets#_jump_text()
@@ -89,6 +91,11 @@ endfunction
 " NB: can be defined in the .vimrc only
 " todo: find people using the select mode and never the visual mode
 let s:k_vmap_type = lh#option#get('bracket_surround_in', 'x', 'g')
+
+" Function: lh#brackets#usemarks() {{{3
+function! lh#brackets#usemarks()
+  return lh#option#get('usemarks', 1)
+endfunction
 
 "------------------------------------------------------------------------
 " ## Mappings Toggling {{{1
@@ -201,6 +208,20 @@ function! s:UpdateMappingsActivationL()
   let s:state.isActiveInBuffer[bid] = s:state.isActive
   " echomsg "updateL[".bid."]: <- ". s:state.isActive
   " call confirm( "updateL[".bid."]: <- ". s:state.isActive, '&Ok', 1)
+endfunction
+
+" Function: lh#brackets#toggle_usemarks() {{{3
+function! lh#brackets#toggle_usemarks()
+  if exists('b:usemarks')
+    let b:usemarks = 1 - b:usemarks
+    call lh#common#warning_msg('b:usemarks <-'.b:usemarks)
+  elseif exists('g:usemarks') 
+    let g:usemarks = 1 - g:usemarks
+    call lh#common#warning_msg('g:usemarks <-'.g:usemarks)
+  else
+    let g:usemarks = 0
+    call lh#common#warning_msg('g:usemarks <-'.g:usemarks)
+  endif
 endfunction
 
 "# Autocommands {{{2

@@ -5,8 +5,8 @@
 "		<URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.2
-let s:k_version = 212
+" Version:	2.2.0
+let s:k_version = 220
 " Created:      13th Mar 2014
 " Last Update:  $Date$
 "------------------------------------------------------------------------
@@ -22,7 +22,6 @@ let s:k_version = 212
 " }}}1
 "=============================================================================
 
-let s:k_version = 1
 " Avoid local reinclusion {{{1
 if &cp || (exists("b:loaded_ftplug_markdown_brackets")
       \ && (b:loaded_ftplug_markdown_brackets >= s:k_version)
@@ -42,7 +41,6 @@ if !exists(':Brackets')
 endif
 
 if exists(':Brackets')
-  let b:usemarks         = 1
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
 

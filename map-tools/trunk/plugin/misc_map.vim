@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.1
+" Version:	2.2.0
 "
 " Purpose:	API plugin: Several mapping-oriented functions
 "
@@ -113,7 +113,7 @@
 " 		  - we can embed insert-mode mappings whose keybindings match
 " 		    '!.\{-}!' (see BuildMapSeq())
 " 		    A special treatment is applied on:
-" 		    - !mark! : according to b:usemarks, it is replaced by
+" 		    - !mark! : according to [bg]:usemarks, it is replaced by
 " 		      Marker_Txt() or nothing
 " 		    - !cursorhere! : will move the cursor to that position in
 " 		      the sequence once it have been expanded.
@@ -162,7 +162,7 @@
 " 	Indicates whether we must try to find and expand mappings of the form
 " 	"!.\{-1,}!" within {begin} and {end}
 " 	When true:
-" 	- b:usemarks is taken into account: when false, {begin} and {end} will
+" 	- [bg]:usemarks is taken into account: when false, {begin} and {end} will
 " 	  be cleared from every occurence of "!mark!".
 " 	- if {begin} or {end} contain "!cursorhere!", {goback} will be ignored
 " 	  and replaced by a more appropriate value.
@@ -193,19 +193,11 @@
 "---------------------------------------------------------------------------
 " Avoid reinclusion
 if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
-  let g:misc_map_loaded = 200
+  let g:misc_map_loaded = 220
   let cpop = &cpoptions
   set cpoptions-=C
   scriptencoding latin1
 "
-if !exists(':Silent') " {{{
-  if version < 600
-    command! -nargs=+ -bang Silent exe "<args>"
-  else
-    command! -nargs=+                -bang Silent silent<bang> <args>
-  endif
-endif
-" }}}
 "---------------------------------------------------------------------------
 function! Map4TheseContexts(key, ...) " {{{
   " Note: requires Vim 6.x
@@ -356,7 +348,7 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
     endif
   endif
   " The substitute is here to compensate a little problem with HTML tags
-  Silent exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
+  silent exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
   " 'gv' is used to refocus on the current visual zone
   "  call confirm(strtrans( "normal! gv". BL.a:end.BR.HL.a:begin.HR), "&Ok")
   let &paste=pp
@@ -387,7 +379,7 @@ function! Smart_insert_seq1(key,expr1,expr2) " {{{
   return s:Smart_insert_seq1(a:key, a:expr1, a:expr2)
 endfunction " }}}
 function! s:Smart_insert_seq1(key,expr1,expr2) " {{{
-  if exists('b:usemarks') && b:usemarks
+  if lh#brackets#usemarks()
     return MapNoContext(a:key,BuildMapSeq(a:expr2))
     " return "\<c-r>=MapNoContext('".a:key."',BuildMapSeq('".a:expr2."'))\<cr>"
   else
@@ -406,7 +398,7 @@ endfunction " }}}
 function! s:Smart_insert_seq(key,expr, ...) " {{{
   let rhs = escape(a:expr, '\')
   " Strip marks (/placeholders) if they are not wanted
-  if !exists('b:usemarks') || !b:usemarks
+  if ! lh#brackets#usemarks()
     let rhs = substitute(rhs, '!mark!\|<+\k*+>', '', 'g')
   endif
   " Interpret the sequence if it is meant to
@@ -563,7 +555,7 @@ function! SurroundBySubstitute(
       " inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
       inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
 
-      if (!exists('b:usemarks') || !b:usemarks)
+      if ! lh#brackets#usemarks()
 	let seq = substitute(seq, '!mark!', '', 'g')
       endif
       if (begin =~ '!cursorhere!') 
@@ -615,7 +607,7 @@ function! Surround(
     " inoremap !movecursor! <sid>GotoMark().'a'
 
     " Check whether markers must be used
-    if (!exists('b:usemarks') || !b:usemarks)
+    if !lh#brackets#usemarks()
       let begin = substitute(begin, '!mark!', '', 'g')
       let end = substitute(end, '!mark!', '', 'g')
     endif
