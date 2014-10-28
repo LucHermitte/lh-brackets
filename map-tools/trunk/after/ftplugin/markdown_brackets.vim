@@ -17,7 +17,7 @@ let s:k_version = 220
 "       - _ -> _<cursor>_ ; twice for __<cursor>__
 "       - ` -> `<cursor>`
 "       - ~ -> <del><cursor></del> ; <localleader>~ for surrounding
-"       - <del> -> delete empty pair
+"       - <bs> -> delete empty pair
 "
 " }}}1
 "=============================================================================
