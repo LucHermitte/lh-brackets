@@ -6,7 +6,7 @@
 " Last Update:	$Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+" Version:	2.2.1
 "
 " Purpose:	API plugin: Several mapping-oriented functions
 "
@@ -193,7 +193,7 @@
 "---------------------------------------------------------------------------
 " Avoid reinclusion
 if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
-  let g:misc_map_loaded = 220
+  let g:misc_map_loaded = 221
   let cpop = &cpoptions
   set cpoptions-=C
   scriptencoding latin1
@@ -314,6 +314,12 @@ function! MapAroundVisualLines(begin,end,isLine,isIndented) range " {{{
 endfunction " }}}
 
 function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
+  if &ft == 'python' && a:isIndented && a:isLine
+    let g:action= "normal! gv>`>o".a:end."\<esc>`<O\<c-d>".a:begin
+    exe "normal! gv>`>o\<c-d>".a:end."\<esc>`<O\<c-d>".a:begin
+    return
+  endif
+
   " Note: to detect a marker before surrounding it, use Surround()
   let pp = &paste
   set paste
@@ -331,6 +337,9 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
   if a:isLine == 1
     let HR="\<cr>".HR
     let BL .="\<cr>"
+  elseif a:isLine == 2
+    let HL = "`<O"
+    let BL = "\<esc>`>o"
   endif
   " If indentation is used
   if a:isIndented == 1
@@ -346,8 +355,12 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
     else " -----------------------Version 6.xx
       let HR .="gv``="
     endif
+  elseif type(a:isIndented) == type('')
+    let BL = a:isIndented . BL " move the previous lines
+    let HR .="gv``=" " indent the new line inserted 
   endif
   " The substitute is here to compensate a little problem with HTML tags
+  let g:action= "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
   silent exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
   " 'gv' is used to refocus on the current visual zone
   "  call confirm(strtrans( "normal! gv". BL.a:end.BR.HL.a:begin.HR), "&Ok")
@@ -635,7 +648,7 @@ function! Surround(
     iunmap !movecursor!
   endif
   " Call the function that really insert the text around the selection
-  call InsertAroundVisual(begin, end, a:isLine, a:isIndented)
+  :'<,'>call InsertAroundVisual(begin, end, a:isLine, a:isIndented)
   " Return the nomal-mode sequence to execute at the end.
   return goback
 endfunction
