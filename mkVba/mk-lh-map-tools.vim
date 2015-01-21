@@ -5,8 +5,8 @@
 "               <URL:http://code.google.com/p/lh-vim/>
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
-let s:version = '2.2.0'
+" Version:	2.2.1
+let s:version = '2.2.1'
 " Created:	06th Nov 2007
 " Last Update:	$Date$
 "------------------------------------------------------------------------
@@ -38,6 +38,7 @@ autoload/lh/marker.vim
 autoload/lh/vim/brackets.vim
 brackets-addon-info.txt
 doc/lh-map-tools.txt
+ftplugin/python/python_snippets.vim
 lh-map-tools.Changelog
 lh-map-tools.README
 mkVba/mk-lh-map-tools.vim
