@@ -1,55 +1,55 @@
 "===========================================================================
 " $Id$
-" File:		plugin/misc_map.vim
-" Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
+" File:         plugin/misc_map.vim
+" Author:       Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
 "               <URL:http://code.google.com/p/lh-vim/>
-" Last Update:	$Date$
+" Last Update:  $Date$
 " License:      GPLv3 with exceptions
 "               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.1
+" Version:      2.2.1
 "
-" Purpose:	API plugin: Several mapping-oriented functions
+" Purpose:      API plugin: Several mapping-oriented functions
 "
-" Todo:		Use the version of EatChar() from Benji Fisher's foo.vim
+" Todo:         Use the version of EatChar() from Benji Fisher's foo.vim
 "---------------------------------------------------------------------------
-" Function:	MapNoContext( key, sequence)				{{{
-" Purpose:	Regarding the context of the current position of the
-" 		cursor, it returns either the value of key or the
-" 		interpreted value of sequence.
-" Parameters:	<key> - returned while whithin comments, strings or characters 
-" 		<sequence> - returned otherwise. In order to enable the
-" 			interpretation of escaped caracters, <sequence>
-" 			must be a double-quoted string. A backslash must be
-" 			inserted before every '<' and '>' sign. Actually,
-" 			the '<' after the second one (included) must be
-" 			backslashed twice.
-" Example:	A mapping of 'if' for C programmation :
+" Function:     MapNoContext( key, sequence)                            {{{
+" Purpose:      Regarding the context of the current position of the
+"               cursor, it returns either the value of key or the
+"               interpreted value of sequence.
+" Parameters:   <key> - returned while whithin comments, strings or characters 
+"               <sequence> - returned otherwise. In order to enable the
+"                       interpretation of escaped caracters, <sequence>
+"                       must be a double-quoted string. A backslash must be
+"                       inserted before every '<' and '>' sign. Actually,
+"                       the '<' after the second one (included) must be
+"                       backslashed twice.
+" Example:      A mapping of 'if' for C programmation :
 "   inoremap if<space> <C-R>=MapNoContext("if ",
-"   \				'\<c-f\>if () {\<cr\>}\<esc\>?)\<cr\>i')<CR>
+"   \                           '\<c-f\>if () {\<cr\>}\<esc\>?)\<cr\>i')<CR>
 " }}}
 "---------------------------------------------------------------------------
-" Function:	MapNoContext2( key, sequence)				{{{
-" Purpose:	Exactly the same purpose than MapNoContext(). There is a
-"		slight difference, the previous function is really boring
-"		when we want to use variables like 'tarif' in the code.
-"		So this function also returns <key> when the character
-"		before the current cursor position is not a keyword
-"		character ('h: iskeyword' for more info). 
-" Hint:		Use MapNoContext2() for mapping keywords like 'if', etc.
-"		and MapNoContext() for other mappings like parenthesis,
-"		punctuations signs, and so on.
+" Function:     MapNoContext2( key, sequence)                           {{{
+" Purpose:      Exactly the same purpose than MapNoContext(). There is a
+"               slight difference, the previous function is really boring
+"               when we want to use variables like 'tarif' in the code.
+"               So this function also returns <key> when the character
+"               before the current cursor position is not a keyword
+"               character ('h: iskeyword' for more info). 
+" Hint:         Use MapNoContext2() for mapping keywords like 'if', etc.
+"               and MapNoContext() for other mappings like parenthesis,
+"               punctuations signs, and so on.
 " }}}
 "---------------------------------------------------------------------------
-" Function:	MapContext( key, syn1, seq1, ...[, default-seq])	{{{
-" Purpose:	Exactly the same purpose than MapNoContext(), but more precise.
+" Function:     MapContext( key, syn1, seq1, ...[, default-seq])        {{{
+" Purpose:      Exactly the same purpose than MapNoContext(), but more precise.
 "               Returns:
 "               - {key} within string, character or comment context,
 "               - interpreted {seq_i} within {syn_i} context,
 "               - interpreted {default-seq} otherwise ; default value: {key}
 " }}}
 "---------------------------------------------------------------------------
-" Function:	Map4TheseContexts( key, syn1, seq1, ...[, default-seq])	{{{
-" Purpose:	Exactly the same purpose than MapContext(), but even more
+" Function:     Map4TheseContexts( key, syn1, seq1, ...[, default-seq]) {{{
+" Purpose:      Exactly the same purpose than MapContext(), but even more
 "               precise. It does not make any assumption for strings-,
 "               comments-, characters- and doxygen-context.
 "               Returns:
@@ -57,23 +57,23 @@
 "               - interpreted {default-seq} otherwise ; default value: {key}
 " }}}
 "---------------------------------------------------------------------------
-" Function:	BuildMapSeq( sequence )					{{{
-" Purpose:	This fonction is to be used to generate the sequences used
-" 		by the «MapNoContext» functions. It considers that every
-" 		«!.\{-}!» pattern is associated to an INSERT-mode mapping and
-" 		expands it.
-" 		It is used to define marked mappings ; cf <c_set.vim>
+" Function:     BuildMapSeq( sequence )                                 {{{
+" Purpose:      This fonction is to be used to generate the sequences used
+"               by the «MapNoContext» functions. It considers that every
+"               «!.\{-}!» pattern is associated to an INSERT-mode mapping and
+"               expands it.
+"               It is used to define marked mappings ; cf <c_set.vim>
 " }}}
 "---------------------------------------------------------------------------
-" Function:	InsertAroundVisual(begin,end,isLine,isIndented) range {{{
-" Old Name:	MapAroundVisualLines(begin,end,isLine,isIndented) range 
-" Purpose:	Ease the definition of visual mappings that add text
-" 		around the selected one.
+" Function:     InsertAroundVisual(begin,end,isLine,isIndented) range {{{
+" Old Name:     MapAroundVisualLines(begin,end,isLine,isIndented) range 
+" Purpose:      Ease the definition of visual mappings that add text
+"               around the selected one.
 " Examples:
 "   (*) LaTeX-like stuff
 "       if &ft=="tex"
 "         vnoremap ;; :call InsertAroundVisual(
-"		      \ '\begin{center}','\end{center}',1,1)<cr>
+"                     \ '\begin{center}','\end{center}',1,1)<cr>
 "   (*) C like stuff
 "       elseif &ft=="c" || &ft=="cpp"
 "         vnoremap ;; :call InsertAroundVisual('else {','}',1,1)<cr>
@@ -92,37 +92,37 @@
 "   => Use Surround()
 " }}}
 "---------------------------------------------------------------------------
-" Function:	ReinterpretEscapedChar(sequence)  {{{
-" Purpose:	This function transforms '\<cr\>', '\<esc\>', ... '\<{keys}\>'
-" 		into the interpreted sequences "\<cr>", "\<esc>", ...
-" 		"\<{keys}>".
-" 		It is meant to be used by fonctions like MapNoContext(),
-" 		InsertSeq(), ... as we can not define mappings (/abbreviations)
-" 		that contain "\<{keys}>" into the sequence to insert.
-" Note:		It accepts sequences containing double-quotes.
+" Function:     ReinterpretEscapedChar(sequence)  {{{
+" Purpose:      This function transforms '\<cr\>', '\<esc\>', ... '\<{keys}\>'
+"               into the interpreted sequences "\<cr>", "\<esc>", ...
+"               "\<{keys}>".
+"               It is meant to be used by fonctions like MapNoContext(),
+"               InsertSeq(), ... as we can not define mappings (/abbreviations)
+"               that contain "\<{keys}>" into the sequence to insert.
+" Note:         It accepts sequences containing double-quotes.
 " Deprecated:   Use lh#dev#reinterpret_escaped_char
 " }}}
 "---------------------------------------------------------------------------
-" Function: 	InsertSeq(key, sequence, [context]) {{{
-" Purpose:	This function is meant to return the {sequence} to insert when
-" 		the {key} is typed. The result will be function of several
-" 		things:
-" 		- the {sequence} will be interpreted:
-" 		  - special characters can be used: '\<cr\>', '\<esc\>', ...
-" 		    (see ReinterpretEscapedChar()) ; '\n'
-" 		  - we can embed insert-mode mappings whose keybindings match
-" 		    '!.\{-}!' (see BuildMapSeq())
-" 		    A special treatment is applied on:
-" 		    - !mark! : according to [bg]:usemarks, it is replaced by
-" 		      Marker_Txt() or nothing
-" 		    - !cursorhere! : will move the cursor to that position in
-" 		      the sequence once it have been expanded.
-" 		- the context ; by default, it returns the interpreted sequence
-" 		  when we are not within string, character or comment context.
-" 		  (see MapNoContext())
-" 		  Thanks to the optional parameter {context}, we can ask to
-" 		  expand and interpret the {sequence} only within some
-" 		  particular {context}.
+" Function:     InsertSeq(key, sequence, [context]) {{{
+" Purpose:      This function is meant to return the {sequence} to insert when
+"               the {key} is typed. The result will be function of several
+"               things:
+"               - the {sequence} will be interpreted:
+"                 - special characters can be used: '\<cr\>', '\<esc\>', ...
+"                   (see ReinterpretEscapedChar()) ; '\n'
+"                 - we can embed insert-mode mappings whose keybindings match
+"                   '!.\{-}!' (see BuildMapSeq())
+"                   A special treatment is applied on:
+"                   - !mark! : according to [bg]:usemarks, it is replaced by
+"                     Marker_Txt() or nothing
+"                   - !cursorhere! : will move the cursor to that position in
+"                     the sequence once it have been expanded.
+"               - the context ; by default, it returns the interpreted sequence
+"                 when we are not within string, character or comment context.
+"                 (see MapNoContext())
+"                 Thanks to the optional parameter {context}, we can ask to
+"                 expand and interpret the {sequence} only within some
+"                 particular {context}.
 "
 " Examples:
 "  (*) Excerpt for my vim-ftplugin
@@ -133,47 +133,47 @@
 "     \ 'function!!cursorhere!(!mark!)\n!mark!\nendfunction!mark!')<CR>
 " }}}
 "---------------------------------------------------------------------------
-" Function:	Surround(begin,end,isLine,isIndented,goback,mustInterpret [, im_seq]) range {{{
-" Purpose:	This function is a smart wrapper around InsertAroundVisual().
-" 		It permit to interpret {begin} and {end} and it also recognizes
-" 		whether what we must surround is a marker or not.
+" Function:     Surround(begin,end,isLine,isIndented,goback,mustInterpret [, im_seq]) range {{{
+" Purpose:      This function is a smart wrapper around InsertAroundVisual().
+"               It permit to interpret {begin} and {end} and it also recognizes
+"               whether what we must surround is a marker or not.
 "
-" 		The point is that there is no :smap command in VimL, and that
-" 		insert-mode mappings (imm) should have the precedence over
-" 		visual-mode mappings (vmm) when we deals with selected markers
-" 		(select-mode) ; unfortunatelly, it is the contrary: vim gives
-" 		the priority to vmm over imm.
+"               The point is that there is no :smap command in VimL, and that
+"               insert-mode mappings (imm) should have the precedence over
+"               visual-mode mappings (vmm) when we deals with selected markers
+"               (select-mode) ; unfortunatelly, it is the contrary: vim gives
+"               the priority to vmm over imm.
 "
 " Parameters:
-" {begin}, {end}	strings
-" 	The visual selection is surrounded by {begin} and {end}, unless what is
-" 	selected is one (and only one) marker. In that latter case, the
-" 	function returns a sequence that will replace the selection by {begin}
-" 	; if {begin} matches the keybinding of an insert-mode mapping, it will
-" 	be expanded.
-" {goback}		string
-" 	This is the normal-mode sequence to execute after the selected text has
-" 	been surrounded; it is meant to place the cursor at the end of {end}
+" {begin}, {end}        strings
+"       The visual selection is surrounded by {begin} and {end}, unless what is
+"       selected is one (and only one) marker. In that latter case, the
+"       function returns a sequence that will replace the selection by {begin}
+"       ; if {begin} matches the keybinding of an insert-mode mapping, it will
+"       be expanded.
+" {goback}              string
+"       This is the normal-mode sequence to execute after the selected text has
+"       been surrounded; it is meant to place the cursor at the end of {end}
 "       Typical values are '%' for true-brackets (), {}, []
 "       or '`>ll' when strlen(a:end) == 1.
-" 	Note: This sequence will be expanded if it contains mappings or
-" 	abbreviations -- this is a feature. see {rtp}/ftplugin/vim_set.vim
-" {mustInterpret}	boolean
-" 	Indicates whether we must try to find and expand mappings of the form
-" 	"!.\{-1,}!" within {begin} and {end}
-" 	When true:
-" 	- [bg]:usemarks is taken into account: when false, {begin} and {end} will
-" 	  be cleared from every occurence of "!mark!".
-" 	- if {begin} or {end} contain "!cursorhere!", {goback} will be ignored
-" 	  and replaced by a more appropriate value.
-" [{a:1}=={im_seq}]	string
-" 	Insert-mode sequence that must be returned instead of {begin} if we try
-" 	to surround a marker.
-" 	Note: This sequence will be expanded if it contains mappings or
-" 	abbreviations -- this is a feature. see {rtp}/ftplugin/vim_set.vim
+"       Note: This sequence will be expanded if it contains mappings or
+"       abbreviations -- this is a feature. see {rtp}/ftplugin/vim_set.vim
+" {mustInterpret}       boolean
+"       Indicates whether we must try to find and expand mappings of the form
+"       "!.\{-1,}!" within {begin} and {end}
+"       When true:
+"       - [bg]:usemarks is taken into account: when false, {begin} and {end} will
+"         be cleared from every occurence of "!mark!".
+"       - if {begin} or {end} contain "!cursorhere!", {goback} will be ignored
+"         and replaced by a more appropriate value.
+" [{a:1}=={im_seq}]     string
+"       Insert-mode sequence that must be returned instead of {begin} if we try
+"       to surround a marker.
+"       Note: This sequence will be expanded if it contains mappings or
+"       abbreviations -- this is a feature. see {rtp}/ftplugin/vim_set.vim
 "
 " Usage:
-" 	:vnoremap <buffer> {key} <c-\><c-n>@=Surround({parameters})<cr>
+"       :vnoremap <buffer> {key} <c-\><c-n>@=Surround({parameters})<cr>
 "
 " Examples:
 "  (*) Excerpt from common_brackets.vim
@@ -207,7 +207,7 @@ function! Map4TheseContexts(key, ...) " {{{
     if (a:{i} =~ '^\(\k\|\\|\)\+$') && (syn =~? a:{i})
       return ReinterpretEscapedChar(a:{i+1})
       " exe 'return "' . 
-	    " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+            " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
     endif
     let i += 2
   endwhile
@@ -215,7 +215,7 @@ function! Map4TheseContexts(key, ...) " {{{
   if i == a:0
     return ReinterpretEscapedChar(a:{a:0})
     " exe 'return "' . 
-	  " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+          " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
   else
     return a:key
   endif
@@ -231,9 +231,9 @@ function! MapContext(key, ...) " {{{
     let i = 1
     while i < a:0
       if (a:{i} =~ '^\k\+$') && (syn =~? a:{i})
-	return ReinterpretEscapedChar(a:{i+1})
-	" exe 'return "' . 
-	      " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+        return ReinterpretEscapedChar(a:{i+1})
+        " exe 'return "' . 
+              " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
       endif
       let i += 2
     endwhile
@@ -241,7 +241,7 @@ function! MapContext(key, ...) " {{{
     if i == a:0
       return ReinterpretEscapedChar(a:{a:0})
       " exe 'return "' . 
-	    " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+            " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
     else
       return a:key
     endif
@@ -288,7 +288,7 @@ function! BuildMapSeq(seq) " {{{
     if strlen(m) != 0
       silent exe 'let m="' . substitute(m, '<\(.\{-1,}\)>', '"."\\<\1>"."', 'g') . '"'
       if has('iconv') " small workaround for !imappings! in UTF-8 on linux
-	let m = iconv(m, "latin1", &encoding)
+        let m = iconv(m, "latin1", &encoding)
       endif
       " let m = ReinterpretEscapedChar(m)
       let r .= m
@@ -344,12 +344,12 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
   " If indentation is used
   if a:isIndented == 1
     if version < 600 " -----------Version 6.xx {{{
-      if &cindent == 1	" C like sources -> <c-f> defined
-	let HR="\<c-f>".HR
-	let BR="\<c-t>".BR
-      else		" Otherwise like LaTeX, VIM
-	let HR .=":>\<cr>"
-	let BR .=":<\<cr>"
+      if &cindent == 1  " C like sources -> <c-f> defined
+        let HR="\<c-f>".HR
+        let BR="\<c-t>".BR
+      else              " Otherwise like LaTeX, VIM
+        let HR .=":>\<cr>"
+        let BR .=":<\<cr>"
       endif
       let BL='>'.BL  " }}}
     else " -----------------------Version 6.xx
@@ -368,7 +368,7 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
 endfunction
 " }}}
 "---------------------------------------------------------------------------
-" Function: EatChar()	{{{
+" Function: EatChar()   {{{
 " Thanks to the VIM Mailing list ; 
 " Note: In it's foo.vim, Benji Fisher maintains a more robust version of this
 " function; see: http://www.vim.org/script.php?script_id=72
@@ -531,7 +531,7 @@ function! IsAMarker()
 
     " Check whether the selected text matches a marker (and only one)
     if (a =~ '^'.Marker_Txt('.\{-}').'$') 
-	  \ && (a !~ '\%(.*'.Marker_Close().'\)\{2}')
+          \ && (a !~ '\%(.*'.Marker_Close().'\)\{2}')
       " If so, return {a:begin}, or {im_seq} if provided
       " return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
       return 1
@@ -569,10 +569,10 @@ function! SurroundBySubstitute(
       inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
 
       if ! lh#brackets#usemarks()
-	let seq = substitute(seq, '!mark!', '', 'g')
+        let seq = substitute(seq, '!mark!', '', 'g')
       endif
       if (begin =~ '!cursorhere!') 
-	let goback = BuildMapSeq('!movecursor!')
+        let goback = BuildMapSeq('!movecursor!')
       endif
       let seq = BuildMapSeq(seq)
     endif
@@ -632,9 +632,9 @@ function! Surround(
       let begin = '!cursorpos1!'.begin.'!cursorpos2!'
       let goback = BuildMapSeq('!movecursor2!')
       if !a:isLine && (line("'>") == line("'<")) && ('V'==visualmode())
-	    \ && (getline("'>")[0] =~ '\s') 
-	:normal! 0"_dw
-	" TODO: fix when &selection == exclusive
+            \ && (getline("'>")[0] =~ '\s') 
+        :normal! 0"_dw
+        " TODO: fix when &selection == exclusive
       endif
     endif
     " Transform {begin} and {end} (interpret the "inlined" mappings)
