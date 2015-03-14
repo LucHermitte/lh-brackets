@@ -1,6 +1,0 @@
-Since with this 1.0.0 version of map-tools, I've undergone profound
-modifications in common_bracket kernel. 
-Instead of having to define several buffer-local variables to decide
-which brackets will be supported with files of a given filetype (and
-instead of having several behaviours hard coded (like how {} expands in
-(La)TeX, ...)), now the brackets are defined with a new command: :Brackets
