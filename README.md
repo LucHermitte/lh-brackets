@@ -10,10 +10,10 @@ It is made of three sub-systems:
 ### The placeholder subsystem
 
 This subsystem provides functions and mappings to:
-  * mark places in the code where we could jump to later,
-> > See the help about `!mark!`, `Marker_Text()`, and `<Plug>MarkersMark`
-  * jump forward and backward to those places.
-> > See the help about `!jump!`, and `<Plug>MarkersJumpF`
+  * mark places in the code where we could jump to later,  
+    See the help about `!mark!`, `Marker_Text()`, and `<Plug>MarkersMark`
+  * jump forward and backward to those places.  
+    See the help about `!jump!`, and `<Plug>MarkersJumpF`
 
 The marker/placeholder characters:
   * default to the French quote characters («»),
