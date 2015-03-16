@@ -131,3 +131,5 @@ Bundle 'LucHermitte/lh-brackets'
   * Most of my ftplugins for examples of use ;
   * [muTemplate](http://github.com/LucHermitte/mu-template), a template-files expander built on top of map-tools.
   * [surround plugin on SF](http://www.vim.org/scripts/script.php?script_id=1697)
+
+[![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
