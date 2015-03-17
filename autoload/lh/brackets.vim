@@ -1,30 +1,28 @@
 "=============================================================================
-" $Id$
 " File:         map-tools::lh#brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:      2.2.2
 " Created:      28th Feb 2008
-" Last Update:  $Date$
 "------------------------------------------------------------------------
-" Description:  
-" 		This autoload plugin defines the functions behind the command
-" 		:Brackets that simplifies the definition of mappings that
-" 		insert pairs of caracters when the first one is typed. Typical
-" 		examples are the parenthesis, brackets, <,>, etc. 
-" 		The definitions can be buffer-relative or global.
+" Description:
+"               This autoload plugin defines the functions behind the command
+"               :Brackets that simplifies the definition of mappings that
+"               insert pairs of caracters when the first one is typed. Typical
+"               examples are the parenthesis, brackets, <,>, etc.
+"               The definitions can be buffer-relative or global.
 "
-" 		This commands is used by different ftplugins:
-" 		<vim_brackets.vim>, <c_brackets.vim> <ML_brackets.vim>,
-" 		<html_brackets.vim>, <php_brackets.vim> and <tex_brackets.vim>
-" 		-- available on my VIM web site.
+"               This commands is used by different ftplugins:
+"               <vim_brackets.vim>, <c_brackets.vim> <ML_brackets.vim>,
+"               <html_brackets.vim>, <php_brackets.vim> and <tex_brackets.vim>
+"               -- available on my VIM web site.
 "
-" 		BTW, they can be activated or desactivated by pressing <F9>
-" 
+"               BTW, they can be activated or desactivated by pressing <F9>
+"
 "------------------------------------------------------------------------
-" Installation: 
+" Installation:
 " * vim7+ required
 " * lh-vim-lib required
 " * drop into {rtp}/autoload/lh/brackets.vim
@@ -40,7 +38,7 @@
 "               <bs>, ... while IMAP is active
 " Version 2.1.0:
 "               * Features from lh-cpp moved to lh-brackets:
-"                 - <cr> within empty brackets; 
+"                 - <cr> within empty brackets;
 "                 - <del> within empty brackets ;
 "               * New option -but to !Brackets to exclude patterns
 " Version 2.0.2:
@@ -51,13 +49,13 @@
 " Version 2.0.0:
 "               * GPLv3
 " Version 1.1.1:
-" 		* Issue#10 refinements: use a stricter placeholder regex to not
-" 		delete everything in ").Marker_Txt('.\{-}').'\)\+')"
+"               * Issue#10 refinements: use a stricter placeholder regex to not
+"               delete everything in ").Marker_Txt('.\{-}').'\)\+')"
 " Version 1.0.0:
-" 		* Vim 7 required!
-" 		* New way to configure the desired brackets, the previous
-" 		approach has been deprecated
-" TODO:         
+"               * Vim 7 required!
+"               * New way to configure the desired brackets, the previous
+"               approach has been deprecated
+" TODO:
 " * Update doc
 " * Move brackets manipulation functions in this autoload plugin
 " * -surround=function('xxx') option
@@ -171,12 +169,12 @@ function! lh#brackets#toggle()
     let crt_definitions = s:GetDefinitions(0) + s:GetDefinitions(1)
     if s:state.isActive " active -> inactive
       for m in crt_definitions
-	call s:UnMap(m)
+        call s:UnMap(m)
       endfor
       call lh#common#warning_msg("Brackets mappings deactivated")
     else " inactive -> active
       for m in crt_definitions
-	call s:Map(m)
+        call s:Map(m)
       endfor
       call lh#common#warning_msg("Brackets mappings (re)activated")
     endif
@@ -190,14 +188,14 @@ function! s:UpdateMappingsActivationE()
     if s:state.mustActivate()
       let crt_definitions = s:GetDefinitions(1)
       for m in crt_definitions
-	call s:Map(m)
+        call s:Map(m)
       endfor
     endif " active && must activate
   else " not active
     let crt_definitions = s:GetDefinitions(1)
     if s:state.mustDeactivate()
     for m in crt_definitions
-	call s:UnMap(m)
+        call s:UnMap(m)
       endfor
     endif
   endif
@@ -215,7 +213,7 @@ function! lh#brackets#toggle_usemarks()
   if exists('b:usemarks')
     let b:usemarks = 1 - b:usemarks
     call lh#common#warning_msg('b:usemarks <-'.b:usemarks)
-  elseif exists('g:usemarks') 
+  elseif exists('g:usemarks')
     let g:usemarks = 1 - g:usemarks
     call lh#common#warning_msg('g:usemarks <-'.g:usemarks)
   else
@@ -278,7 +276,7 @@ endfunction
 
 " s:DefineImap(trigger, inserter, isLocal) {{{2
 function! s:DefineImap(trigger, inserter, isLocal)
-  if exists('*IMAP') && a:trigger !~? '<bs>\|<cr>\|<up>\|<down>\|<left>\|<right>' 
+  if exists('*IMAP') && a:trigger !~? '<bs>\|<cr>\|<up>\|<down>\|<left>\|<right>'
     if a:isLocal
       call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
     else
@@ -442,7 +440,7 @@ endfunction
 " {cbrkt}:      close bracket
 " {esc}:        escaped version 0:none, 1:\, 2:\%
 " {nm}:         new line between {obrkt} and {cbrkt}
-function! s:ImapBrackets(obrkt, cbrkt, esc, nl) 
+function! s:ImapBrackets(obrkt, cbrkt, esc, nl)
   " Generic function used by the others
   if     a:esc == 0 | let open = ''   | let close = ''
   elseif a:esc == 1 | let open = '\'  | let close = '\'
@@ -524,7 +522,7 @@ function! lh#brackets#define(bang, ...)
       else
         let Exceptions = exceptions
       endif
-    elseif p =~ '-o\%[open]'     
+    elseif p =~ '-o\%[open]'
       let open = matchstr(p, '-o\%[pen]=\zs.*')
       if open =~ "^function"
         exe 'let Open =' . open
@@ -532,7 +530,7 @@ function! lh#brackets#define(bang, ...)
         let Open = open
       endif
       " let Open = open =~ "^function" ? {open} : open   ## don't work with function()
-    elseif p =~ '-clo\%[se]'     
+    elseif p =~ '-clo\%[se]'
       let close = matchstr(p, '-clo\%[se]=\zs.*')
       if close =~ "^function"
         exe 'let Close =' . close
@@ -540,14 +538,14 @@ function! lh#brackets#define(bang, ...)
         let Close = close
       endif
       " let Close = close =~ "^function" ? {close} : close   ## don't work with function()
-    else 
+    else
       call add(options, p)
     endif
   endfor
   if len(options) != 2
     throw ":Brackets: incorrect number of arguments"
   endif
-  
+
   if !exists('trigger')    | let trigger    = options[0] | endif
   if !exists('Open')       | let Open       = options[0] | endif
   if !exists('Close')      | let Close      = options[1] | endif
@@ -558,7 +556,7 @@ function! lh#brackets#define(bang, ...)
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
     let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').','.string(nl).
-	  \','. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
+          \','. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
       let inserter = 'lh#brackets#closer('.string(options[1]).','.string (Close).','.string(Exceptions).')'

@@ -1,18 +1,17 @@
 "=============================================================================
-" $Id$
 " File:		ftlugin/vim/vim_brackets.vim                             {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 " Created:	24th Mar 2008
 " Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	
+" Description:
 " 	vim-ftplugin that defines the default preferences regarding the
 " 	bracketing mappings we want to use.
-" 
+"
 "------------------------------------------------------------------------
 " Installation:
 " 	This particular file is meant to be into {rtp}/after/ftplugin/vim/
@@ -23,7 +22,7 @@
 "
 " 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/vim/brackets.vim
 " History:
-" TODO:		
+" TODO:
 " * Escapable "()" must also work with \%(\)
 
 "=============================================================================
@@ -35,7 +34,7 @@ if exists("b:loaded_ftplug_vim_brackets") && !exists('g:force_reload_ftplug_vim_
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_vim_brackets = 220
+let b:loaded_ftplug_vim_brackets = 222
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------

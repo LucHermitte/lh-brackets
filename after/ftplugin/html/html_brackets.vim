@@ -1,20 +1,18 @@
 "=============================================================================
-" $Id$
 " File:		ftplugin/html/html_brackets.vim                          {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 " Created:	24th Mar 2008
-" Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	
+" Description:
 " 	html-ftplugin that defines the default preferences regarding the
 " 	bracketing mappings we want to use.
-" 
+"
 "------------------------------------------------------------------------
-" Installation:	
+" Installation:
 " 	This particular file is meant to be into {rtp}/after/ftplugin/html/
 " 	In order to overidde these default definitions, copy this file into a
 " 	directory that comes before the {rtp}/after/ftplugin/html/ you choosed
@@ -23,7 +21,7 @@
 
 " 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/html/brackets.vim
 " History:
-" TODO:	
+" TODO:
 " }}}1
 "=============================================================================
 
@@ -34,7 +32,7 @@ if exists("b:loaded_ftplug_html_brackets") && !exists('g:force_reload_ftplug_htm
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_html_brackets = 220
+let b:loaded_ftplug_html_brackets = 222
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------
@@ -49,7 +47,7 @@ endif
 
 let b:cb_jump_on_close = 1
 
-Brackets < > -visual=0 
+Brackets < > -visual=0
       \      -open=function('lh#html#brackets#lt')
       \      -clos=function('lh#html#brackets#gt')
 Brackets < > -visual=1 -insert=0 -trigger=<localleader><

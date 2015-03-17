@@ -1,20 +1,18 @@
 "=============================================================================
-" $Id$
 " File:		ftplugin/tex/tex_brackets.vim                            {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 " Created:	24th Mar 2008
-" Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	
+" Description:
 " 	tex-ftplugin that defines the default preferences regarding the
 " 	bracketing mappings we want to use.
-" 
+"
 "------------------------------------------------------------------------
-" Installation:	
+" Installation:
 " 	This particular file is meant to be into {rtp}/ftplugin/tex/
 " 	In order to overidde these default definitions, copy this file into a
 " 	directory that comes after the {rtp}/ftplugin/tex/ you choosed --
@@ -23,7 +21,7 @@
 "
 " 	Requires Vim7+, and lh-map-tools
 " History:
-" TODO:	
+" TODO:
 " }}}1
 "=============================================================================
 " Buffer-local Definitions {{{1
@@ -33,7 +31,7 @@ if exists("b:loaded_ftplug_tex_brackets") && !exists('g:force_reload_ftplug_tex_
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_tex_brackets = 220
+let b:loaded_ftplug_tex_brackets = 222
 " Avoid local reinclusion }}}2
 
 

@@ -1,20 +1,18 @@
 "=============================================================================
-" $Id$
 " File:		ftplugin/perl/perl_brackets.vim                                {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 " Created:	26th May 2004
-" Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	
+" Description:
 " 	perl-ftplugin that defines the default preferences regarding the
 " 	bracketing mappings we want to use.
-" 
+"
 "------------------------------------------------------------------------
-" Installation:	
+" Installation:
 " 	This particular file is meant to be into {rtp}/after/ftplugin/perl/
 " 	In order to overidde these default definitions, copy this file into a
 " 	directory that comes before the {rtp}/after/ftplugin/perl/ you choosed --
@@ -23,11 +21,11 @@
 "
 " 	Requires Vim7+, lh-map-tools
 "
-" History:	
+" History:
 "	v1.0.0	07th Sep 2009
 "		copy-paste of c_brackets.vim
 "       v2.0.0  GPLv3
-" TODO:		
+" TODO:
 " }}}1
 "=============================================================================
 
@@ -37,8 +35,8 @@
 if exists('b:loaded_ftplug_perl_brackets') && !exists('g:force_reload_ftplug_perl_brackets')
   finish
 endif
-let b:loaded_ftplug_perl_brackets = 220
- 
+let b:loaded_ftplug_perl_brackets = 222
+
 let s:cpo_save=&cpo
 set cpo&vim
 " }}}1

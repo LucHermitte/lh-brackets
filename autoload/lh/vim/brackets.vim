@@ -1,23 +1,21 @@
 "=============================================================================
-" $Id$
 " File:		autoload/lh/brackets.vim                               {{{1
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 " Created:	20th Mar 2008
-" Last Update:	$Date$
 "------------------------------------------------------------------------
-" Description:	
+" Description:
 " 	Functions that tune how some bracket characters should expand in VimL
-" 
+"
 "------------------------------------------------------------------------
-" Installation:	
+" Installation:
 " 	Requires Vim7+ and lh-map-tools
 " 	Used by {ftp}/ftplugin/vim/vim_brackets.vim
 " 	Drop this file into {rtp}/autoload/lh/vim
-" History:	
+" History:
 " 	v1.0.0: First version
 " }}}1
 "=============================================================================
@@ -35,11 +33,11 @@ set cpo&vim
 function! lh#vim#brackets#lt()
   let l = getline('.')
   let c = col('.') - 1
-  let syn = synIDattr(synID(line('.'),c,1),'name') 
+  let syn = synIDattr(synID(line('.'),c,1),'name')
   if (l[c-1] != '\') && (syn !~? '\(string\)\|\(character\)')
     if (syn =~? 'comment') || (l =~ '\m.*\<\(if\|while\)\s*.*')
       return '<'
-    endif 
+    endif
   endif
   if lh#brackets#usemarks()
     " return '<>' . "!mark!\<esc>".lh#encoding#strlen(Marker_Txt())."\<left>i"
@@ -55,7 +53,7 @@ endfunction
 " - after ')', it can not be a string => comment
 " - in the beginning of a line ('^\s*$') => comment
 " - otherwise => string
-function! lh#vim#brackets#dquotes() 
+function! lh#vim#brackets#dquotes()
   " TEST: OK sans imaps.vim
   let l = strpart(getline(line('.')), 0, col('.')-1)
   if l =~ '\m)\s*$\|^\s*$'

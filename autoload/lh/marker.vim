@@ -1,19 +1,18 @@
 "=============================================================================
-" $Id$
 " File:         map-tools::lh#marker.vim                            {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.0.2
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
+let s:k_version = 222
 " Created:      27th Nov 2013
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       Functions to generate and handle |markers|
-" 
+"
 "------------------------------------------------------------------------
-" History:      
+" History:
 " Version 2.0.2
 "       * Moves Marker_txt() to lh#marker#txt()
 " TODO:         «missing features»
@@ -25,7 +24,6 @@ set cpo&vim
 "------------------------------------------------------------------------
 " ## Misc Functions     {{{1
 " # Version {{{2
-let s:k_version = 202
 function! lh#marker#version()
   return s:k_version
 endfunction
@@ -56,12 +54,12 @@ function! lh#marker#open()
   " call Dfunc('Marker_Open()')
   if s:Option('use_place_holders', 0) && exists('*IMAP_GetPlaceHolderStart')
     let m = IMAP_GetPlaceHolderStart()
-    if "" != m 
+    if "" != m
       " call Dret('Marker_Open '.m.'  using IMAP placeholder characters')
-      return m 
+      return m
     endif
   endif
-  if !exists("b:marker_open") 
+  if !exists("b:marker_open")
     " :call Decho( "b:marker_open is not set")
     " Note: \xab <=> <C-K><<
     call s:SetMarker("\xab", '')
@@ -87,12 +85,12 @@ endfunction
 function! lh#marker#close()
   if s:Option('use_place_holders', 0) && exists('*IMAP_GetPlaceHolderEnd')
     let m = IMAP_GetPlaceHolderEnd()
-    if "" != m 
+    if "" != m
       " call Dret('Marker_Close '.m.'  using IMAP placeholder characters')
-      return m 
+      return m
     endif
   endif
-  if !exists("b:marker_close") 
+  if !exists("b:marker_close")
     " :call Decho( "b:marker_close is not set")
     " Note: \xbb <=> <C-K>>>
     call s:SetMarker('', "\xbb")
@@ -139,11 +137,11 @@ function! s:SetMarker(open, close, ...) " {{{2
     let b:marker_close = lh#encoding#iconv(a:close, from, &enc)
     " let ret = ret . "  b:close=".b:marker_close
   endif
-  " :call Dret("s:SetMarker".ret) 
+  " :call Dret("s:SetMarker".ret)
 
   " Exploits Tom Link Stakeholders plugin if installed
   " http://www.vim.org/scripts/script.php?script_id=3326
-  if exists(':StakeholdersEnable') && exists('b:marker_open') && exists('b:marker_close') 
+  if exists(':StakeholdersEnable') && exists('b:marker_open') && exists('b:marker_close')
     let g:stakeholders#def = {'rx': b:marker_open.'\(..\{-}\)'.b:marker_close}
     " Seems to be required to update g:stakeholders#def.Replace(text)
     runtime autoload/stakeholders.vim

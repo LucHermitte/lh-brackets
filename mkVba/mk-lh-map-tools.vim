@@ -1,26 +1,26 @@
 "=============================================================================
-" $Id$
 " File:		mkvba/mk-lh-map-tools.vim
-" Author:	Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.1
-let s:version = '2.2.1'
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
+let s:version = '2.2.2'
 " Created:	06th Nov 2007
-" Last Update:	$Date$
 "------------------------------------------------------------------------
 cd <sfile>:p:h
-try 
+try
   let save_rtp = &rtp
   let &rtp = expand('<sfile>:p:h:h').','.&rtp
-  exe '24,$MkVimball! lh-map-tools-'.s:version
+  exe '22,$MkVimball! lh-map-tools-'.s:version
   set modifiable
   set buftype=
 finally
   let &rtp = save_rtp
 endtry
 finish
+README.md
+addon-info.txt
 after/ftplugin/c/c_brackets.vim
 after/ftplugin/html/html_brackets.vim
 after/ftplugin/javascript_brackets.vim
@@ -32,17 +32,13 @@ after/ftplugin/vim/vim_brackets.vim
 autoload/lh/brackets.vim
 autoload/lh/cpp/brackets.vim
 autoload/lh/html/brackets.vim
-autoload/lh/markdown
 autoload/lh/markdown/brackets.vim
 autoload/lh/marker.vim
 autoload/lh/vim/brackets.vim
-brackets-addon-info.txt
+doc/default_brackets.md
 doc/lh-map-tools.txt
 ftplugin/python/python_snippets.vim
-lh-map-tools.Changelog
-lh-map-tools.README
 mkVba/mk-lh-map-tools.vim
 plugin/bracketing.base.vim
 plugin/common_brackets.vim
 plugin/misc_map.vim
-

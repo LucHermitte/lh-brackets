@@ -1,22 +1,20 @@
 "=============================================================================
-" $Id$
 " File:         ftplugin/ruby_brackets.vim                        {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.1.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
+let s:k_version = 222
 " Created:      17th Jun 2010
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       «description»
-" 
+"
 "------------------------------------------------------------------------
 " }}}1
 "=============================================================================
 
-let s:k_version = 210
 " Buffer-local Definitions {{{1
 " Avoid local reinclusion {{{2
 if &cp || (exists("b:loaded_ftplug_ruby_brackets")

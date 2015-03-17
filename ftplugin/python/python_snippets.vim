@@ -1,16 +1,16 @@
 "=============================================================================
-" $Id$
 " File:         ftplugin/python/python_snippets.vim               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
-" Version:      2..2..1.
-let s:k_version = '2.2.1'
+"               <URL:http://github.com/LucHermitte>
+" License:      GPLv3 with exceptions
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
+let s:k_version = '2.2.2'
 " Created:      21st Jan 2015
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       Snippets of python Control Statements
-" 
+"
 "------------------------------------------------------------------------
 " }}}1
 "=============================================================================
@@ -39,10 +39,10 @@ runtime! ftplugin/c/c_localleader.vim
 Inoreabbr <buffer> <silent> if <C-R>=InsertSeq('if ',
       \ '\<c-f\>if !cursorhere!:\n!mark!')<cr>
 "--,if    insert "if" statement
-xnoremap <buffer> <silent> <localleader>if 
+xnoremap <buffer> <silent> <localleader>if
       \ <c-\><c-n>@=Surround('if !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'if ')<cr>
-xnoremap <buffer> <silent> <LocalLeader><localleader>if 
+xnoremap <buffer> <silent> <LocalLeader><localleader>if
       \ <c-\><c-n>@=Surround('if ', '!cursorhere!:\n!mark!',
       \ 0, 1, '', 1, 'if ')<cr>
 nmap <buffer> <LocalLeader>if V<LocalLeader>if
@@ -52,10 +52,10 @@ nmap <buffer> <LocalLeader><LocalLeader>if ^v$<LocalLeader><LocalLeader>if
 Inoreabbr <buffer> <silent> elif <C-R>=InsertSeq('elif ',
       \ '\<c-f\>elif !cursorhere!:\n!mark!')<cr>
 "--,elif    insert "elif" statement
-xnoremap <buffer> <silent> <localleader>elif 
+xnoremap <buffer> <silent> <localleader>elif
       \ <c-\><c-n>@=Surround('elif !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'elif ')<cr>
-xnoremap <buffer> <silent> <LocalLeader><localleader>elif 
+xnoremap <buffer> <silent> <LocalLeader><localleader>elif
       \ <c-\><c-n>@=Surround('elif ', '!cursorhere!:\n!mark!',
       \ 0, 1, '', 1, 'elif ')<cr>
 nmap <buffer> <LocalLeader>elif V<LocalLeader>elif
@@ -75,10 +75,10 @@ nmap <buffer> <LocalLeader>else V<LocalLeader>else
 Inoreabbr <buffer> <silent> for <C-R>=InsertSeq('for ',
       \ '\<c-f\>for !cursorhere!:\n!mark!')<cr>
 "--,for    insert "for" statement
-xnoremap <buffer> <silent> <localleader>for 
+xnoremap <buffer> <silent> <localleader>for
       \ <c-\><c-n>@=Surround('for !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'for ')<cr>
-xnoremap <buffer> <silent> <LocalLeader><localleader>for 
+xnoremap <buffer> <silent> <LocalLeader><localleader>for
       \ <c-\><c-n>@=Surround('for ', '!cursorhere!:\n!mark!',
       \ 0, 1, '', 1, 'for ')<cr>
 nmap <buffer> <LocalLeader>for V<LocalLeader>for
@@ -89,10 +89,10 @@ nmap <buffer> <LocalLeader><LocalLeader>for ^v$<LocalLeader><LocalLeader>for
 Inoreabbr <buffer> <silent> while <C-R>=InsertSeq('while ',
       \ '\<c-f\>while !cursorhere!:\n!mark!')<cr>
 "--,while    insert "while" statement
-xnoremap <buffer> <silent> <localleader>while 
+xnoremap <buffer> <silent> <localleader>while
       \ <c-\><c-n>@=Surround('while !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'while ')<cr>
-xnoremap <buffer> <silent> <LocalLeader><localleader>while 
+xnoremap <buffer> <silent> <LocalLeader><localleader>while
       \ <c-\><c-n>@=Surround('while ', '!cursorhere!:\n!mark!',
       \ 0, 1, '', 1, 'while ')<cr>
 nmap <buffer> <LocalLeader>while V<LocalLeader>while

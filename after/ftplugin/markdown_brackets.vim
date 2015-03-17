@@ -1,14 +1,12 @@
 "=============================================================================
-" $Id$
 " File:         ftplugin/markdown-brackets.vim                    {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
-let s:k_version = 220
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
+let s:k_version = 222
 " Created:      13th Mar 2014
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       Mapping to insert markdown pairs:
@@ -51,7 +49,7 @@ if exists(':Brackets')
   :Brackets * * -open=function('lh#markdown#brackets#star') -visual=0
   :Brackets * * -insert=0 -trigger=<localleader>*
   " :Brackets * * -open=function('lh#markdown#brackets#star') -close=function('lh#markdown#brackets#star')
-  :Brackets ` ` 
+  :Brackets ` `
   :Brackets <\del> </del> -trigger=<localleader>~ -insert=0
   :Brackets ~ ~ -open=function('lh#markdown#brackets#strike') -visual=0
   "

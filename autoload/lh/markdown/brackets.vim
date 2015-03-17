@@ -1,14 +1,12 @@
 "=============================================================================
-" $Id$
 " File:         autoload/lh/markdown/brackets.vim                 {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"		<URL:http://code.google.com/p/lh-vim/>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
-let s:k_version = 220
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
+let s:k_version = 222
 " Created:      14th Mar 2014
-" Last Update:  $Date$
 "------------------------------------------------------------------------
 " Description:
 "       Tweaking of lh-brackets functions for markdown
@@ -54,7 +52,12 @@ endfunction
 
 " Function: lh#markdown#brackets#star() {{{3
 function! lh#markdown#brackets#star()
-  return s:Pair('*')
+  if getline('.')[:col('.')-1] =~ '\s\+$'
+    " Enumerations
+    return '* '
+  else
+    return s:Pair('*')
+  endif
 endfunction
 
 " Function: s:Pair() {{{3
@@ -68,6 +71,9 @@ function! s:Pair(char)
   elseif lig[col-1] == a:char
     let nb = matchend(lig[(col-1) :], escape(a:char, '*').'\+')
     return repeat("\<right>", nb).lh#brackets#_jump_text(lig[(col+nb-1) :])
+  elseif     lh#syntax#name_at(line('.'), col-1) =~ 'markdownCode'
+        \ && lh#syntax#name_at(line('.'), col)   =~ 'markdownCode'
+    return a:char
   else
     return result.s:Mark()
   endif
@@ -75,15 +81,18 @@ endfunction
 
 " Function: lh#markdown#brackets#strike() {{{3
 function! lh#markdown#brackets#strike()
-  let column = col(".")
+  let col = col(".")
   let lig = getline(line("."))
-  let lig = lig[(column-1) :]
+  let lig = lig[(col-1) :]
   if lig =~ '</del>'
     let length = len('</del>')
     let lig = lig[length : ]
     let res = repeat("\<right>", length)
     let res .= lh#brackets#_jump_text(lig)
     return res
+  elseif     lh#syntax#name_at(line('.'), col-1) =~ 'markdownCode'
+        \ && lh#syntax#name_at(line('.'), col)   =~ 'markdownCode'
+    return '~'
   else
     return "<del>!cursorhere!</del>" . s:Mark()
   endif

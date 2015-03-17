@@ -1,17 +1,15 @@
 "===========================================================================
-" $Id$
 " File:		common_brackets.vim
-" Author:	Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
-" 		<URL:http://code.google.com/p/lh-vim/>
-" Last Update:	$Date$
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:	2.2.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
 " 		the first one is typed. Typical examples are the parenthesis,
-" 		brackets, <,>, etc. 
+" 		brackets, <,>, etc.
 " 		The definitions can be buffer-relative or global.
 "
 " 		This commands is used by different ftplugins:
@@ -29,7 +27,7 @@
 "               * Bracket toggling mode waits for no more than one action/key
 " Version 2.1.0:
 "               * Features from lh-cpp moved to lh-brackets (
-"                 - <cr> within empty brackets; 
+"                 - <cr> within empty brackets;
 "                 - <del> within empty brackets ;
 "               * New option -but to !Brackets to exclude patterns
 "               * Default brackets definitions re-established
@@ -57,7 +55,7 @@
 "		* Fix a small bug when editing vimL files.
 " Version 0.5.0:
 "		* Compatible with Srinath Avadhanula's imaps.vim
-"               * Vim buffers: smarter keybindings for \(, \%( and ( 
+"               * Vim buffers: smarter keybindings for \(, \%( and (
 "                 (requires imaps.vim)
 "               * Visual-mode mappings for the brackets do not surround markers
 "                 (/placeholders) anymore, now they are discarded
@@ -88,7 +86,7 @@
 " Version 0.3.5:
 "		* add continuation lines support ; cf 'cpoptions'
 " Version 0.3.4:
-"		* Works correctly when editing several files (like with 
+"		* Works correctly when editing several files (like with
 " 		"vim foo1.x foo2.x").
 " 		* ')' and '}' don't search for the end of the bracket when we
 " 		are within a comment.
@@ -116,7 +114,7 @@
 " 		the ftplugins.
 " 		Note that I planned to use this file with my customized
 " 		version of Stephan Riehm's file.
-" 
+"
 " Options:      {{{1
 " 	(*) b:cb_bracket			: [ -> [ & ]
 "	(*) b:cb_cmp				: < -> < & >
@@ -130,7 +128,7 @@
 "	(*) b:cb_Dquotes			: " -> " & "
 "	    could be customized thanks to b:cb_DqFn ;	[vim_set.vim]
 "		== 2  => non active within comment or strings
-"	(*) [bg]:usemarks				: 
+"	(*) [bg]:usemarks				:
 "		indicates the wish to use the marking feature first defined by
 "		Stephan Riehm.
 "	(*) b:cb_jump_on_close			: ), ], }
@@ -156,7 +154,7 @@ let s:version = 220
 "# Anti-reinclusion & dependencies {{{1
 if exists("g:loaded_common_brackets") && !exists('g:force_reload_common_brackets')
   let &cpo = s:cpo_save
-  finish 
+  finish
 endif
 let g:loaded_common_brackets = s:version
 
@@ -226,7 +224,7 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   :Brackets! < > -visual=1 -insert=0 -trigger=<localleader><
 
   " :Brackets { } -visual=0 -nl
-  " :Brackets { } -visual=0 -trigger=#{ 
+  " :Brackets { } -visual=0 -trigger=#{
   " :Brackets { } -visual=1 -insert=0
   :Brackets! { }
   :Brackets! { } -visual=1 -insert=0 -nl -trigger=<leader>{
@@ -357,9 +355,9 @@ function! BracketsManipMode(starting_key) " {{{
   echohl None
   let key = getchar()
   let bracketsManip=nr2char(key)
-  if (-1 != stridx("x([{<\\q",bracketsManip)) || 
+  if (-1 != stridx("x([{<\\q",bracketsManip)) ||
         \ (key =~ "\\(\<F1>\\|\<Del>\\)")
-    if     bracketsManip == "x"      || key == "\<Del>" 
+    if     bracketsManip == "x"      || key == "\<Del>"
       call s:DeleteBrackets() | redraw! | return ''
     elseif bracketsManip == "("      | call s:ChangeRound()
     elseif bracketsManip == "["      | call s:ChangeSquare()

@@ -1,12 +1,10 @@
 "===========================================================================
-" $Id$
 " File:         plugin/misc_map.vim
-" Author:       Luc Hermitte <MAIL:hermitte {at} free {dot} fr>
-"               <URL:http://code.google.com/p/lh-vim/>
-" Last Update:  $Date$
+" Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
+"               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://code.google.com/p/lh-vim/wiki/License>
-" Version:      2.2.1
+"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
+" Version:	2.2.2
 "
 " Purpose:      API plugin: Several mapping-oriented functions
 "
@@ -16,7 +14,7 @@
 " Purpose:      Regarding the context of the current position of the
 "               cursor, it returns either the value of key or the
 "               interpreted value of sequence.
-" Parameters:   <key> - returned while whithin comments, strings or characters 
+" Parameters:   <key> - returned while whithin comments, strings or characters
 "               <sequence> - returned otherwise. In order to enable the
 "                       interpretation of escaped caracters, <sequence>
 "                       must be a double-quoted string. A backslash must be
@@ -34,7 +32,7 @@
 "               when we want to use variables like 'tarif' in the code.
 "               So this function also returns <key> when the character
 "               before the current cursor position is not a keyword
-"               character ('h: iskeyword' for more info). 
+"               character ('h: iskeyword' for more info).
 " Hint:         Use MapNoContext2() for mapping keywords like 'if', etc.
 "               and MapNoContext() for other mappings like parenthesis,
 "               punctuations signs, and so on.
@@ -66,7 +64,7 @@
 " }}}
 "---------------------------------------------------------------------------
 " Function:     InsertAroundVisual(begin,end,isLine,isIndented) range {{{
-" Old Name:     MapAroundVisualLines(begin,end,isLine,isIndented) range 
+" Old Name:     MapAroundVisualLines(begin,end,isLine,isIndented) range
 " Purpose:      Ease the definition of visual mappings that add text
 "               around the selected one.
 " Examples:
@@ -78,14 +76,14 @@
 "       elseif &ft=="c" || &ft=="cpp"
 "         vnoremap ;; :call InsertAroundVisual('else {','}',1,1)<cr>
 "   (*) VIM-like stuff
-"       elseif &ft=="vim" 
+"       elseif &ft=="vim"
 "         vnoremap ;; :call InsertAroundVisual('if','endif',1,1)<cr>
 "       endif
 
-" Fixed Problem: 
+" Fixed Problem:
 " * if a word from 'begin' or 'end' is used as a terminaison of an
-" abbreviation, this function yields to an incorrect behaviour. 
-" Problems: 
+" abbreviation, this function yields to an incorrect behaviour.
+" Problems:
 " * Smartindent is not properly managed. [Vim 5.xx]
 " Todo:
 " * Add a positionning feature -> ?{<cr>a
@@ -126,10 +124,10 @@
 "
 " Examples:
 "  (*) Excerpt for my vim-ftplugin
-"    inoremap  <buffer> <silent> <M-c> 
+"    inoremap  <buffer> <silent> <M-c>
 "     \ <c-r>=InsertSeq('<m-c>', ':call !cursorhere!(!mark!)!mark!')<cr>
-"    inoreab  <buffer> <silent>  fun      
-"     \ <C-R>=InsertSeq('fun', 
+"    inoreab  <buffer> <silent>  fun
+"     \ <C-R>=InsertSeq('fun',
 "     \ 'function!!cursorhere!(!mark!)\n!mark!\nendfunction!mark!')<CR>
 " }}}
 "---------------------------------------------------------------------------
@@ -179,11 +177,11 @@
 "  (*) Excerpt from common_brackets.vim
 "    :vnoremap <buffer> [ <c-\><c-n>@=Surround('[', ']', 0, 0, '%', 0)<cr>
 "  (*) Excerpt from my vim-ftplugin
-"    :vnoremap <buffer> <silent> <m-f> 
+"    :vnoremap <buffer> <silent> <m-f>
 "     \ <c-\><c-n>@=Surround('function! !cursorhere!(!mark!)', 'endfunction',
 "     \ 1, 1, '', 1, 'fun ')<cr>
 "  (*) Excerpt from my c-ftplugin
-"    :vnoremap <buffer> <silent> <localleader>for 
+"    :vnoremap <buffer> <silent> <localleader>for
 "     \ <c-\><c-n>@=Surround('for (!cursorhere!;!mark!;!mark!) {', '}!mark!',
 "     \ 1, 1, '', 1, 'for ')<cr>
 "
@@ -201,12 +199,12 @@ if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
 "---------------------------------------------------------------------------
 function! Map4TheseContexts(key, ...) " {{{
   " Note: requires Vim 6.x
-  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name') 
+  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
   let i = 1
   while i < a:0
     if (a:{i} =~ '^\(\k\|\\|\)\+$') && (syn =~? a:{i})
       return ReinterpretEscapedChar(a:{i+1})
-      " exe 'return "' . 
+      " exe 'return "' .
             " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
     endif
     let i += 2
@@ -214,7 +212,7 @@ function! Map4TheseContexts(key, ...) " {{{
   " Else: default case
   if i == a:0
     return ReinterpretEscapedChar(a:{a:0})
-    " exe 'return "' . 
+    " exe 'return "' .
           " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
   else
     return a:key
@@ -224,7 +222,7 @@ endfunction
 "---------------------------------------------------------------------------
 function! MapContext(key, ...) " {{{
   " Note: requires Vim 6.x
-  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name') 
+  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
   if syn =~? 'comment\|string\|character\|doxygen'
     return a:key
   else
@@ -232,7 +230,7 @@ function! MapContext(key, ...) " {{{
     while i < a:0
       if (a:{i} =~ '^\k\+$') && (syn =~? a:{i})
         return ReinterpretEscapedChar(a:{i+1})
-        " exe 'return "' . 
+        " exe 'return "' .
               " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
       endif
       let i += 2
@@ -240,40 +238,40 @@ function! MapContext(key, ...) " {{{
     " Else: default case
     if i == a:0
       return ReinterpretEscapedChar(a:{a:0})
-      " exe 'return "' . 
+      " exe 'return "' .
             " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
     else
       return a:key
     endif
-  endif 
+  endif
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! MapNoContext(key, seq) " {{{
-  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name') 
+  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
   if syn =~? 'comment\|string\|character\|doxygen'
     return a:key
   else
     return ReinterpretEscapedChar(a:seq)
-    " exe 'return "' . 
+    " exe 'return "' .
       " \   substitute( a:seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-  endif 
+  endif
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! MapNoContext2(key, seq) " {{{
   let c = col('.')-1
   let l = line('.')
-  let syn = synIDattr(synID(l,c,1), 'name') 
+  let syn = synIDattr(synID(l,c,1), 'name')
   if syn =~? 'comment\|string\|character\|doxygen'
     return a:key
   elseif getline(l)[c-1] =~ '\k'
     return a:key
   else
     return ReinterpretEscapedChar(a:seq)
-    " exe 'return "' . 
+    " exe 'return "' .
       " \   substitute( a:seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-  endif 
+  endif
 endfunction
 " }}}
 "---------------------------------------------------------------------------
@@ -297,14 +295,14 @@ function! BuildMapSeq(seq) " {{{
     endif
   endwhile
   return ReinterpretEscapedChar(r)
-  " silent exe 'return "' . 
+  " silent exe 'return "' .
     " \   substitute( r, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! ReinterpretEscapedChar(seq) " {{{
   let seq = escape(a:seq, '"')
-  exe 'return "' . 
+  exe 'return "' .
     \   substitute( seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
 endfunction
 " }}}
@@ -323,7 +321,7 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
   " Note: to detect a marker before surrounding it, use Surround()
   let pp = &paste
   set paste
-  " 'H' stands for 'High' ; 'B' stands for 'Bottom' 
+  " 'H' stands for 'High' ; 'B' stands for 'Bottom'
   " 'L' stands for 'Left', 'R' for 'Right'
   let HL = "`<i"
   if &selection == 'exclusive'
@@ -357,7 +355,7 @@ function! InsertAroundVisual(begin,end,isLine,isIndented) range " {{{
     endif
   elseif type(a:isIndented) == type('')
     let BL = a:isIndented . BL " move the previous lines
-    let HR .="gv``=" " indent the new line inserted 
+    let HR .="gv``=" " indent the new line inserted
   endif
   " The substitute is here to compensate a little problem with HTML tags
   let g:action= "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
@@ -369,7 +367,7 @@ endfunction
 " }}}
 "---------------------------------------------------------------------------
 " Function: EatChar()   {{{
-" Thanks to the VIM Mailing list ; 
+" Thanks to the VIM Mailing list ;
 " Note: In it's foo.vim, Benji Fisher maintains a more robust version of this
 " function; see: http://www.vim.org/script.php?script_id=72
 " NB: To make it work with VIM 5.x, replace the '? :' operator with an 'if
@@ -382,7 +380,7 @@ function! EatChar(pat)
 endfunction
 
 command! -narg=+ Iabbr execute "iabbr " <q-args>."<C-R>=EatChar('\\s')<CR>"
-command! -narg=+ Inoreabbr 
+command! -narg=+ Inoreabbr
       \ execute "inoreabbr " <q-args>."<C-R>=EatChar('\\s')<CR>"
 
 " }}}
@@ -458,7 +456,7 @@ function! LHGotoMark()
   if crt_indent < s:old_indent
     let s:fix_indent = s:old_indent - crt_indent
   else
-    let s:old_indent = crt_indent - s:old_indent 
+    let s:old_indent = crt_indent - s:old_indent
     let s:fix_indent = 0
   endif
   let g:fix_indent = s:fix_indent
@@ -475,7 +473,7 @@ function! LHGotoEndMark()
   if crt_indent < s:old_indent
     let s:fix_indent = s:old_indent - crt_indent
   else
-    let s:old_indent = crt_indent - s:old_indent 
+    let s:old_indent = crt_indent - s:old_indent
     let s:fix_indent = 0
   endif
   if s:old_indent != 0
@@ -530,7 +528,7 @@ function! IsAMarker()
     let @a = a_save
 
     " Check whether the selected text matches a marker (and only one)
-    if (a =~ '^'.Marker_Txt('.\{-}').'$') 
+    if (a =~ '^'.Marker_Txt('.\{-}').'$')
           \ && (a !~ '\%(.*'.Marker_Close().'\)\{2}')
       " If so, return {a:begin}, or {im_seq} if provided
       " return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
@@ -541,7 +539,7 @@ function! IsAMarker()
 endfunction
 "}}}
 
-" Surround any visual selection but not a marker! 
+" Surround any visual selection but not a marker!
 " Function: Surround(begin,end, isIndented, goback, mustInterpret [, imSeq] ) {{{
 function! SurroundBySubstitute(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range
@@ -571,7 +569,7 @@ function! SurroundBySubstitute(
       if ! lh#brackets#usemarks()
         let seq = substitute(seq, '!mark!', '', 'g')
       endif
-      if (begin =~ '!cursorhere!') 
+      if (begin =~ '!cursorhere!')
         let goback = BuildMapSeq('!movecursor!')
       endif
       let seq = BuildMapSeq(seq)
@@ -600,7 +598,7 @@ function! Surround(
   if a:mustInterpret
     " internal mappings
     " <c-o> should be better for !cursorhere! as it does not move the cursor
-    " But only <c-\><c-n> works correctly. 
+    " But only <c-\><c-n> works correctly.
     " inoremap !cursorhere! <c-o>:call <sid>CursorHere()<cr>
     if 0
       " inoremap !cursorhere! <c-\><c-n>:call <sid>CursorHere()<cr>a
@@ -625,14 +623,14 @@ function! Surround(
       let end = substitute(end, '!mark!', '', 'g')
     endif
     " Override the value of {goback} if "!cursorhere!" is used.
-    if (begin =~ '!cursorhere!') 
+    if (begin =~ '!cursorhere!')
       let goback = BuildMapSeq('!movecursor!')
     endif
     if (end =~ '!cursorhere!')
       let begin = '!cursorpos1!'.begin.'!cursorpos2!'
       let goback = BuildMapSeq('!movecursor2!')
       if !a:isLine && (line("'>") == line("'<")) && ('V'==visualmode())
-            \ && (getline("'>")[0] =~ '\s') 
+            \ && (getline("'>")[0] =~ '\s')
         :normal! 0"_dw
         " TODO: fix when &selection == exclusive
       endif
