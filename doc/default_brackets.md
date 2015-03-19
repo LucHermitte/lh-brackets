@@ -3,13 +3,13 @@
 By default, lh-brackets comes with a few ready-to-use mappings:
  * some are [global](#global-mappings) and apply to all filetypes,
  * other are specialized for various filetypes:
-   * [C and C++](#c-c-mappings)
+   * [C and C++](#c-and-c-mappings)
    * [HTML](#html-mappings)
    * [Javascript](#javascript-mappings)
    * [Markdown](#markdown-mappings)
    * [Perl](#perl-mappings)
    * [Ruby](#ruby-mappings)
-   * [(La)TeX](#la-tex-mappings)
+   * [(La)TeX](#latex-mappings)
    * [VimL](#viml-mappings)
 
 
@@ -76,7 +76,7 @@ New mappings are avaible.
 | `_` after a `_`         | `__<cursor>__<++>`              | n/a                                           | n/a                       |
 | `*`                     | `*<cursor>*<++>` <sup>3,4</sup> | `*<selection>*`                               | word                      |
 | `*` after a `*`         | `**<cursor>**<++>`              | n/a                                           | n/a                       |
-| `````                   | ```<cursor>`<++>``              | ```<selection>``                              | word                      |
+| `` ` ``                 | `` `<cursor>`<++>``             | `` `<selection>` ``                           | word                      |
 | `~`                     | `<del><cursor></del>«»`         | <sup>1</sup>                                  | <sup>1</sup>              |
 | `<localleader>~`        |                                 | `<del><cursor></del>`                         | word                      |
 
@@ -87,7 +87,7 @@ New mappings are avaible.
     are not expanded
   * <sup>4</sup> Right after spaces at the beginning of the line, `*` is not
     expanded: it will serve to start a new point in a bullet-list.
-  * `<bs>` has been update to handle the new pairs of brackets.
+  * `<bs>` has been updated to handle the new pairs of brackets.
 
 ### Perl mappings
 The main differences from the global table are:
@@ -97,8 +97,8 @@ The main differences from the global table are:
     angle brackets.
 
 ### Ruby mappings
- * In normal mode, `<C-X>{` replace begin-end block by {-}, or the other way
-   around.
+ * In normal mode, `<C-X>{` replace `begin`-`end` block by `{-}`, or the other
+   way around.
 
 ### (La)TeX mappings
 New and specialized mappings are avaible.
