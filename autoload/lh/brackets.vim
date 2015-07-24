@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.2.2
+" Version:      2.2.3
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -22,12 +22,11 @@
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 "------------------------------------------------------------------------
-" Installation:
-" * vim7+ required
-" * lh-vim-lib required
-" * drop into {rtp}/autoload/lh/brackets.vim
-"
 " History:
+" Version 2.2.3:
+"               * Fix a bug when the bracket pair inserted would trigger a line
+"               break because of 'tw' exceeded.
+"               * Correctly handle escaped brackets on <BS>
 " Version 2.2.0:
 "               * b:usemarks -> [bg]:usemarks through lh#brackets#usemarks()
 " Version 2.1.2:
@@ -327,7 +326,8 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
   if s:thereIsAnException(a:Ft_exceptions)
     return a:trigger
   endif
-  let escaped = getline('.')[col('.')-2] == '\'
+  let line = getline('.')
+  let escaped = line[col('.')-2] == '\'
   if type(a:Open) == type(function('has'))
     let res = InsertSeq(a:trigger, a:Open())
     return res
@@ -350,12 +350,21 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
   endif
 
   if strlen(a:nl) > 0
-    " Cannot use the following generic line because &cinkey does not always
+    " Cannot use the following generic line because &inckey does not always
     " work and !cursorhere! does not provokes a reindentation
     "  :return InsertSeq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
     " hence the following solution
     return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
   else
+    if lh#encoding#strlen(line.open.close.lh#marker#txt()) > &tw
+      " inserted text will go on the next line => force the newline before!
+      " But don't forget to take the text that has to come
+      let trailling = matchstr(line, '\s\+\S\+$')
+      let trail_length = lh#encoding#strlen(trailling)
+      call setline(line('.'), line[0:-trail_length-1])
+      " An undo break is added here. I'll have to investigate that someday
+      let open = "\<cr>".substitute(trailling, '^\s\+', '', '').open
+    endif
     return InsertSeq(a:trigger, open.'!cursorhere!'.close.'!mark!')
 endfunction
 
@@ -599,16 +608,25 @@ endfunction
 " Function: lh#brackets#_match_any_bracket_pair() {{{2
 function! lh#brackets#_match_any_bracket_pair()
   return getline(".")[col(".")-2:]=~'^\(()\|{}\|\[]\|""\|''\)'
+        \ || getline(".")[col(".")-3:]=~'^\(\\(\\)\|\\{\\}\|\\\[\\]\|\\"\\"\)'
 endfunction
 
 "------------------------------------------------------------------------
 " Function: lh#brackets#_delete_empty_bracket_pair() {{{2
 function! lh#brackets#_delete_empty_bracket_pair()
-  let l=getline('.')[col("."):]
-  let m = matchstr(l, '^'.Marker_Txt('.\{-}'))
-  let lm = lh#encoding#strlen(m)
+  let line = getline('.')
+  let l=line[col("."):]
+  if line[col('.')-1] == '\' " escaped bracket
+    let m = matchstr(l[1:], '^'.Marker_Txt('.\{-}'))
+    let lm = lh#encoding#strlen(m)
 
-  return "\<left>".repeat("\<del>", lm+2)
+    return "\<left>\<left>".repeat("\<del>", lm+4)
+  else
+    let m = matchstr(l, '^'.Marker_Txt('.\{-}'))
+    let lm = lh#encoding#strlen(m)
+
+    return "\<left>".repeat("\<del>", lm+2)
+  endif
 endfunction
 
 "------------------------------------------------------------------------
