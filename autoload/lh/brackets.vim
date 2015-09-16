@@ -356,7 +356,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     " hence the following solution
     return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
   else
-    if lh#encoding#strlen(line.open.close.lh#marker#txt()) > &tw
+    if &tw > 0 && lh#encoding#strlen(line.open.close.lh#marker#txt()) > &tw
       " inserted text will go on the next line => force the newline before!
       " But don't forget to take the text that has to come
       let trailling = matchstr(line, '\s\+\S\+$')
