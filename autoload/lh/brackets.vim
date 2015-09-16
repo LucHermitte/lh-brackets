@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.2.3
+" Version:      2.2.4
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -23,6 +23,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 2.2.4:
+"               * Fix Issue#1 (Line inserted above current line with typing '(')
 " Version 2.2.3:
 "               * Fix a bug when the bracket pair inserted would trigger a line
 "               break because of 'tw' exceeded.
@@ -356,7 +358,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     " hence the following solution
     return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
   else
-    if lh#encoding#strlen(line.open.close.lh#marker#txt()) > &tw
+    if &tw > 0 && lh#encoding#strlen(line.open.close.lh#marker#txt()) > &tw
       " inserted text will go on the next line => force the newline before!
       " But don't forget to take the text that has to come
       let trailling = matchstr(line, '\s\+\S\+$')
