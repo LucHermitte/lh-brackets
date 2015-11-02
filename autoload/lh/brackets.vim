@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.2.4
+" Version:      2.2.5
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -14,15 +14,18 @@
 "               examples are the parenthesis, brackets, <,>, etc.
 "               The definitions can be buffer-relative or global.
 "
-"               This commands is used by different ftplugins:
+"               This command is used by different ftplugins:
 "               <vim_brackets.vim>, <c_brackets.vim> <ML_brackets.vim>,
 "               <html_brackets.vim>, <php_brackets.vim> and <tex_brackets.vim>
-"               -- available on my VIM web site.
+"               -- available on my github respos.
 "
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 "------------------------------------------------------------------------
 " History:
+" Version 2.2.5:
+"               * Better fix for the bug about line breaks when &tw is
+"               exceeded.
 " Version 2.2.4:
 "               * Fix Issue#1 (Line inserted above current line with typing '(')
 " Version 2.2.3:
@@ -91,7 +94,7 @@ endfunction
 " todo: find people using the select mode and never the visual mode
 let s:k_vmap_type = lh#option#get('bracket_surround_in', 'x', 'g')
 
-" Function: lh#brackets#usemarks() {{{3
+" Function: lh#brackets#usemarks() {{{2
 function! lh#brackets#usemarks()
   return lh#option#get('usemarks', 1)
 endfunction
@@ -358,14 +361,20 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     " hence the following solution
     return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
   else
-    if &tw > 0 && lh#encoding#strlen(line.open.close.lh#marker#txt()) > &tw
-      " inserted text will go on the next line => force the newline before!
-      " But don't forget to take the text that has to come
-      let trailling = matchstr(line, '\s\+\S\+$')
-      let trail_length = lh#encoding#strlen(trailling)
-      call setline(line('.'), line[0:-trail_length-1])
+    let c = virtcol('.')
+    let current = matchstr(line, '.*\%'.(c).'c\S*')
+    if &tw > 0 && lh#encoding#strlen(current.open.close.lh#marker#txt()) > &tw
+      " Problems occurs when the inserted text is near &tw
+      " => need to cut only in this case
+      "
+      " Inserted text will go on the next line => force the newline before!
+      " But don't forget to take the text that has to come right before
+      let [head, before, after] = lh#brackets#_split_line(line, c, &tw)
+      call setline(line('.'), head)
+
       " An undo break is added here. I'll have to investigate that someday
-      let open = "\<cr>".substitute(trailling, '^\s\+', '', '').open
+      let before = "\<cr>".substitute(before, '^\s\+', '', '')
+      return InsertSeq(a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after)
     endif
     return InsertSeq(a:trigger, open.'!cursorhere!'.close.'!mark!')
 endfunction
@@ -637,13 +646,29 @@ function! lh#brackets#_add_newline_between_brackets()
   return "\<cr>\<esc>O"
 endfunction
 
-" Function: lh#brackets#_jump_text(marker) {{{3
+" Function: lh#brackets#_jump_text(marker) {{{2
 function! lh#brackets#_jump_text(marker)
   let m = matchstr(a:marker, '^'.lh#marker#txt('.\{-}'))
   let l = lh#encoding#strlen(m)
   return repeat("\<del>", l)
 endfunction
 "
+"------------------------------------------------------------------------
+" Function: lh#brackets#_split_line(line, c, tw) {{{2
+function! lh#brackets#_split_line(line, c, tw) abort
+  let line = a:line
+  let c    = a:c
+
+  let head = matchstr(line, '.\{-}\ze\(\s\+\S*\%'.(c).'c\|$\)')
+  " assert(lh#encoding#strlen(head) <= &tw)
+  " assert(lh#encoding#strlen(head) <= c)
+  let head_length = lh#encoding#strlen(head)
+  let trailling = matchstr(line, '.*', head_length+1)
+  let before = lh#encoding#strpart(trailling, 0, c - head_length-2)
+  let after = matchstr(trailling, '.*', c - head_length-2)
+  return [head, before, after]
+endfunction
+
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
