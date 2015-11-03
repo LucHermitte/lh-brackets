@@ -296,7 +296,7 @@ function! s:ListMappings(isLocal)
   let crt_definitions = s:GetDefinitions(a:isLocal)
   for m in crt_definitions
     let cmd = m.mode.'map <silent> ' . m.buffer . m.trigger .' '.m.action
-    echomsg cmd
+    " echomsg cmd
   endfor
 endfunction
 
@@ -412,7 +412,7 @@ function! s:JumpOverAllClose(chars, ...)
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
   let m = matchstr(ll, '^\(['.a:chars.']\|'.Marker_Txt('.\{-}').'\)\+')
-  echomsg ll.'##'.m.'##'
+  " echomsg ll.'##'.m.'##'
   let lm = strwidth(m)
   let len_match = strlen(m)
   if lm
@@ -422,7 +422,7 @@ function! s:JumpOverAllClose(chars, ...)
   " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
   if a:0 > 0
     let remaining = ll[len_match : ]
-    echomsg "rem: <<".remaining.">>"
+    " echomsg "rem: <<".remaining.">>"
     let match_rem = matchstr(remaining, '^\('.Marker_Txt('.\{-}').'\)*'.a:1.'\('.Marker_Txt('.\{-}').'\)*')
     let len_match_rem = strwidth(match_rem)
     if len_match_rem
@@ -430,7 +430,7 @@ function! s:JumpOverAllClose(chars, ...)
     endif
     let del_mark .= a:1
   endif
-  echomsg strtrans(del_mark)
+  " echomsg strtrans(del_mark)
 
 
   return "\<right>".del_mark
