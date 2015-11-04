@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
+" Version:	2.3.0
 "
 " Purpose:      API plugin: Several mapping-oriented functions
 "
@@ -28,7 +28,7 @@
 "---------------------------------------------------------------------------
 " Function:     MapNoContext2( key, sequence)                           {{{
 " Purpose:      Exactly the same purpose than MapNoContext(). There is a
-"               slight difference, the previous function is really boring
+"               slight difference, the previous function is really annoying
 "               when we want to use variables like 'tarif' in the code.
 "               So this function also returns <key> when the character
 "               before the current cursor position is not a keyword
@@ -56,7 +56,7 @@
 " }}}
 "---------------------------------------------------------------------------
 " Function:     BuildMapSeq( sequence )                                 {{{
-" Purpose:      This fonction is to be used to generate the sequences used
+" Purpose:      This function is to be used to generate the sequences used
 "               by the «MapNoContext» functions. It considers that every
 "               «!.\{-}!» pattern is associated to an INSERT-mode mapping and
 "               expands it.
@@ -107,12 +107,12 @@
 "               things:
 "               - the {sequence} will be interpreted:
 "                 - special characters can be used: '\<cr\>', '\<esc\>', ...
-"                   (see ReinterpretEscapedChar()) ; '\n'
+"                   (see lh#dev#reinterpret_escaped_char()) ; '\n'
 "                 - we can embed insert-mode mappings whose keybindings match
 "                   '!.\{-}!' (see BuildMapSeq())
 "                   A special treatment is applied on:
 "                   - !mark! : according to [bg]:usemarks, it is replaced by
-"                     Marker_Txt() or nothing
+"                     lh#marker#txt() or nothing
 "                   - !cursorhere! : will move the cursor to that position in
 "                     the sequence once it have been expanded.
 "               - the context ; by default, it returns the interpreted sequence
@@ -191,119 +191,39 @@
 "---------------------------------------------------------------------------
 " Avoid reinclusion
 if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
-  let g:misc_map_loaded = 221
+  let g:misc_map_loaded = 230
   let cpop = &cpoptions
   set cpoptions-=C
   scriptencoding latin1
 "
 "---------------------------------------------------------------------------
-function! Map4TheseContexts(key, ...) " {{{
-  " Note: requires Vim 6.x
-  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
-  let i = 1
-  while i < a:0
-    if (a:{i} =~ '^\(\k\|\\|\)\+$') && (syn =~? a:{i})
-      return ReinterpretEscapedChar(a:{i+1})
-      " exe 'return "' .
-            " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-    endif
-    let i += 2
-  endwhile
-  " Else: default case
-  if i == a:0
-    return ReinterpretEscapedChar(a:{a:0})
-    " exe 'return "' .
-          " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-  else
-    return a:key
-  endif
+function! Map4TheseContexts(key, ...) abort " {{{
+  return call('lh#map#4_these_contexts', [a:key] + a:000)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
-function! MapContext(key, ...) " {{{
-  " Note: requires Vim 6.x
-  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
-  if syn =~? 'comment\|string\|character\|doxygen'
-    return a:key
-  else
-    let i = 1
-    while i < a:0
-      if (a:{i} =~ '^\k\+$') && (syn =~? a:{i})
-        return ReinterpretEscapedChar(a:{i+1})
-        " exe 'return "' .
-              " \   substitute( a:{i+1}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-      endif
-      let i += 2
-    endwhile
-    " Else: default case
-    if i == a:0
-      return ReinterpretEscapedChar(a:{a:0})
-      " exe 'return "' .
-            " \   substitute( a:{a:0}, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-    else
-      return a:key
-    endif
-  endif
+function! MapContext(key, ...) abort " {{{
+  return call('lh#map#context', [a:key] + a:000)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
-function! MapNoContext(key, seq) " {{{
-  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
-  if syn =~? 'comment\|string\|character\|doxygen'
-    return a:key
-  else
-    return ReinterpretEscapedChar(a:seq)
-    " exe 'return "' .
-      " \   substitute( a:seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-  endif
+function! MapNoContext(key, seq) abort " {{{
+  return call('lh#map#no_context', [a:key, a:seq])
 endfunction
 " }}}
 "---------------------------------------------------------------------------
-function! MapNoContext2(key, seq) " {{{
-  let c = col('.')-1
-  let l = line('.')
-  let syn = synIDattr(synID(l,c,1), 'name')
-  if syn =~? 'comment\|string\|character\|doxygen'
-    return a:key
-  elseif getline(l)[c-1] =~ '\k'
-    return a:key
-  else
-    return ReinterpretEscapedChar(a:seq)
-    " exe 'return "' .
-      " \   substitute( a:seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
-  endif
+function! MapNoContext2(key, seq) abort " {{{
+  return call('lh#map#no_context2', [a:key, a:seq])
 endfunction
 " }}}
 "---------------------------------------------------------------------------
-function! BuildMapSeq(seq) " {{{
-  let r = ''
-  let s = a:seq
-  while strlen(s) != 0 " For every '!.*!' pattern, extract it
-    let r .= substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\1', '')
-    let c =  substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\3', '')
-    let s =  substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\4', '')
-    let m = maparg(c,'i')
-    if strlen(m) != 0
-      silent exe 'let m="' . substitute(m, '<\(.\{-1,}\)>', '"."\\<\1>"."', 'g') . '"'
-      if has('iconv') " small workaround for !imappings! in UTF-8 on linux
-        let m = iconv(m, "latin1", &encoding)
-      endif
-      " let m = ReinterpretEscapedChar(m)
-      let r .= m
-    else
-      let r .= c
-    endif
-  endwhile
-  return ReinterpretEscapedChar(r)
-  " silent exe 'return "' .
-    " \   substitute( r, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+function! BuildMapSeq(seq) abort " {{{
+  return lh#map#build_map_seq(a:seq)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! ReinterpretEscapedChar(seq) " {{{
-  let seq = escape(a:seq, '"')
-  exe 'return "' .
-    \   substitute( seq, '\\<\(.\{-}\)\\>', '"."\\<\1>"."', 'g' ) .  '"'
+  return lh#dev#reinterpret_escaped_char(a:seq)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
@@ -374,168 +294,55 @@ endfunction
 " then' test.
 " This version does not support multi-bytes characters.
 " Todo: add support for <buffer>
+" Deprecated: use lh#map#eat_char()
 function! EatChar(pat)
-  let c = nr2char(getchar())
-  return (c =~ a:pat) ? '' : c
+  return lh#map#eat_char(a:pat)
 endfunction
 
-command! -narg=+ Iabbr execute "iabbr " <q-args>."<C-R>=EatChar('\\s')<CR>"
+command! -narg=+ Iabbr execute "iabbr " <q-args>."<C-R>=lh#map#eat_char('\\s')<CR>"
 command! -narg=+ Inoreabbr
-      \ execute "inoreabbr " <q-args>."<C-R>=EatChar('\\s')<CR>"
+      \ execute "inoreabbr " <q-args>."<C-R>=lh#map#eat_char('\\s')<CR>"
 
 " }}}
 "---------------------------------------------------------------------------
 " In order to define things like '{'
-function! Smart_insert_seq1(key,expr1,expr2) " {{{
-  return s:Smart_insert_seq1(a:key, a:expr1, a:expr2)
-endfunction " }}}
-function! s:Smart_insert_seq1(key,expr1,expr2) " {{{
-  if lh#brackets#usemarks()
-    return MapNoContext(a:key,BuildMapSeq(a:expr2))
-    " return "\<c-r>=MapNoContext('".a:key."',BuildMapSeq('".a:expr2."'))\<cr>"
-  else
-    return MapNoContext(a:key,a:expr1)
-    " return "\<c-r>=MapNoContext('".a:key."', '".a:expr1."')\<cr>"
-  endif
+function! Smart_insert_seq1(key,expr1,expr2) abort " {{{
+  return lh#map#smart_insert_seq1(a:key, a:expr1, a:expr2)
 endfunction " }}}
 
-function! Smart_insert_seq2(key,expr,...) " {{{
-  if a:0 > 0
-    return s:Smart_insert_seq(a:key, a:expr, a:1)
-  else
-    return s:Smart_insert_seq(a:key, a:expr)
-  endif
-endfunction " }}}
-function! s:Smart_insert_seq(key,expr, ...) " {{{
-  let rhs = escape(a:expr, '\')
-  " Strip marks (/placeholders) if they are not wanted
-  if ! lh#brackets#usemarks()
-    let rhs = substitute(rhs, '!mark!\|<+\k*+>', '', 'g')
-  endif
-  " Interpret the sequence if it is meant to
-  if rhs =~ '\m!\(mark\%(here\)\=\|movecursor\)!'
-    " may be, the regex should be '\m!\S\{-}!'
-    let rhs = BuildMapSeq(escape(rhs, '\'))
-  elseif rhs =~ '<+.\{-}+>'
-    " @todo: add a move to cursor + jump/select
-    let rhs = substitute(rhs, '<+\(.\{-}\)+>', "!cursorhere!&", '')
-    let rhs = substitute(rhs, '<+\(.\{-}\)+>', "\<c-r>=Marker_Txt(".string('\1').")\<cr>", 'g')
-    let rhs .= "!movecursor!"
-    let rhs = BuildMapSeq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump(1)\<cr>"
-  endif
-  " Build & return the context dependent sequence to insert
-  if a:0 > 0
-    return Map4TheseContexts(a:key, a:1, rhs)
-  else
-    return MapNoContext(a:key,rhs)
-  endif
+function! Smart_insert_seq2(key,expr,...) abort " {{{
+  return call('lh#map#smart_insert_seq2', [a:key, a:expr] + a:000)
 endfunction " }}}
 "---------------------------------------------------------------------------
 " Mark where the cursor should be at the end of the insertion {{{
-function! LHCursorHere(...)
-  " NB: ``|'' requires virtcol() but cursor() requires col()
-  " let s:gotomark = line('.') . 'normal! '.virtcol('.')."|"
-  " let s:gotomark = 'call cursor ('.line('.').','.col('.').')'
-  if a:0 > 0
-    let s:goto_lin_{a:1} = line('.')
-    let s:goto_col_{a:1} = virtcol('.')
-    let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
-  else
-    let s:goto_lin = line('.')
-    let s:goto_col = virtcol('.')
-    let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
-  endif
-  let s:old_indent = indent(line('.'))
-  let g:repos .= "   indent=".s:old_indent
-  " return ''
+function! LHCursorHere(...) abort
+  return call('lh#map#_cursor_here', a:000)
 endfunction
 
-function! LHGotoMark()
-  " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
-  let crt_indent = indent(s:goto_lin)
-  if crt_indent < s:old_indent
-    let s:fix_indent = s:old_indent - crt_indent
-  else
-    let s:old_indent = crt_indent - s:old_indent
-    let s:fix_indent = 0
-  endif
-  let g:fix_indent = s:fix_indent
-  if s:old_indent != 0
-    let s:goto_col += s:old_indent
-  endif
-  " uses {lig}'normal! {col}|' because of the possible reindent
-  execute s:goto_lin . 'normal! ' . s:goto_col . '|'
-  " return ''
+function! LHGotoMark() abort
+  call lh#map#_goto_mark()
 endfunction
-function! LHGotoEndMark()
-  " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
-  let crt_indent = indent(s:goto_lin)
-  if crt_indent < s:old_indent
-    let s:fix_indent = s:old_indent - crt_indent
-  else
-    let s:old_indent = crt_indent - s:old_indent
-    let s:fix_indent = 0
-  endif
-  if s:old_indent != 0
-    let s:goto_col += s:old_indent
-  endif
-  if     s:goto_lin != s:goto_lin_2
-    " TODO: !!
-  else
-    let s:goto_col += s:goto_col_2 - s:goto_col_1
-  endif
-  " uses {lig}'normal! {col}|' because of the possible reindent
-  execute s:goto_lin . 'normal! ' . s:goto_col . '|'
-  " return ''
+
+function! LHGotoEndMark() abort
+  call lh#map#_goto_end_mark()
 endfunction
-function! LHFixIndent()
-  return repeat( ' ', s:fix_indent)
+
+function! LHFixIndent() abort
+  return lh#map#_fix_indent()
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 " Function: InsertSeq(key, seq, [context]) {{{
 function! InsertSeq(key,seq, ...)
-  let s:gotomark = ''
-  let mark = a:seq =~ '!cursorhere!'
-  let seq = ReinterpretEscapedChar(a:seq)
-  let seq .= (mark ? '!movecursor!' : '')
-  " internal mappings
-  inoremap <silent> !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
-  inoremap <silent> !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
-  "inoremap !cursorhere! <c-\><c-n>:call <sid>CursorHere()<cr>a
-  "inoremap !movecursor! <c-\><c-n>:call <sid>GotoMark()<cr>a
-  " Build the sequence to insert
-  if a:0 > 0
-    let res = s:Smart_insert_seq(a:key, seq, a:1)
-  else
-    let res = s:Smart_insert_seq(a:key, seq)
-  endif
-  " purge the internal mappings
-  iunmap !cursorhere!
-  iunmap !movecursor!
-  return res
+  return call('lh#map#insert_seq', [a:key, a:seq] + a:000)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 " Function: IsAMarker() {{{
 " Returns whether the text currently selected matches a marker and only one.
+" Deprecated: Use lh#marker#is_a_marker()
 function! IsAMarker()
-  if line("'<") == line("'>") " I suppose markers don't spread over several lines
-    " Extract the selected text
-    let a_save = @a
-    normal! gv"ay
-    let a = @a
-    let @a = a_save
-
-    " Check whether the selected text matches a marker (and only one)
-    if (a =~ '^'.Marker_Txt('.\{-}').'$')
-          \ && (a !~ '\%(.*'.Marker_Close().'\)\{2}')
-      " If so, return {a:begin}, or {im_seq} if provided
-      " return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
-      return 1
-    endif
-  endif
-  return 0
+  return lh#marker#is_a_marker()
 endfunction
 "}}}
 
@@ -554,7 +361,7 @@ function! SurroundBySubstitute(
     let end = a:end
     if a:isLine
       let begin .= "\n"
-      let end   = "\n" . end
+      let end    = "\n" . end
     endif
     " Hack to know what is selected without altering any register
     normal! gv"ay
@@ -562,17 +369,17 @@ function! SurroundBySubstitute(
     let goback = ''
 
     if a:mustInterpret
-      inoremap !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
-      " inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a
-      inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
+      inoremap !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
+      " inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a
+      inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
 
       if ! lh#brackets#usemarks()
         let seq = substitute(seq, '!mark!', '', 'g')
       endif
       if (begin =~ '!cursorhere!')
-        let goback = BuildMapSeq('!movecursor!')
+        let goback = lh#map#build_map_seq('!movecursor!')
       endif
-      let seq = BuildMapSeq(seq)
+      let seq = lh#map#build_map_seq(seq)
     endif
     let res = 'gv"_c'.seq
     exe "normal! ".res
@@ -607,14 +414,14 @@ function! Surround(
       " inoremap !movecursor! <c-\><c-n>:call <sid>GotoMark()<cr>a
       " inoremap !movecursor2! <c-\><c-n>:call <sid>GotoEndMark()<cr>a
     endif
-    inoremap !cursorhere! <c-\><c-n>:call LHCursorHere()<cr>a
+    inoremap !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
     " Weird: cursorpos1 & 2 require <c-o> an not <c-\><c-n>
-    inoremap !cursorpos1! <c-o>:call LHCursorHere(1)<cr>
-    inoremap !cursorpos2! <c-o>:call LHCursorHere(2)<cr>
+    inoremap !cursorpos1! <c-o>:call lh#map#_cursor_here(1)<cr>
+    inoremap !cursorpos2! <c-o>:call lh#map#_cursor_here(2)<cr>
     " <c-\><c-n>....a is better for !movecursor! as it leaves the cursor `in'
     " insert-mode... <c-o> does not; that's odd.
-    inoremap !movecursor! <c-\><c-n>:call LHGotoMark()<cr>a<c-r>=LHFixIndent()<cr>
-    inoremap !movecursor2! <c-\><c-n>:call LHGotoEndMark()<cr>a<c-r>=LHFixIndent()<cr>
+    inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
+    inoremap !movecursor2! <c-\><c-n>:call lh#map#_goto_end_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
     " inoremap !movecursor! <sid>GotoMark().'a'
 
     " Check whether markers must be used
@@ -624,11 +431,11 @@ function! Surround(
     endif
     " Override the value of {goback} if "!cursorhere!" is used.
     if (begin =~ '!cursorhere!')
-      let goback = BuildMapSeq('!movecursor!')
+      let goback = lh#map#build_map_seq('!movecursor!')
     endif
     if (end =~ '!cursorhere!')
       let begin = '!cursorpos1!'.begin.'!cursorpos2!'
-      let goback = BuildMapSeq('!movecursor2!')
+      let goback = lh#map#build_map_seq('!movecursor2!')
       if !a:isLine && (line("'>") == line("'<")) && ('V'==visualmode())
             \ && (getline("'>")[0] =~ '\s')
         :normal! 0"_dw
@@ -636,8 +443,8 @@ function! Surround(
       endif
     endif
     " Transform {begin} and {end} (interpret the "inlined" mappings)
-    let begin = BuildMapSeq(begin)
-    let end = BuildMapSeq(end)
+    let begin = lh#map#build_map_seq(begin)
+    let end = lh#map#build_map_seq(end)
 
     " purge the internal mappings
     iunmap !cursorhere!

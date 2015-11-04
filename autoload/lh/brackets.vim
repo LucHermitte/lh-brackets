@@ -54,7 +54,7 @@
 "               * GPLv3
 " Version 1.1.1:
 "               * Issue#10 refinements: use a stricter placeholder regex to not
-"               delete everything in ").Marker_Txt('.\{-}').'\)\+')"
+"               delete everything in ").lh#marker#txt('.\{-}').'\)\+')"
 " Version 1.0.0:
 "               * Vim 7 required!
 "               * New way to configure the desired brackets, the previous
@@ -93,6 +93,10 @@ endfunction
 " NB: can be defined in the .vimrc only
 " todo: find people using the select mode and never the visual mode
 let s:k_vmap_type = lh#option#get('bracket_surround_in', 'x', 'g')
+
+" Does vim supports the new way to support redo/undo?
+let s:k_vim_supports_redo = has('patch-7.4.849')
+let s:k_move_prefix = s:k_vim_supports_redo ? "\<C-G>U" : ""
 
 " Function: lh#brackets#usemarks() {{{2
 function! lh#brackets#usemarks()
@@ -247,19 +251,20 @@ endfunction
 
 " s:Map(m) {{{2
 function! s:Map(m)
-  let cmd = a:m.mode.'map <silent> ' . a:m.buffer . a:m.trigger .' '.a:m.action
+  let cmd = a:m.mode.'map <silent> ' . a:m.expr . a:m.buffer . a:m.trigger .' '.a:m.action
   if &verbose >= 1 | echomsg cmd | endif
   exe cmd
 endfunction
 
-" s:DefineMap(mode, trigger, action, isLocal) {{{2
-function! s:DefineMap(mode, trigger, action, isLocal)
+" s:DefineMap(mode, trigger, action, isLocal, isExpr) {{{2
+function! s:DefineMap(mode, trigger, action, isLocal, isExpr)
   let crt_definitions = s:GetDefinitions(a:isLocal)
   let crt_mapping = {}
   let crt_mapping.trigger = a:trigger
   let crt_mapping.mode    = a:mode
   let crt_mapping.action  = a:action
   let crt_mapping.buffer  = a:isLocal ? '<buffer> ' : ''
+  let crt_mapping.expr    = a:isExpr  ? '<expr> '   : ''
   if s:state.isActive
     call s:Map(crt_mapping)
   endif
@@ -287,7 +292,8 @@ function! s:DefineImap(trigger, inserter, isLocal)
       call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", '')
     endif
   else
-    call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>", a:isLocal)
+    " call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>", a:isLocal)
+    call s:DefineMap('inore', a:trigger, (a:inserter), a:isLocal, 1)
   endif
 endfunction
 
@@ -334,7 +340,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
   let line = getline('.')
   let escaped = line[col('.')-2] == '\'
   if type(a:Open) == type(function('has'))
-    let res = InsertSeq(a:trigger, a:Open())
+    let res = lh#map#insert_seq(a:trigger, a:Open())
     return res
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
@@ -357,26 +363,47 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
   if strlen(a:nl) > 0
     " Cannot use the following generic line because &inckey does not always
     " work and !cursorhere! does not provokes a reindentation
-    "  :return InsertSeq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
+    "  :return lh#map#insert_seq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
     " hence the following solution
-    return InsertSeq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
+    return lh#map#insert_seq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
   else
     let c = virtcol('.')
     let current = matchstr(line, '.*\%'.(c).'c\S*')
-    if &tw > 0 && lh#encoding#strlen(current.open.close.lh#marker#txt()) > &tw
+    if 0 && &tw > 0 && lh#encoding#strlen(current.open.close.lh#marker#txt()) > &tw
+      " v2.3.0 update:
+      " This situation (that should take &fo and &wrapmargin into account as
+      " well) could only occur when the cursor is moved on the same line (from
+      " after the closing bracket to in between the brackets). This case is now
+      " handled in lh#map#_goto_mark() that just applies a relative move that
+      " is compatible with any setting of &fo/&wm/&tw
+
+
+      " ---< deprecated >---
       " Problems occurs when the inserted text is near &tw
       " => need to cut only in this case
       "
       " Inserted text will go on the next line => force the newline before!
       " But don't forget to take the text that has to come right before
       let [head, before, after] = lh#brackets#_split_line(line, c, &tw)
-      call setline(line('.'), head)
+      " Now the mapping is a :map-<expr>, we cannot break the line with a
+      " :setline(), we'll have to move the cursor
+      if 0
+	call setline(line('.'), head)
+	" An undo break is added here. I'll have to investigate that someday
+	let before = "\<cr>".substitute(before, '^\s\+', '', '')
+	return lh#map#insert_seq(a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after)
+      endif
+      let delta_to_line_cut = lh#encoding#strlen(before)
+      let delta_to_insertion = lh#encoding#strlen(substitute(before, '^\s\+', '', ''))
+      let prepare = lh#map#_move_cursor_on_the_current_line(- delta_to_line_cut)
+            \ . "\<cr>"
+            \ . lh#map#_move_cursor_on_the_current_line(delta_to_insertion)
 
-      " An undo break is added here. I'll have to investigate that someday
-      let before = "\<cr>".substitute(before, '^\s\+', '', '')
-      return InsertSeq(a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after)
+      echomsg "--> ".strtrans(prepare)
+
+      return lh#map#insert_seq(a:trigger, prepare.open.'!cursorhere!'.close.'!mark!')
     endif
-    return InsertSeq(a:trigger, open.'!cursorhere!'.close.'!mark!')
+    return lh#map#insert_seq(a:trigger, open.'!cursorhere!'.close.'!mark!')
 endfunction
 
 "------------------------------------------------------------------------
@@ -386,7 +413,7 @@ function! lh#brackets#closer(trigger, Action, Ft_exceptions)
     return a:trigger
   endif
   if type(a:Action) == type(function('has'))
-    return InsertSeq(a:trigger,a:Action())
+    return lh#map#insert_seq(a:trigger,a:Action())
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
   else
@@ -411,10 +438,10 @@ function! s:JumpOverAllClose(chars, ...)
   let del_mark = ''
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
-  let m = matchstr(ll, '^\(['.a:chars.']\|'.Marker_Txt('.\{-}').'\)\+')
+  let m = matchstr(ll, '^\(['.a:chars.']\|'.lh#marker#txt('.\{-}').'\)\+')
   " echomsg ll.'##'.m.'##'
   let lm = strwidth(m)
-  let len_match = strlen(m)
+  let len_match = lh#encoding#strlen(m)
   if lm
     let del_mark = repeat("\<del>", lm)
     let del_mark .= substitute(m, '[^'.a:chars.']', '', 'g')
@@ -423,34 +450,30 @@ function! s:JumpOverAllClose(chars, ...)
   if a:0 > 0
     let remaining = ll[len_match : ]
     " echomsg "rem: <<".remaining.">>"
-    let match_rem = matchstr(remaining, '^\('.Marker_Txt('.\{-}').'\)*'.a:1.'\('.Marker_Txt('.\{-}').'\)*')
+    let match_rem = matchstr(remaining, '^\('.lh#marker#txt('.\{-}').'\)*'.a:1.'\('.lh#marker#txt('.\{-}').'\)*')
     let len_match_rem = strwidth(match_rem)
     if len_match_rem
       let del_mark = repeat("\<del>", len_match_rem).del_mark
     endif
     let del_mark .= a:1
   endif
-  " echomsg strtrans(del_mark)
+  " echomsg "-->".strtrans(del_mark)
 
-
-  return "\<right>".del_mark
+  return s:k_move_prefix."\<right>".del_mark
 endfunction
 
 "------------------------------------------------------------------------
 " Function: s:Jump() {{{2
 function! s:Jump()
   " todo: get rid of the marker as well
-  let del_mark = ''
   let p = col('.')
 
   let ll = getline('.')[p : ]
   " echomsg ll
-  let m = matchstr(ll, '^'.Marker_Txt('.\{-}'))
+  let m = matchstr(ll, '^'.lh#marker#txt('.\{-}'))
   let lm = strwidth(m)
-  if lm
-    let del_mark = repeat("\<del>", lm)
-  endif
-  return "\<right>".del_mark
+  let del_mark = repeat("\<del>", lm)
+  return s:k_move_prefix."\<right>".del_mark
 endfunction
 
 "------------------------------------------------------------------------
@@ -489,7 +512,7 @@ function! lh#brackets#_switch_int(trigger, cases)
       return eval(c.action)
     endif
   endfor
-  return ReinterpretEscapedChar(eval(a:trigger))
+  return lh#dev#reinterpret_escaped_char(eval(a:trigger))
 endfunction
 
 function! lh#brackets#_switch(trigger, cases)
@@ -501,7 +524,7 @@ endfunction
 function! lh#brackets#define_imap(trigger, cases, isLocal, ...)
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
-  " ReinterpretEscapedChar(eval()), which requires nested strings...
+  " lh#dev#reinterpret_escaped_char(eval()), which requires nested strings...
   let default = (a:0>0) ? (a:1) : (a:trigger)
   let sCases='lh#brackets#_switch('.string(string(default)).', '.string(a:cases).')'
   call s:DefineImap(a:trigger, sCases, a:isLocal)
@@ -511,7 +534,7 @@ endfunction
 function! lh#brackets#enrich_imap(trigger, case, isLocal, ...)
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
-  " ReinterpretEscapedChar(eval()), which requires nested strings...
+  " lh#dev#reinterpret_escaped_char(eval()), which requires nested strings...
   let default = (a:0>0) ? (a:1) : (a:trigger)
   let sCase='lh#brackets#_switch('.string(string(default)).', '.string([a:case]).')'
   call s:DefineImap(a:trigger, sCase, a:isLocal)
@@ -597,7 +620,7 @@ function! lh#brackets#define(bang, ...)
       let action = ' <c-\><c-n>@=Surround('.
             \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 1)\<cr>"
     endif
-    call s:DefineMap(s:k_vmap_type.'nore', trigger, action, isLocal)
+    call s:DefineMap(s:k_vmap_type.'nore', trigger, action, isLocal, 0)
 
     if type(normal)==type('string') && normal=="default=1"
       let normal = 1
@@ -611,7 +634,7 @@ function! lh#brackets#define(bang, ...)
     let normal = strlen(nl)>0 ? 'V' : 'viw'
   endif
   if type(normal)!=type(0) || normal != 0
-    call s:DefineMap('n', trigger, normal.trigger, isLocal)
+    call s:DefineMap('n', trigger, normal.trigger, isLocal, 0)
   endif
 endfunction
 
@@ -628,20 +651,21 @@ function! lh#brackets#_delete_empty_bracket_pair()
   let line = getline('.')
   let l=line[col("."):]
   if line[col('.')-1] == '\' " escaped bracket
-    let m = matchstr(l[1:], '^'.Marker_Txt('.\{-}'))
+    let m = matchstr(l[1:], '^'.lh#marker#txt('.\{-}'))
     let lm = lh#encoding#strlen(m)
 
-    return "\<left>\<left>".repeat("\<del>", lm+4)
+    return repeat(s:k_move_prefix."\<left>", 2).repeat("\<del>", lm+4)
   else
-    let m = matchstr(l, '^'.Marker_Txt('.\{-}'))
+    let m = matchstr(l, '^'.lh#marker#txt('.\{-}'))
     let lm = lh#encoding#strlen(m)
 
-    return "\<left>".repeat("\<del>", lm+2)
+    return s:k_move_prefix."\<left>".repeat("\<del>", lm+2)
   endif
 endfunction
 
 "------------------------------------------------------------------------
 " Function: lh#brackets#_add_newline_between_brackets() {{{2
+" TODO: make this action redoable
 function! lh#brackets#_add_newline_between_brackets()
   return "\<cr>\<esc>O"
 endfunction

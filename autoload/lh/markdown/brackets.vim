@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
-let s:k_version = 222
+" Version:	2.3.0
+let s:k_version = 230
 " Created:      14th Mar 2014
 "------------------------------------------------------------------------
 " Description:
@@ -70,7 +70,7 @@ function! s:Pair(char)
     return result
   elseif lig[col-1] == a:char
     let nb = matchend(lig[(col-1) :], escape(a:char, '*').'\+')
-    return repeat("\<right>", nb).lh#brackets#_jump_text(lig[(col+nb-1) :])
+    return lh#map#_move_cursor_on_the_current_line(nb).lh#brackets#_jump_text(lig[(col+nb-1) :])
   elseif     lh#syntax#name_at(line('.'), col-1) =~ 'markdownCode'
         \ && lh#syntax#name_at(line('.'), col)   =~ 'markdownCode'
     return a:char

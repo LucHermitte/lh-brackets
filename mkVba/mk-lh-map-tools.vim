@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.5
-let s:version = '2.2.5'
+" Version:	2.3.0
+let s:version = '2.3.0'
 " Created:	06th Nov 2007
 "------------------------------------------------------------------------
 cd <sfile>:p:h
@@ -32,6 +32,7 @@ after/ftplugin/vim/vim_brackets.vim
 autoload/lh/brackets.vim
 autoload/lh/cpp/brackets.vim
 autoload/lh/html/brackets.vim
+autoload/lh/map.vim
 autoload/lh/markdown/brackets.vim
 autoload/lh/marker.vim
 autoload/lh/vim/brackets.vim

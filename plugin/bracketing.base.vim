@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.2.2
+" Version:      2.3.0
 "
 "       Stephen Riehm's braketing macros for vim
 "       Customizations by Luc Hermitte.
@@ -231,7 +231,7 @@ function! s:MarkerInsert(text) range
     normal viw!mark!
   elseif mode == 3
     "<c-o>:MI titi toto<cr>
-    let text = Marker_Txt(a:text)
+    let text = lh#marker#txt(a:text)
     exe "normal! i".text."\<esc>l"
   endif
 endfunction
@@ -254,8 +254,8 @@ function! Marker_Jump(...) " {{{2
   let delete    = ((a:0 > 1) && (a:2=='1'))
 
   " little optimization
-  let mo = Marker_Open()        | let emo = escape(mo, '\')
-  let mc = Marker_Close()       | let emc = escape(mc, '\')
+  let mo = lh#marker#open()        | let emo = escape(mo, '\')
+  let mc = lh#marker#close()       | let emc = escape(mc, '\')
 
   " if within a marker, and going backward, {{{3
   if (direction == 'b') && !s:Option('marker_select_current', 0)
@@ -379,7 +379,7 @@ function! LHMoveWithinMarker()     " {{{3
   " function! s:MoveWithinMarker()
   " Purpose: move the cursor within the marker just inserted.
   " Here, b:marker_close exists
-  return "\<esc>" . strlen(lh#encoding#iconv(Marker_Close(),&enc, 'latin1')) . 'ha'
+  return "\<esc>" . strlen(lh#encoding#iconv(lh#marker#close(),&enc, 'latin1')) . 'ha'
 endfunction
 
 function! LHToggleMarkerInVisual() " {{{3
@@ -394,10 +394,10 @@ function! LHToggleMarkerInVisual() " {{{3
     let @a = a_save
 
     " Check whether the selected text is strictly a marker (and only one)
-    if (a =~ '^'.Marker_Txt('.\{-}').'$')
-          \ && (a !~ '\%(.*'.Marker_Close().'\)\{2}')
+    if (a =~ '^'.lh#marker#txt('.\{-}').'$')
+          \ && (a !~ '\%(.*'.lh#marker#close().'\)\{2}')
       " 2- If so, strip the marker characters
-      let a = substitute(a, Marker_Txt('\(.\{-}\)'), '\1', '')
+      let a = substitute(a, lh#marker#txt('\(.\{-}\)'), '\1', '')
       let unnamed_save=@"
       exe "normal! gvs".a."\<esc>"
       " escape(a, '\') must not be used.
@@ -408,8 +408,8 @@ function! LHToggleMarkerInVisual() " {{{3
   endif
 
   " 3- Else insert the pair of marker characters around the visual selection
-  call InsertAroundVisual(Marker_Open(),Marker_Close(),0,0)
-  return '`>'.strlen(Marker_Txt()).'l'
+  call InsertAroundVisual(lh#marker#open(),lh#marker#close(),0,0)
+  return '`>'.lh#encoding#strlen(lh#marker#txt()).'l'
 endfunction
 
 " Other options:                    {{{2
@@ -435,7 +435,7 @@ function! s:UpdateHighlight()
   silent! syn clear marker
   let hl = s:Highlight()
   if strlen(hl) > 0
-    exe 'syn match marker /'.Marker_Txt('.\{-}').'/ containedin=ALL'
+    exe 'syn match marker /'.lh#marker#txt('.\{-}').'/ containedin=ALL'
     exe 'hi marker '.hl
   endif
 endfunction
@@ -455,7 +455,7 @@ endif
 
 " Set a marker ; contrary to <Plug>!mark!, !mark! doesn't move the cursor
 " between the marker characters.
-inoremap <silent> !mark! <c-r>=Marker_Txt()<cr>
+inoremap <silent> !mark! <c-r>=lh#marker#txt()<cr>
 " vnoremap <silent> !mark! <C-\><C-N>@=<sid>ToggleMarkerInVisual()<cr>
 vnoremap <silent> !mark! <C-\><C-N>@=LHToggleMarkerInVisual()<cr>
 nmap <silent> !mark! viw!mark!

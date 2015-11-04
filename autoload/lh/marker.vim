@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
-let s:k_version = 222
+" Version:	2.3.0
+let s:k_version = 230
 " Created:      27th Nov 2013
 "------------------------------------------------------------------------
 " Description:
@@ -50,12 +50,12 @@ endfunction
 " ## Exported functions {{{1
 
 " Function: lh#marker#open() {{{2
-function! lh#marker#open()
-  " call Dfunc('Marker_Open()')
+function! lh#marker#open() abort
+  " call Dfunc('lh#marker#open()')
   if s:Option('use_place_holders', 0) && exists('*IMAP_GetPlaceHolderStart')
     let m = IMAP_GetPlaceHolderStart()
     if "" != m
-      " call Dret('Marker_Open '.m.'  using IMAP placeholder characters')
+      " call Dret('lh#marker#open '.m.'  using IMAP placeholder characters')
       return m
     endif
   endif
@@ -77,16 +77,16 @@ function! lh#marker#open()
       let b:last_encoding_used = &enc
     endif
   endif
-  " call Dret('Marker_Open '.b:marker_open)
+  " call Dret('lh#marker#open '.b:marker_open)
   return b:marker_open
 endfunction
 
 " Function: lh#marker#close() {{{2
-function! lh#marker#close()
+function! lh#marker#close() abort
   if s:Option('use_place_holders', 0) && exists('*IMAP_GetPlaceHolderEnd')
     let m = IMAP_GetPlaceHolderEnd()
     if "" != m
-      " call Dret('Marker_Close '.m.'  using IMAP placeholder characters')
+      " call Dret('lh#marker#close '.m.'  using IMAP placeholder characters')
       return m
     endif
   endif
@@ -108,8 +108,26 @@ function! lh#marker#close()
 endfunction
 
 " Function: lh#marker#txt({text}) {{{2
-function! lh#marker#txt(...)
+function! lh#marker#txt(...) abort
   return lh#marker#open() . ((a:0>0) ? a:1 : '') . lh#marker#close()
+endfunction
+
+" Function: lh#marker#is_a_marker() {{{3
+" Returns whether the text currently selected matches a marker and only one.
+function! lh#marker#is_a_marker() abort
+  if line("'<") == line("'>") " I suppose markers don't spread over several lines
+    " Extract the selected text
+    let a = lh#visual#selection()
+
+    " Check whether the selected text matches a marker (and only one)
+    if (a =~ '^'.lh#marker#txt('.\{-}').'$')
+          \ && (a !~ '\%(.*'.lh#marker#close().'\)\{2}')
+      " If so, return {a:begin}, or {im_seq} if provided
+      " return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
+      return 1
+    endif
+  endif
+  return 0
 endfunction
 
 "------------------------------------------------------------------------
