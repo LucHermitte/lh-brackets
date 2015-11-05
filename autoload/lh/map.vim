@@ -295,8 +295,9 @@ function! lh#map#_goto_mark() abort
     let delta = s:goto_col - virtcol('.')
     return lh#map#_move_cursor_on_the_current_line(delta)
   else
-    " uses {lig}'normal! {col}|' because of the possible reindent
-    execute s:goto_lin . 'normal! ' . s:goto_col . '|'
+    " " uses {lig}'normal! {col}|' because of the possible reindent
+    " execute s:goto_lin . 'normal! ' . (s:goto_col) . '|'
+    call cursor(s:goto_lin, s:goto_col)
     return ''
   endif
 endfunction
@@ -319,9 +320,8 @@ function! lh#map#_goto_end_mark() abort
   else
     let s:goto_col += s:goto_col_2 - s:goto_col_1
   endif
-  " uses {lig}'normal! {col}|' because of the possible reindent
-  execute s:goto_lin . 'normal! ' . s:goto_col . '|'
-  " return ''
+  call cursor(s:goto_lin, s:goto_col)
+  return ''
 endfunction
 
 " Function: lh#map#_fix_indent() {{{3
