@@ -123,7 +123,7 @@ function! PyMapOnSingleLine(key, what) abort
   let l = getline('.')
   let after = strpart(l, c)
   let before = strpart(l, 0, c)
-  let g:msg = c.' --> <' . before . '> ## <'.after . '>'
+  " let g:msg = c.' --> <' . before . '> ## <'.after . '>'
   " echomsg g:msg
   if before =~ '^\s*$'
     if after =~ '^\s*$'
