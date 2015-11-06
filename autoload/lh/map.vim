@@ -4,10 +4,10 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.0
-let s:k_version = '230'
+" Version:      2.3.2
+let s:k_version = '232'
 " Created:      03rd Nov 2015
-" Last Update:
+" Last Update:  06th Nov 2015
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
@@ -214,7 +214,7 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "!cursorhere!&", '')
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "\<c-r>=lh#marker#txt(".string('\1').")\<cr>", 'g')
     let rhs .= "!movecursor!"
-    let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump(1)\<cr>"
+    let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
   endif
   " Build & return the context dependent sequence to insert
   if a:0 > 0

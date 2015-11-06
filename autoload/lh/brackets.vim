@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.2.5
+" Version:      2.3.0
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -23,6 +23,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 2.3.0:
+"               * Support for redo-able brackets
 " Version 2.2.5:
 "               * Better fix for the bug about line breaks when &tw is
 "               exceeded.
