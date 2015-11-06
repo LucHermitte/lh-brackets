@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
-let s:k_version = '2.2.2'
+" Version:	2.3.1
+let s:k_version = '2.3.1'
 " Created:      21st Jan 2015
 "------------------------------------------------------------------------
 " Description:
@@ -28,7 +28,7 @@ set cpo&vim
 " Avoid local reinclusion }}}2
 
 " This must be loaded before continuing
-runtime! ftplugin/c/c_localleader.vim
+runtime! ftplugin/python/python_localleader.vim
 
 "------------------------------------------------------------------------
 " Local mappings {{{2
@@ -36,34 +36,34 @@ runtime! ftplugin/c/c_localleader.vim
 " Control statements {{{3
 " --- if ---------------------------------------------------------{{{4
 "--if    insert "if" statement                   {{{5
-Inoreabbr <buffer> <silent> if <C-R>=InsertSeq('if ',
-      \ '\<c-f\>if !cursorhere!:\n!mark!')<cr>
+Inoreabbr <buffer> <silent> if <C-R>=PyMapOnSingleLine('if ',
+      \ "\\<c-f\\>if !cursorhere!:\n!mark!")<cr>
 "--,if    insert "if" statement
 xnoremap <buffer> <silent> <localleader>if
       \ <c-\><c-n>@=Surround('if !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'if ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>if
-      \ <c-\><c-n>@=Surround('if ', '!cursorhere!:\n!mark!',
+      \ <c-\><c-n>@=Surround('if ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'if ')<cr>
 nmap <buffer> <LocalLeader>if V<LocalLeader>if
 nmap <buffer> <LocalLeader><LocalLeader>if ^v$<LocalLeader><LocalLeader>if
 
 "--elif  insert "elif" statement                 {{{5
-Inoreabbr <buffer> <silent> elif <C-R>=InsertSeq('elif ',
-      \ '\<c-f\>elif !cursorhere!:\n!mark!')<cr>
+Inoreabbr <buffer> <silent> elif <C-R>=PyMapOnSingleLine('elif ',
+      \ "\\<c-f\\>elif !cursorhere!:\n!mark!")<cr>
 "--,elif    insert "elif" statement
 xnoremap <buffer> <silent> <localleader>elif
       \ <c-\><c-n>@=Surround('elif !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'elif ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>elif
-      \ <c-\><c-n>@=Surround('elif ', '!cursorhere!:\n!mark!',
+      \ <c-\><c-n>@=Surround('elif ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'elif ')<cr>
 nmap <buffer> <LocalLeader>elif V<LocalLeader>elif
 nmap <buffer> <LocalLeader><LocalLeader>elif ^v$<LocalLeader><LocalLeader>elif
 
 "--elif  insert "elif" statement                 {{{5
-Inoreabbr <buffer> <silent> else <C-R>=InsertSeq('else ',
-      \ '\<c-f\>else:\n')<cr>
+Inoreabbr <buffer> <silent> else <C-R>=PyMapOnSingleLine('else ',
+      \ "\\<c-f\\>else:\n")<cr>
 "--,elif    insert "elif" statement
 xnoremap <buffer> <silent> <localleader>else
       \ <c-\><c-n>@=Surround('else:!cursorhere!', '\<c-d>!mark!',
@@ -72,28 +72,28 @@ nmap <buffer> <LocalLeader>else V<LocalLeader>else
 
 " --- for --------------------------------------------------------{{{4
 "--for    insert "for" statement                  {{{5
-Inoreabbr <buffer> <silent> for <C-R>=InsertSeq('for ',
-      \ '\<c-f\>for !cursorhere!:\n!mark!')<cr>
+Inoreabbr <buffer> <silent> for <C-R>=PyMapOnSingleLine('for ',
+      \ "\\<c-f\\>for !cursorhere!:\n!mark!")<cr>
 "--,for    insert "for" statement
 xnoremap <buffer> <silent> <localleader>for
       \ <c-\><c-n>@=Surround('for !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'for ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>for
-      \ <c-\><c-n>@=Surround('for ', '!cursorhere!:\n!mark!',
+      \ <c-\><c-n>@=Surround('for ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'for ')<cr>
 nmap <buffer> <LocalLeader>for V<LocalLeader>for
 nmap <buffer> <LocalLeader><LocalLeader>for ^v$<LocalLeader><LocalLeader>for
 
 " --- while ------------------------------------------------------{{{4
 "--while    insert "while" statement                {{{5
-Inoreabbr <buffer> <silent> while <C-R>=InsertSeq('while ',
-      \ '\<c-f\>while !cursorhere!:\n!mark!')<cr>
+Inoreabbr <buffer> <silent> while <C-R>=PyMapOnSingleLine('while ',
+      \ "\\<c-f\\>while !cursorhere!:\n!mark!")<cr>
 "--,while    insert "while" statement
 xnoremap <buffer> <silent> <localleader>while
       \ <c-\><c-n>@=Surround('while !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'while ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>while
-      \ <c-\><c-n>@=Surround('while ', '!cursorhere!:\n!mark!',
+      \ <c-\><c-n>@=Surround('while ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'while ')<cr>
 nmap <buffer> <LocalLeader>while V<LocalLeader>while
 nmap <buffer> <LocalLeader><LocalLeader>while ^v$<LocalLeader><LocalLeader>while
@@ -116,6 +116,28 @@ let g:loaded_ftplug_python_snippets = s:k_version
 " Keep here only the functions are are required when the ftplugin is
 " loaded, like functions that help building a vim-menu for this
 " ftplugin.
+
+" Function: PyMapOnSingleLine(key, what) {{{3
+function! PyMapOnSingleLine(key, what) abort
+  let c = col('.') - 1
+  let l = getline('.')
+  let after = strpart(l, c)
+  let before = strpart(l, 0, c)
+  let g:msg = c.' --> <' . before . '> ## <'.after . '>'
+  " echomsg g:msg
+  if before =~ '^\s*$'
+    if after =~ '^\s*$'
+      return lh#map#insert_seq(a:key, a:what)
+    else " => surround condition
+      let ll = get(g:, 'maplocalleader', get(g:, 'localleader', '\'))
+      exe "normal ".ll.ll.a:key
+    return ""
+    endif
+  else
+    return a:key
+  endif
+endfunction
+
 " Functions }}}2
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
