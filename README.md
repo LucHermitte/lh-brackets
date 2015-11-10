@@ -11,7 +11,7 @@ It is made of three sub-systems:
 
 This subsystem provides functions and mappings to:
   * mark places in the code where we could jump to later,  
-    See the help about `!mark!`, `Marker_Text()`, and `<Plug>MarkersMark`
+    See the help about `!mark!`, `lh#marker#txt()`, and `<Plug>MarkersMark`
   * jump forward and backward to those places.  
     See the help about `!jump!`, and `<Plug>MarkersJumpF`
 
@@ -24,10 +24,12 @@ The marker/placeholder characters:
 Jumping to the next/previous placeholder:
   * is binded to `<M-ins>` or `<C-J>` by default (see `:h <Plug>MarkersJumpF`),
   * can be tuned to delete or select the placeholder the cursor is jumping to (`:h g:marker_prefers_select`, `:h g:marker_select_empty_marks`),
-  * can select or ignore the placeholder where the cursor is currently within (if any) (`:h g:marker_select_current`, `:h g:marker_select_current_fwd`)
-  * may move the line of the placeholder (we jump to) to the middle of the window (`:h g:marker_center`)
+  * can select or ignore the placeholder where the cursor is currently within (if any) (`:h g:marker_select_current`, `:h g:marker_select_current_fwd`),
+  * may move the line of the placeholder (we jump to) to the middle of the window (`:h g:marker_center`),
   * respects `'wrapscan'`,
-  * opens the folder where the placeholder, we jump to, is.
+  * opens the folder where the placeholder, we jump to, is,
+  * doesn't break _redo_ (is the case of empty placeholders, when placeholders
+    are deleted instead of selected) ; this feature requires Vim 7.4-849.
 
 
 ### The bracketing subsystem
@@ -88,18 +90,19 @@ map-tools provides mappings (originally from auctex.vim) to replace a pair of br
 
 As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a few functions of its own. All these functions are specialized into the definition of smart abbreviations and INSERT-mode mappings.
 
-| `MapNoContext()`, `MapNoContext2()` | Core functions to define mappings that only expand outside of _string_, _comment_, and _character_ contexts |
-|:------------------------------------|:------------------------------------------------------------------------------------------------------------|
-| `Map4TheseContext()`                | Like `MapNoContext()`, except this time we can specify which text must be returned depending on the current context |
-| `InsertAroundVisual()`              | This is the core surrounding function ; the surrounding text is not interpreted                             |
-| `Surround()`                        | Interprets the `!.*!` mappings that are passed to `InsertAroundVisual()` (`!cursorhere!` tells were to put the cursor). This function also recognises when the selected area is actually a marker/placeholder in order to not surround, but expand instead. |
-| `BuildMapSeq()`                     | Core function that interprets `!.*!` mappings                                                               |
-| `EatChar()`, `:I(nore)abbr`         | Permits to define abbreviations that do not insert a whitespace when the `<space>` key is used to trigger the abbreviation |
-| `InsertSeq()`                       | High level function that interprets `!.*!` mappings, and take the context into account                      |
+| Function                                      | Purpose                                                                                                                    |
+|:----------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
+| `lh#map#no_context()`, `lh#map#no_context2()` | Core functions to define mappings that only expand outside of _string_, _comment_, and _character_ contexts                |
+| `lh#map#4_these_contexts()`                   | Like `lh#map#no_context()`, except this time we can specify which text must be returned depending on the current context   |
+| `InsertAroundVisual()`                        | This is the core surrounding function ; the surrounding text is not interpreted                                            |
+| `Surround()`                                  | Interprets the `!.*!` mappings that are passed to `InsertAroundVisual()` (`!cursorhere!` tells were to put the cursor). This function also recognises when the selected area is actually a marker/placeholder in order to not surround, but expand instead. |
+| `lh#map#build_map_seq()`                      | Core function that interprets `!.*!` mappings                                                                              |
+| `lh#map#eat_char()`, `:I(nore)abbr`           | Permits to define abbreviations that do not insert a whitespace when the `<space>` key is used to trigger the abbreviation |
+| `lh#map#insert_seq()`                         | High level function that interprets `!.*!` mappings, and take the context into account                                     |
 
 
 # Installation
-  * Requirements: Vim 7.+, [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), [lh-dev](http://github.com/LucHermitte/lh-dev)
+  * Requirements: Vim 7.+ (7.4-849 in order to support redo), [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), [lh-dev](http://github.com/LucHermitte/lh-dev) v1.3.4+
   * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-brackets (this is the preferred method because of the dependencies)
 ```vim
 ActivateAddons lh-brackets
@@ -128,7 +131,7 @@ Bundle 'LucHermitte/lh-brackets'
 ## See also
   * [imaps.vim, from LaTeX-suite](http://www.vim.org/scripts/script.php?script_id=475), with which map-tools is compatible (there is no conflictual mappings if both are installed) ;
   * All the [brackets related tips on vim.wikia](http://vim.wikia.com/wiki/Category:Brackets) ;
-  * Most of my ftplugins for examples of use ;
+  * Most of my ftplugins for examples of use, or more simply the [Python ftplugin](ftplugin/python/python_snippets.vim) shipped with lh-brackets.
   * [muTemplate](http://github.com/LucHermitte/mu-template), a template-files expander built on top of map-tools.
   * [surround plugin on SF](http://www.vim.org/scripts/script.php?script_id=1697)
 
