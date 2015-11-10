@@ -367,6 +367,7 @@ function! s:DoSelect(emo, emc, delete, position, mode)
   endif
 endfunction
 
+" }}}1
 " ------------------------------------------------------------------------
 " Internals         {{{1
 " =================

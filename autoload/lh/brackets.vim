@@ -401,7 +401,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
             \ . "\<cr>"
             \ . lh#map#_move_cursor_on_the_current_line(delta_to_insertion)
 
-      echomsg "--> ".strtrans(prepare)
+      " echomsg "--> ".strtrans(prepare)
 
       return lh#map#insert_seq(a:trigger, prepare.open.'!cursorhere!'.close.'!mark!')
     endif
