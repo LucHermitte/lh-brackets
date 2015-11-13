@@ -264,19 +264,19 @@ function! lh#map#_cursor_here(...) abort
   if a:0 > 0
     let s:goto_lin_{a:1} = line('.')
     let s:goto_col_{a:1} = virtcol('.')
-    let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
+    " let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
   else
     let s:goto_lin = line('.')
     let s:goto_col = virtcol('.')
-    let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
+    " let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
   endif
   let s:old_indent = indent(line('.'))
-  let g:repos .= "   indent=".s:old_indent
+  " let g:repos .= "   indent=".s:old_indent
   return ''
 endfunction
 
-" Function: lh#map#_goto_mark() {{{3
-function! lh#map#_goto_mark() abort
+" Function: lh#map#_goto_mark([old_behaviour]) {{{3
+function! lh#map#_goto_mark(...) abort
   " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
   let crt_indent = indent(s:goto_lin)
   if crt_indent < s:old_indent
@@ -285,19 +285,21 @@ function! lh#map#_goto_mark() abort
     let s:old_indent = crt_indent - s:old_indent
     let s:fix_indent = 0
   endif
-  let g:fix_indent = s:fix_indent
+  " let g:fix_indent = s:fix_indent
   if s:old_indent != 0
     let s:goto_col += s:old_indent
   endif
-  if s:goto_lin == line('.')
+  let new_behaviour = (a:0 > 0) ? (!a:1) : 1
+  if new_behaviour && s:goto_lin == line('.')
     " Same line -> eligible for moving the cursor
     " TODO: handle reindentation changes
     let delta = s:goto_col - virtcol('.')
-    return lh#map#_move_cursor_on_the_current_line(delta)
+    let move = lh#map#_move_cursor_on_the_current_line(delta)
+    return move
   else
     " " uses {lig}'normal! {col}|' because of the possible reindent
-    " execute s:goto_lin . 'normal! ' . (s:goto_col) . '|'
-    call cursor(s:goto_lin, s:goto_col)
+    execute s:goto_lin . 'normal! ' . (s:goto_col) . '|'
+    " call cursor(s:goto_lin, s:goto_col)
     return ''
   endif
 endfunction
