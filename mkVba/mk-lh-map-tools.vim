@@ -4,15 +4,16 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.2
-let s:version = '2.3.2'
+" Version:	2.3.3
+let s:version = '2.3.3'
 " Created:	06th Nov 2007
+" Last Update:  13th Nov 2015
 "------------------------------------------------------------------------
 cd <sfile>:p:h
 try
   let save_rtp = &rtp
   let &rtp = expand('<sfile>:p:h:h').','.&rtp
-  exe '22,$MkVimball! lh-map-tools-'.s:version
+  exe '23,$MkVimball! lh-map-tools-'.s:version
   set modifiable
   set buftype=
 finally
@@ -38,6 +39,7 @@ autoload/lh/marker.vim
 autoload/lh/vim/brackets.vim
 doc/default_brackets.md
 doc/lh-map-tools.txt
+ftplugin/python/python_localleader.vim
 ftplugin/python/python_snippets.vim
 mkVba/mk-lh-map-tools.vim
 plugin/bracketing.base.vim

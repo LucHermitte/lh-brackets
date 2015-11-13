@@ -12,6 +12,9 @@ let s:k_version = '2.3.1'
 "       Snippets of python Control Statements
 "
 "------------------------------------------------------------------------
+" TODO:
+" - move this file from lh-brachets to lh-misc (or a future lh-python in case I
+"   spend more time writing Python)
 " }}}1
 "=============================================================================
 
@@ -129,7 +132,7 @@ function! PyMapOnSingleLine(key, what) abort
     if after =~ '^\s*$'
       return lh#map#insert_seq(a:key, a:what)
     else " => surround condition
-      let ll = get(g:, 'maplocalleader', get(g:, 'localleader', '\'))
+      let ll = lh#leader#get_local()
       exe "normal ".ll.ll.a:key
     return ""
     endif
