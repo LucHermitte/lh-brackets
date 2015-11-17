@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.0
+" Version:      2.3.4
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -23,6 +23,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 2.3.4:
+"               * Fix surrounding and -newline
 " Version 2.3.0:
 "               * Support for redo-able brackets
 " Version 2.2.5:
@@ -546,7 +548,7 @@ endfunction
 function! lh#brackets#define(bang, ...) abort
   " Parse Options {{{3
   let isLocal    = a:bang != "!"
-  let nl         = '""'
+  let nl         = ''
   let insert     = 1
   let visual     = 1
   let normal     = 'default=1'
@@ -554,7 +556,7 @@ function! lh#brackets#define(bang, ...) abort
   for p in a:000
     if     p =~ '-l\%[list]'        | call s:ListMappings(isLocal)  | return
     elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(isLocal) | return
-    elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '"\n"'
+    elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
@@ -600,8 +602,8 @@ function! lh#brackets#define(bang, ...) abort
   if insert
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
-    let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').','.(nl).
-          \','. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
+    let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').',"'.(nl).
+          \'",'. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
       let inserter = 'lh#brackets#closer('.string(options[1]).','.string (Close).','.string(Exceptions).')'
@@ -615,11 +617,11 @@ function! lh#brackets#define(bang, ...) abort
   " VISUAL-mode surrounding {{{3
   if visual
     if strlen(nl) > 0
-      let action = ' <c-\><c-n>@=Surround('.
+      let action = ' <c-\><c-n>@=lh#map#surround('.
             \ string(options[0].'!cursorhere!').', '.
             \ string(options[1].'!mark!').", 1, 1, '', 1, ".string(trigger).")\<cr>"
     else
-      let action = ' <c-\><c-n>@=Surround('.
+      let action = ' <c-\><c-n>@=lh#map#surround('.
             \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 1)\<cr>"
     endif
     call s:DefineMap(s:k_vmap_type.'nore', trigger, action, isLocal, 0)

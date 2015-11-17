@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
+" Version:	2.3.4
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -20,6 +20,8 @@
 " 		BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 2.3.x:
+"               * File deprecated. Use autoload/lh/map.vim instead
 " Version 2.2.0:
 "               * b:usemarks -> [bg]:usemarks
 " Version 2.1.3:

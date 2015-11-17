@@ -96,8 +96,8 @@ As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a 
 |:----------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
 | `lh#map#no_context()`, `lh#map#no_context2()` | Core functions to define mappings that only expand outside of _string_, _comment_, and _character_ contexts                |
 | `lh#map#4_these_contexts()`                   | Like `lh#map#no_context()`, except this time we can specify which text must be returned depending on the current context   |
-| `InsertAroundVisual()`                        | This is the core surrounding function ; the surrounding text is not interpreted                                            |
-| `Surround()`                                  | Interprets the `!.*!` mappings that are passed to `InsertAroundVisual()` (`!cursorhere!` tells were to put the cursor). This function also recognises when the selected area is actually a marker/placeholder in order to not surround, but expand instead. |
+| `lh#map#insert_around_visual()`               | This is the core surrounding function ; the surrounding text is not interpreted                                            |
+| `lh#map#surround()`                           | Interprets the `!.*!` mappings that are passed to `lh#map#insert_around_visual()` (`!cursorhere!` tells were to put the cursor). This function also recognises when the selected area is actually a marker/placeholder in order to not surround, but expand instead. |
 | `lh#map#build_map_seq()`                      | Core function that interprets `!.*!` mappings                                                                              |
 | `lh#map#eat_char()`, `:I(nore)abbr`           | Permits to define abbreviations that do not insert a whitespace when the `<space>` key is used to trigger the abbreviation |
 | `lh#map#insert_seq()`                         | High level function that interprets `!.*!` mappings, and take the context into account                                     |

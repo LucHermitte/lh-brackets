@@ -1,7 +1,7 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.3.2)
-*lh-brackets*           For Vim version 7.+     Last change: 10th Nov 2015
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.3.4)
+*lh-brackets*           For Vim version 7.+     Last change: 17th Nov 2015
 
-                        Map Tools MANUAL     by Luc Hermitte
+                        lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
 
 
@@ -39,17 +39,17 @@ API: autoload/lh/map.vim~
 
 This plugin defines several functions and commands to use when you want to
 program smart-mappings and abbreviations:
-|lh#map#context()|         for context dependent mappings,
+|lh#map#context()|              for context dependent mappings,
 |lh#map#4_these_contexts|
 |lh#map#no_context()|
 |lh#map#no_context2()|
-|InsertAroundVisual()|      that inserts a pair of tokens around a visual area,
-|lh#map#build_map_seq()|    that expands mappings contained into strings,
-|lh#map#eat_char()|         function that eats the <space> ending abbreviations,
-|lh#map#insert_seq()|       high level function to define smart mappings and
-                          abbreviations,
-|Surround()|                high level fn. to insert text around a visual area.
-|lh#marker#is_a_marker()|   that tells whether a |marker| is currently selected.
+|lh#map#insert_around_visual()| that inserts a pair of tokens around a visual area,
+|lh#map#build_map_seq()|        that expands mappings contained into strings,
+|lh#map#eat_char()|             function that eats the <space> ending abbreviations,
+|lh#map#insert_seq()|           high level function to define smart mappings and
+                              abbreviations,
+|lh#map#surround()|             high level fn. to insert text around a visual area.
+|lh#marker#is_a_marker()|       that tells whether a |marker| is currently selected.
 
 The typical way to use these helpers is addressed into |mm-How-To|.
 
@@ -133,8 +133,10 @@ Note: Works with Vim 6+ only.
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                                 *InsertAroundVisual()*
                                                 *MapAroundVisualLine()*
-InsertAroundVisual({begin}, {end}, {isLine}, {isIndented})~
-MapAroundVisualLine({begin}, {end}, {isLine}, {isIndented}) [depreciated]~
+                                                *lh#map#insert_around_visual()*
+lh#map#insert_around_visual({begin}, {end}, {isLine}, {isIndented})~
+InsertAroundVisualLine({begin}, {end}, {isLine}, {isIndented}) [deprecated]~
+MapAroundVisualLine({begin}, {end}, {isLine}, {isIndented}) [deprecated]~
 
 This helper function is dedicated to the addition of text around a visual
 selection. {begin} is added before the selection while {end} is added just
@@ -143,11 +145,11 @@ should be line-wise and whether the selected text should be re-indented after
 the operation.
 
 It can be used to define things like (LaTeX): >
-        :xnoremap ]ec :call InsertAroundVisual('\begin{center}',
+        :xnoremap ]ec :call lh#map#insert_around_visual('\begin{center}',
         \ '\end{center}',1,1)<CR>
 >
 It also fits perfectly to define the C & co. dedicated visual mappings: >
-        :xnoremap ,else :call InsertAroundVisual('else {', '}',1,1)<CR>%
+        :xnoremap ,else :call lh#map#insert_around_visual('else {', '}',1,1)<CR>%
 <
 Rem.: there are still problems with the indenting and more precisely when a
 text is |smartindent|ed under VIM 5.xx ; it seems to work fine with VIM 6.0.
@@ -162,7 +164,7 @@ classical: >
 Very important: if the mapping is binded to the same unique key an insert-mode
 mapping is binded to and, if the insert-mode mapping is to be preferred when
 a |marker| is selected, in select-mode, then we must prefer the function
-|Surround()|. Surround() is also able to interpret the sequences passed to
+|lh#map#surround()|. lh#map#surround() is also able to interpret the sequences passed to
 {begin} and {end}.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -256,15 +258,16 @@ Examples:~
 (*) Excerpt from my c-ftplugin: >
     " Put the current selection within the parenthesis.
     xnoremap <buffer> <silent> <localleader><localleader>wh
-        \ <c-\><c-n>@=Surround('while (',
+        \ <c-\><c-n>@=lh#map#surround('while (',
         \ '!cursorhere!) {\n!mark!\n}!mark!',
         \ 0, 1, '', 1, 'while ')<cr>
 <
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                                             *Surround()*
-Surround({begin},{end},{isLine},{isIndented},{goback},{mustInterpret}[,{imSeq]})~
+                                                            *lh#map#surround()*
+lh#map#surround({begin},{end},{isLine},{isIndented},{goback},{mustInterpret}[,{imSeq]})~
 
-This function is a smart wrapper around |InsertAroundVisual()|.
+This function is a smart wrapper around |lh#map#insert_around_visual()|.
 It permit to interpret {begin} and {end} and it also recognizes whether what
 we must surround is a |marker| or not.
 
@@ -302,25 +305,25 @@ Parameters:~
 
 Usage:~
 >
-    :xnoremap <buffer> {key} <c-\><c-n>@=Surround({parameters})<cr>
+    :xnoremap <buffer> {key} <c-\><c-n>@=lh#map#surround({parameters})<cr>
 
 Examples:~
 (*) Excerpt from common_brackets.vim >
    :xnoremap <buffer> <localleader>[
-    \ <c-\><c-n>@=Surround('[', ']', 0, 0, '%', 0)<cr>
+    \ <c-\><c-n>@=lh#map#surround('[', ']', 0, 0, '%', 0)<cr>
 (*) Excerpt from my vim-ftplugin >
    :xnoremap <buffer> <silent> <m-f>
-    \ <c-\><c-n>@=Surround('function! !cursorhere!(!mark!)', 'endfunction',
+    \ <c-\><c-n>@=lh#map#surround('function! !cursorhere!(!mark!)', 'endfunction',
     \ 1, 1, '', 1, 'fun ')<cr>
 (*) Excerpt from my c-ftplugin >
    :xnoremap <buffer> <silent> <localleader>for
-    \ <c-\><c-n>@=Surround('for (!cursorhere!;!mark!;!mark!) {', '}!mark!',
+    \ <c-\><c-n>@=lh#map#surround('for (!cursorhere!;!mark!;!mark!) {', '}!mark!',
     \ 1, 1, '', 1, 'for ')<cr>
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                                             *!cursorhere!*
 
-"!cursorhere!" has a special meaning for |lh#map#insert_seq()| and |Surround()|. This
+"!cursorhere!" has a special meaning for |lh#map#insert_seq()| and |lh#map#surround()|. This
 special string is used to indicate where the cursor should go once the
 sequence to insert has been inserted and expanded.
 Unlike |!mark!|, there is no mapping associated to !cursorhere!.
@@ -341,7 +344,7 @@ we may need visual-mode mappings to not expand.
 
 Typically, having '{' expanded to surround the |marker| with a pair of
 brackets is undesired. Regarding the brackets, |common_brackets.vim| already
-handles this -- thanks to |Surround()|, that delegates the detection to
+handles this -- thanks to |lh#map#surround()|, that delegates the detection to
 |lh#marker#is_a_marker()|. However, we may still run into visual-mode mappings we do not
 wish to see expanded when a marker is selected.
 |lh#marker#is_a_marker()| is provided for this very reason.
@@ -408,7 +411,7 @@ Excerpt from my C-ftplugin: >
 <
                                                             *mmht-vm*
 Which one(s) must I use to define Visual-Mode mappings ?~
-see |Surround()|, |v_CTRL-\_CTRL-N|, |@|, |!mark!|, |!cursorhere!|,
+see |lh#map#surround()|, |v_CTRL-\_CTRL-N|, |@|, |!mark!|, |!cursorhere!|,
 |:xnoremap|, |lh#marker#is_a_marker()|.
 
                                                             *mmht-cm*
@@ -421,7 +424,7 @@ function that will delegate its work to |lh#map#4_these_contexts()|.
 If the problem only consists in expanding other custom mappings, then define
 an adapter (like the design pattern) mapping whose keybinding matches
 '!.\{-}!'. Have a look at the definition of !cursorhere! and !gotocursor! in
-the implementation of |Surround()| and |lh#map#insert_seq()|.
+the implementation of |lh#map#surround()| and |lh#map#insert_seq()|.
 
 
 ------------------------------------------------------------------------------
@@ -476,7 +479,7 @@ I have also added some other features:
     one thing: the SELECT-mode is considered to be a declension of the
     |VISUAL-mode|. Hence all the |imap|s won't expand in SELECT-mode!
     Fortunately, the |iabbr|s will still expand. To workaround this problem,
-    define your |xmap|s with |Surround()|.
+    define your |xmap|s with |lh#map#surround()|.
 
                                                 *g:marker_select_empty_marks*
 (*) The option |g:marker_select_empty_marks| (default 1) determines whether an

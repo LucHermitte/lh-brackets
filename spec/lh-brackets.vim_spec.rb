@@ -66,7 +66,6 @@ RSpec.describe "autoload/lh/map.vim" do
                 foo(bar)foo
               EOF
           end
-          # vim.echo('input("pause")')
       end
 
       it "Inserts Brackets with newline" do
@@ -95,7 +94,29 @@ RSpec.describe "autoload/lh/map.vim" do
               foo
               +>bar
           EOF
+      end
 
+      it "Surround with backets" do
+          vim.command('%d_')
+          vim.insert('foo bar foo<esc>')
+          assert_buffer_contents <<-EOF
+            foo bar foo
+          EOF
+          vim.normal('^')
+          vim.feedkeys('viw(')
+          assert_buffer_contents <<-EOF
+            (foo) bar foo
+          EOF
+          vim.normal('^')
+          vim.feedkeys('\<m-b>xw(')
+          assert_buffer_contents <<-EOF
+            foo (bar) foo
+          EOF
+          vim.feedkeys('V(')
+          assert_buffer_contents <<-EOF
+            (foo (bar) foo)
+          EOF
+          # vim.echo('input("pause")')
       end
   end
 end

@@ -4,10 +4,10 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.2
-let s:k_version = '232'
+" Version:      2.3.4
+let s:k_version = '234'
 " Created:      03rd Nov 2015
-" Last Update:  06th Nov 2015
+" Last Update:  17th Nov 2015
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
@@ -249,6 +249,170 @@ function! lh#map#insert_seq(key, seq, ...) abort
 endfunction
 
 " # Surrounding functions {{{2
+
+" Function: lh#map#surround_by_substitute(begin, end, isLine, isIndented, goback, mustInterpret, ...) {{{3
+" @Overload that does not rely on '>a + '<i, but on s
+function! lh#map#surround_by_substitute(
+      \  begin, end, isLine, isIndented, goback, mustInterpret, ...) range abort
+  if lh#marker#is_a_marker()
+      return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
+  endif
+
+  let save_a = @a
+  try
+    let begin = a:begin
+    let end = a:end
+    if a:isLine
+      let begin .= "\n"
+      let end    = "\n" . end
+    endif
+    " Hack to know what is selected without altering any register
+    normal! gv"ay
+    let seq = begin . @a . end
+    let goback = ''
+
+    if a:mustInterpret
+      inoremap !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
+      " inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a
+      inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
+
+      if ! lh#brackets#usemarks()
+        let seq = substitute(seq, '!mark!', '', 'g')
+      endif
+      if (begin =~ '!cursorhere!')
+        let goback = lh#map#build_map_seq('!movecursor!')
+      endif
+      let seq = lh#map#build_map_seq(seq)
+    endif
+    let res = 'gv"_c'.seq
+    exe "normal! ".res
+    return goback
+  finally
+    let @a = save_a
+    " purge the internal mappings
+    silent! iunmap !cursorhere!
+    silent! iunmap !movecursor!
+  endtry
+endfunction
+
+" Function: lh#map#surround(begin, end, isLine, isIndented, goback, mustInterpret, ...) {{{3
+function! lh#map#surround(begin, end, isLine, isIndented, goback, mustInterpret, ...) range abort
+  if lh#marker#is_a_marker()
+      return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
+  endif
+
+  " Prepare {a:begin} and {a:end} to be inserted around the visual selection
+  let begin = a:begin
+  let end = a:end
+  let goback = a:goback
+  if a:mustInterpret
+    " internal mappings
+    " <c-o> should be better for !cursorhere! as it does not move the cursor
+    " But only <c-\><c-n> works correctly.
+    inoremap !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
+    " Weird: cursorpos1 & 2 require <c-o> an not <c-\><c-n>
+    inoremap !cursorpos1! <c-o>:call lh#map#_cursor_here(1)<cr>
+    inoremap !cursorpos2! <c-o>:call lh#map#_cursor_here(2)<cr>
+    " <c-\><c-n>....a is better for !movecursor! as it leaves the cursor `in'
+    " insert-mode... <c-o> does not; that's odd.
+    " inoremap !movecursor! a<c-r>=lh#map#_goto_mark().lh#map#_fix_indent()<cr>
+    inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark(1)<cr>a<c-r>=lh#map#_fix_indent()<cr>
+    inoremap !movecursor2! <c-\><c-n>:call lh#map#_goto_end_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
+
+    " Check whether markers must be used
+    if !lh#brackets#usemarks()
+      let begin = substitute(begin, '!mark!', '', 'g')
+      let end   = substitute(end,   '!mark!', '', 'g')
+    endif
+    " Override the value of {goback} if "!cursorhere!" is used.
+    if (begin =~ '!cursorhere!')
+      let goback = lh#map#build_map_seq('!movecursor!')
+      " let goback = "a\<c-r>=".'lh#map#_goto_mark().lh#map#_fix_indent()'."\<cr>"
+    endif
+    if (end =~ '!cursorhere!')
+      let begin = '!cursorpos1!'.begin.'!cursorpos2!'
+      let goback = lh#map#build_map_seq('!movecursor2!')
+      if !a:isLine && (line("'>") == line("'<")) && ('V'==visualmode())
+            \ && (getline("'>")[0] =~ '\s')
+        :normal! 0"_dw
+        " TODO: fix when &selection == exclusive
+      endif
+    endif
+    " Transform {begin} and {end} (interpret the "inlined" mappings)
+    let begin = lh#map#build_map_seq(begin)
+    let end   = lh#map#build_map_seq(end)
+
+    " purge the internal mappings
+    iunmap !cursorhere!
+    iunmap !cursorpos1!
+    iunmap !cursorpos2!
+    iunmap !movecursor!
+  endif
+  " Call the function that really insert the text around the selection
+  :'<,'>call lh#map#insert_around_visual(begin, end, a:isLine, a:isIndented)
+  " Return the nomal-mode sequence to execute at the end.
+  " let g:goback =goback
+  return goback
+endfunction
+
+" Function: lh#map#insert_around_visual(begin,end,isLine,isIndented) {{{3
+function! lh#map#insert_around_visual(begin,end,isLine,isIndented) range abort
+  if &ft == 'python' && a:isIndented && a:isLine
+    " let g:action= "normal! gv>`>o".a:end."\<esc>`<O\<c-d>".a:begin
+    exe "normal! gv>`>o\<c-d>".a:end."\<esc>`<O\<c-d>".a:begin
+    return
+  endif
+
+  " Note: to detect a marker before surrounding it, use Surround()
+  let cleanup = lh#on#exit()
+        \.restore('&paste')
+  try
+    set paste
+    " 'H' stands for 'High' ; 'B' stands for 'Bottom'
+    " 'L' stands for 'Left', 'R' for 'Right'
+    let HL = "`<i"
+    if &selection == 'exclusive'
+      let BL = "\<esc>`>i"
+    else
+      let BL = "\<esc>`>a"
+    endif
+    let HR = "\<esc>"
+    let BR = "\<esc>"
+    " If visual-line mode macros -> jump between stuffs
+    if a:isLine == 1
+      let HR="\<cr>".HR
+      let BL .="\<cr>"
+    elseif a:isLine == 2
+      let HL = "`<O"
+      let BL = "\<esc>`>o"
+    endif
+    " If indentation is used
+    if a:isIndented == 1
+      if version < 600 " -----------Version 6.xx {{{
+        if &cindent == 1  " C like sources -> <c-f> defined
+          let HR="\<c-f>".HR
+          let BR="\<c-t>".BR
+        else              " Otherwise like LaTeX, VIM
+          let HR .=":>\<cr>"
+          let BR .=":<\<cr>"
+        endif
+        let BL='>'.BL  " }}}
+      else " -----------------------Version 6.xx
+        let HR .="gv``="
+      endif
+    elseif type(a:isIndented) == type('')
+      let BL = a:isIndented . BL " move the previous lines
+      let HR .="gv``=" " indent the new line inserted
+    endif
+    " The substitute is here to compensate a little problem with HTML tags
+    " let g:action= "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
+    silent exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
+    " 'gv' is used to refocus on the current visual zone
+    "  call confirm(strtrans( "normal! gv". BL.a:end.BR.HL.a:begin.HR), "&Ok")
+  finally
+    call cleanup.finalize()
+  endtry
+endfunction
 
 "------------------------------------------------------------------------
 " ## Internal functions {{{1

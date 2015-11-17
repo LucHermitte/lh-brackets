@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.1
-let s:k_version = '2.3.1'
+" Version:	2.3.4
+let s:k_version = '2.3.4'
 " Created:      21st Jan 2015
 "------------------------------------------------------------------------
 " Description:
@@ -43,10 +43,10 @@ Inoreabbr <buffer> <silent> if <C-R>=PyMapOnSingleLine('if ',
       \ "\\<c-f\\>if !cursorhere!:\n!mark!")<cr>
 "--,if    insert "if" statement
 xnoremap <buffer> <silent> <localleader>if
-      \ <c-\><c-n>@=Surround('if !cursorhere!:', '!mark!',
+      \ <c-\><c-n>@=lh#map#surround('if !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'if ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>if
-      \ <c-\><c-n>@=Surround('if ', "!cursorhere!:\n!mark!",
+      \ <c-\><c-n>@=lh#map#surround('if ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'if ')<cr>
 nmap <buffer> <LocalLeader>if V<LocalLeader>if
 nmap <buffer> <LocalLeader><LocalLeader>if ^v$<LocalLeader><LocalLeader>if
@@ -56,10 +56,10 @@ Inoreabbr <buffer> <silent> elif <C-R>=PyMapOnSingleLine('elif ',
       \ "\\<c-f\\>elif !cursorhere!:\n!mark!")<cr>
 "--,elif    insert "elif" statement
 xnoremap <buffer> <silent> <localleader>elif
-      \ <c-\><c-n>@=Surround('elif !cursorhere!:', '!mark!',
+      \ <c-\><c-n>@=lh#map#surround('elif !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'elif ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>elif
-      \ <c-\><c-n>@=Surround('elif ', "!cursorhere!:\n!mark!",
+      \ <c-\><c-n>@=lh#map#surround('elif ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'elif ')<cr>
 nmap <buffer> <LocalLeader>elif V<LocalLeader>elif
 nmap <buffer> <LocalLeader><LocalLeader>elif ^v$<LocalLeader><LocalLeader>elif
@@ -69,7 +69,7 @@ Inoreabbr <buffer> <silent> else <C-R>=PyMapOnSingleLine('else ',
       \ "\\<c-f\\>else:\n")<cr>
 "--,elif    insert "elif" statement
 xnoremap <buffer> <silent> <localleader>else
-      \ <c-\><c-n>@=Surround('else:!cursorhere!', '\<c-d>!mark!',
+      \ <c-\><c-n>@=lh#map#surround('else:!cursorhere!', '\<c-d>!mark!',
       \ 1, 1, '', 1, 'else ')<cr>
 nmap <buffer> <LocalLeader>else V<LocalLeader>else
 
@@ -79,10 +79,10 @@ Inoreabbr <buffer> <silent> for <C-R>=PyMapOnSingleLine('for ',
       \ "\\<c-f\\>for !cursorhere!:\n!mark!")<cr>
 "--,for    insert "for" statement
 xnoremap <buffer> <silent> <localleader>for
-      \ <c-\><c-n>@=Surround('for !cursorhere!:', '!mark!',
+      \ <c-\><c-n>@=lh#map#surround('for !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'for ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>for
-      \ <c-\><c-n>@=Surround('for ', "!cursorhere!:\n!mark!",
+      \ <c-\><c-n>@=lh#map#surround('for ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'for ')<cr>
 nmap <buffer> <LocalLeader>for V<LocalLeader>for
 nmap <buffer> <LocalLeader><LocalLeader>for ^v$<LocalLeader><LocalLeader>for
@@ -93,10 +93,10 @@ Inoreabbr <buffer> <silent> while <C-R>=PyMapOnSingleLine('while ',
       \ "\\<c-f\\>while !cursorhere!:\n!mark!")<cr>
 "--,while    insert "while" statement
 xnoremap <buffer> <silent> <localleader>while
-      \ <c-\><c-n>@=Surround('while !cursorhere!:', '!mark!',
+      \ <c-\><c-n>@=lh#map#surround('while !cursorhere!:', '!mark!',
       \ 1, 1, '', 1, 'while ')<cr>
 xnoremap <buffer> <silent> <LocalLeader><localleader>while
-      \ <c-\><c-n>@=Surround('while ', "!cursorhere!:\n!mark!",
+      \ <c-\><c-n>@=lh#map#surround('while ', "!cursorhere!:\n!mark!",
       \ 0, 1, '', 1, 'while ')<cr>
 nmap <buffer> <LocalLeader>while V<LocalLeader>while
 nmap <buffer> <LocalLeader><LocalLeader>while ^v$<LocalLeader><LocalLeader>while

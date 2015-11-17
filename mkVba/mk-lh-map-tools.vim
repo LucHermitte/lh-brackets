@@ -4,10 +4,10 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.3
-let s:version = '2.3.3'
+" Version:	2.3.4
+let s:version = '2.3.4'
 " Created:	06th Nov 2007
-" Last Update:  13th Nov 2015
+" Last Update:  17th Nov 2015
 "------------------------------------------------------------------------
 cd <sfile>:p:h
 try
@@ -46,3 +46,4 @@ plugin/bracketing.base.vim
 plugin/common_brackets.vim
 plugin/misc_map.vim
 tests/lh/test-split.vim
+VimFlavor
