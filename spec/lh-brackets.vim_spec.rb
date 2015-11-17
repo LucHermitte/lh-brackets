@@ -71,7 +71,7 @@ RSpec.describe "autoload/lh/map.vim" do
       it "Inserts Brackets with newline" do
           vim.command('Brackets <+ +> -nl')
 
-          vim.command('%d_')
+          vim.normal('ggdG')
           vim.feedkeys 'i<+\<esc>'
           assert_buffer_contents <<-EOF
               <+
@@ -79,7 +79,7 @@ RSpec.describe "autoload/lh/map.vim" do
               +>«»
           EOF
 
-          vim.command('%d_')
+          vim.normal('ggdG')
           vim.feedkeys 'i<+foo\<esc>'
           assert_buffer_contents <<-EOF
               <+
@@ -87,7 +87,7 @@ RSpec.describe "autoload/lh/map.vim" do
               +>«»
           EOF
 
-          vim.command('%d_')
+          vim.normal('ggdG')
           vim.feedkeys 'i<+foo!jump!bar\<esc>'
           assert_buffer_contents <<-EOF
               <+
@@ -97,7 +97,7 @@ RSpec.describe "autoload/lh/map.vim" do
       end
 
       it "Surround with backets" do
-          vim.command('%d_')
+          vim.normal('ggdG')
           vim.insert('foo bar foo<esc>')
           assert_buffer_contents <<-EOF
             foo bar foo
