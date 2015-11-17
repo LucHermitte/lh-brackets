@@ -26,6 +26,7 @@ RSpec.describe "autoload/lh/map.vim" do
       it "Has lh-dev" do
           expect(vim.echo('&rtp')).to match(/lh-dev/)
       end
+  end
 
   describe "lh#map#version" do
       it "returns the current script version" do
