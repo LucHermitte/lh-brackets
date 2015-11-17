@@ -22,6 +22,7 @@ RSpec.describe "autoload/lh/map.vim" do
   describe "Dependent plugins are available" do
       it "Has lh-vim-lib" do
           expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
+          expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to be == "1"
       end
       it "Has lh-dev" do
           expect(vim.echo('&rtp')).to match(/lh-dev/)
