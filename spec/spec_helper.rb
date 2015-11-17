@@ -1,7 +1,7 @@
 require "tmpdir"
-require "simplecov"
+# require "simplecov"
 
-SimpleCov.start
+# SimpleCov.start
 
 RSpec.configure do |config|
   def write_file(filename, contents)
