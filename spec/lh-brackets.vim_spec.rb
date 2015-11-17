@@ -19,6 +19,14 @@ RSpec.describe "autoload/lh/map.vim" do
     vim.kill
   end
 
+  describe "Dependent plugins are available" do
+      it "Has lh-vim-lib" do
+          expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
+      end
+      it "Has lh-dev" do
+          expect(vim.echo('&rtp')).to match(/lh-dev/)
+      end
+
   describe "lh#map#version" do
       it "returns the current script version" do
           expect(vim.echo('lh#map#version()')).to be >= ('232')
