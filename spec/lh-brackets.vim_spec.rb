@@ -8,6 +8,10 @@ vim_brackets_path = File.expand_path('../..', __FILE__)
 vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
 vim_dev_path      = File.expand_path('../../../lh-dev', __FILE__)
 
+vim_flavor_path   = ENV['HOME']+'/.vim/flavors'
+
+vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
+
 vim.append_runtimepath(vim_lib_path)
 vim.append_runtimepath(vim_dev_path)
 # LetIfUndef
@@ -24,6 +28,7 @@ RSpec.describe "autoload/lh/map.vim" do
 
   describe "Dependent plugins are available" do
       it "Has lh-vim-lib" do
+          pp vim_flavor_path
           pp vim.echo('&rtp')
           expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
           expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to eq "1"
