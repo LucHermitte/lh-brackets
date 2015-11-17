@@ -1,9 +1,43 @@
-require "tmpdir"
-# require "simplecov"
+require 'tmpdir'
+require 'vimrunner'
+require 'vimrunner/rspec'
+require_relative './support/vim'
+# require 'simplecov'
 
 # SimpleCov.start
 
+Vimrunner::RSpec.configure do |config|
+  config.reuse_server = true
+
+  vim_brackets_path = File.expand_path('.')
+  vim_flavor_path   = ENV['HOME']+'/.vim/flavors'
+
+  config.start_vim do
+    vim = Vimrunner.start_gvim
+    # vim = Vimrunner.start_vim
+    vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
+    pp vim_flavor_path
+    # LetIfUndef
+    # vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
+    vim_lib_path      = File.expand_path('../lh-vim-lib', __FILE__)
+    vim.add_plugin(vim_lib_path, 'plugin/let.vim')
+    # :Brackets
+    vim.add_plugin(vim_brackets_path, 'plugin/common_brackets.vim')
+    # !mark!
+    vim.add_plugin(vim_brackets_path, 'plugin/bracketing.base.vim')
+    pp vim.echo('&rtp')
+
+    has_redo = vim.echo('has("patch-7.4.849")')
+    if has_redo != "1"
+      puts "WARNING: this flavor of vim won't permit lh-brackets to support redo"
+    end
+    vim
+  end
+end
+
 RSpec.configure do |config|
+  config.include Support::Vim
+
   def write_file(filename, contents)
     dirname = File.dirname(filename)
     FileUtils.mkdir_p dirname if not File.directory?(dirname)
@@ -21,3 +55,5 @@ RSpec.configure do |config|
     end
   end
 end
+
+# vim:set sw=2:

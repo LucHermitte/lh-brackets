@@ -1,37 +1,14 @@
 # encoding: UTF-8
-require 'vimrunner'
+require 'spec_helper'
 require 'pp'
 
-vim = Vimrunner.start
-# vim = Vimrunner.start_gvim
-vim_brackets_path = File.expand_path('../..', __FILE__)
-vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
-vim_dev_path      = File.expand_path('../../../lh-dev', __FILE__)
-
-vim_flavor_path   = ENV['HOME']+'/.vim/flavors'
-
-vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
-
-vim.append_runtimepath(vim_lib_path)
-vim.append_runtimepath(vim_dev_path)
-# LetIfUndef
-vim.add_plugin(vim_lib_path, 'plugin/let.vim')
-# :Brackets
-vim.add_plugin(vim_brackets_path, 'plugin/common_brackets.vim')
-# !mark!
-vim.add_plugin(vim_brackets_path, 'plugin/bracketing.base.vim')
-
-has_redo = vim.echo('has("patch-7.4.849")')
-
 RSpec.describe "autoload/lh/map.vim" do
-  after(:all) do
-    vim.kill
-  end
+  # after(:all) do
+    # vim.kill
+  # end
 
   describe "Dependent plugins are available" do
       it "Has lh-vim-lib" do
-          pp vim_flavor_path
-          pp vim.echo('&rtp')
           expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
           expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to eq "1"
           expect(vim.command("scriptnames")).to match(/autoload.lh.option\.vim/)
@@ -46,10 +23,6 @@ RSpec.describe "autoload/lh/map.vim" do
   describe "lh#map#version is >= 2.3.2" do
       it "Checks the current script version" do
           expect(vim.echo('lh#map#version()')).to be >= ('232')
-
-          if has_redo != "1"
-              puts "WARNING: this flavor of vim won't permit lh-brackets to support redo"
-          end
       end
   end
 
@@ -67,23 +40,64 @@ RSpec.describe "autoload/lh/map.vim" do
 
   describe "Test bracket-pair insertions (and redo)" do
       it "Inserts foo(bar" do
+          has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('i(\<esc>')
-          expect(vim.echo('getline(".")')).to eq "()«»"
+          assert_line_contents <<-EOF
+            ()«»
+          EOF
           vim.feedkeys 'ofoo(bar\<esc>'
-          expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
+          assert_line_contents <<-EOF
+            foo(bar)«»
+          EOF
           if has_redo == "1"
               vim.type(".")
               expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
           end
       end
       it "Inserts foo(bar)foo" do
+          has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('ofoo(bar)foo\<esc>')
-          expect(vim.echo('getline(".")')).to eq "foo(bar)foo"
+          assert_line_contents <<-EOF
+            foo(bar)foo
+          EOF
           if has_redo == "1"
               vim.type(".")
-              expect(vim.echo('getline(".")')).to eq "foo(bar)foo"
+              assert_line_contents <<-EOF
+                foo(bar)foo
+              EOF
           end
           # vim.echo('input("pause")')
       end
+
+      it "Inserts Brackets with newline" do
+          vim.command('Brackets <+ +> -nl')
+
+          vim.command('%d_')
+          vim.feedkeys 'i<+\<esc>'
+          assert_buffer_contents <<-EOF
+              <+
+
+              +>«»
+          EOF
+
+          vim.command('%d_')
+          vim.feedkeys 'i<+foo\<esc>'
+          assert_buffer_contents <<-EOF
+              <+
+              foo
+              +>«»
+          EOF
+
+          vim.command('%d_')
+          vim.feedkeys 'i<+foo!jump!bar\<esc>'
+          assert_buffer_contents <<-EOF
+              <+
+              foo
+              +>bar
+          EOF
+
+      end
   end
 end
+
+# vim:set sw=2:
