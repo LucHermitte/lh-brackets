@@ -21,6 +21,8 @@ vim.add_plugin(vim_brackets_path, 'plugin/common_brackets.vim')
 # !mark!
 vim.add_plugin(vim_brackets_path, 'plugin/bracketing.base.vim')
 
+has_redo = vim.echo('has("patch-7.4.849")')
+
 RSpec.describe "autoload/lh/map.vim" do
   after(:all) do
     vim.kill
@@ -44,6 +46,10 @@ RSpec.describe "autoload/lh/map.vim" do
   describe "lh#map#version is >= 2.3.2" do
       it "Checks the current script version" do
           expect(vim.echo('lh#map#version()')).to be >= ('232')
+
+          if has_redo != "1"
+              puts "WARNING: this flavor of vim won't permit lh-brackets to support redo"
+          end
       end
   end
 
@@ -65,14 +71,18 @@ RSpec.describe "autoload/lh/map.vim" do
           expect(vim.echo('getline(".")')).to eq "()«»"
           vim.feedkeys 'ofoo(bar\<esc>'
           expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
-          vim.type(".")
-          expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
+          if has_redo == "1"
+              vim.type(".")
+              expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
+          end
       end
       it "Inserts foo(bar)foo" do
           vim.feedkeys('ofoo(bar)foo\<esc>')
           expect(vim.echo('getline(".")')).to eq "foo(bar)foo"
-          vim.type(".")
-          expect(vim.echo('getline(".")')).to eq "foo(bar)foo"
+          if has_redo == "1"
+              vim.type(".")
+              expect(vim.echo('getline(".")')).to eq "foo(bar)foo"
+          end
           # vim.echo('input("pause")')
       end
   end
