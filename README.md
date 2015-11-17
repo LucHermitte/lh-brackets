@@ -1,3 +1,5 @@
+# lh-brackets [![Build Status](https://secure.travis-ci.org/LucHermitte/lh-brackets.png?branch=master)](http://travis-ci.org/LucHermitte/lh-brackets) [![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
+
 ## Features
 
 map-tools provides various commands and functions to help design smart and advanced mappings dedicated to text insertion.
@@ -107,6 +109,10 @@ As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a 
 ```vim
 ActivateAddons lh-brackets
 ```
+  * or with [vim-flavor](https://github.com/kana/vim-flavor) (which also support dependencies)
+```
+flavor LucHermitte/lh-brackets
+```
   * or you can clone the git repositories
 ```vim
 git clone git@github.com:LucHermitte/lh-vim-lib.git
@@ -134,5 +140,3 @@ Bundle 'LucHermitte/lh-brackets'
   * Most of my ftplugins for examples of use, or more simply the [Python ftplugin](ftplugin/python/python_snippets.vim) shipped with lh-brackets.
   * [muTemplate](http://github.com/LucHermitte/mu-template), a template-files expander built on top of map-tools.
   * [surround plugin on SF](http://www.vim.org/scripts/script.php?script_id=1697)
-
-[![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
