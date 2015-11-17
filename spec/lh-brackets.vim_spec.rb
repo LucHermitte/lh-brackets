@@ -1,5 +1,6 @@
 # encoding: UTF-8
 require 'vimrunner'
+require 'pp'
 
 vim = Vimrunner.start
 # vim = Vimrunner.start_gvim
@@ -23,6 +24,7 @@ RSpec.describe "autoload/lh/map.vim" do
 
   describe "Dependent plugins are available" do
       it "Has lh-vim-lib" do
+          pp vim.echo('&rtp')
           expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
           expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to eq "1"
           expect(vim.command("scriptnames")).to match(/autoload.lh.option\.vim/)
