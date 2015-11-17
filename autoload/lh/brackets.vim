@@ -304,7 +304,7 @@ function! s:ListMappings(isLocal) abort
   let crt_definitions = s:GetDefinitions(a:isLocal)
   for m in crt_definitions
     let cmd = m.mode.'map <silent> ' . m.buffer . m.trigger .' '.m.action
-    " echomsg cmd
+    echomsg cmd
   endfor
 endfunction
 
@@ -546,7 +546,7 @@ endfunction
 function! lh#brackets#define(bang, ...) abort
   " Parse Options {{{3
   let isLocal    = a:bang != "!"
-  let nl         = ''
+  let nl         = '""'
   let insert     = 1
   let visual     = 1
   let normal     = 'default=1'
@@ -554,7 +554,7 @@ function! lh#brackets#define(bang, ...) abort
   for p in a:000
     if     p =~ '-l\%[list]'        | call s:ListMappings(isLocal)  | return
     elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(isLocal) | return
-    elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
+    elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '"\n"'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
@@ -600,7 +600,7 @@ function! lh#brackets#define(bang, ...) abort
   if insert
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
-    let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').','.string(nl).
+    let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').','.(nl).
           \','. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
