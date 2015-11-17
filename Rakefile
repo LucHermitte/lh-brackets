@@ -13,6 +13,11 @@ task :dump do
 end
 
 task :test    => :spec
+
+task :spec do
+    sh 'rspec spec'
+end
+
 task :install do
   sh 'bundle exec vim-flavor install'
 end
