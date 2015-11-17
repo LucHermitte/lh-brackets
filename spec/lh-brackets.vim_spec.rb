@@ -1,18 +1,20 @@
 # encoding: UTF-8
 require 'vimrunner'
 
-# vim = Vimrunner.start
-vim = Vimrunner.start_gvim
+vim = Vimrunner.start
+# vim = Vimrunner.start_gvim
 vim_brackets_path = File.expand_path('../..', __FILE__)
 vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
 vim_dev_path      = File.expand_path('../../../lh-dev', __FILE__)
 
 vim.append_runtimepath(vim_lib_path)
 vim.append_runtimepath(vim_dev_path)
+# LetIfUndef
 vim.add_plugin(vim_lib_path, 'plugin/let.vim')
+# :Brackets
 vim.add_plugin(vim_brackets_path, 'plugin/common_brackets.vim')
+# !mark!
 vim.add_plugin(vim_brackets_path, 'plugin/bracketing.base.vim')
-vim.add_plugin(vim_brackets_path, 'autoload/lh/map.vim')
 
 RSpec.describe "autoload/lh/map.vim" do
   after(:all) do
@@ -22,15 +24,18 @@ RSpec.describe "autoload/lh/map.vim" do
   describe "Dependent plugins are available" do
       it "Has lh-vim-lib" do
           expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
-          expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to be == "1"
+          expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to eq "1"
+          expect(vim.command("scriptnames")).to match(/autoload.lh.option\.vim/)
       end
       it "Has lh-dev" do
           expect(vim.echo('&rtp')).to match(/lh-dev/)
+          expect(vim.echo('lh#dev#version()')).to be >= "135"
+          expect(vim.command("scriptnames")).to match(/autoload.lh.dev\.vim/)
       end
   end
 
-  describe "lh#map#version" do
-      it "returns the current script version" do
+  describe "lh#map#version is >= 2.3.2" do
+      it "Checks the current script version" do
           expect(vim.echo('lh#map#version()')).to be >= ('232')
       end
   end
@@ -48,7 +53,7 @@ RSpec.describe "autoload/lh/map.vim" do
   end
 
   describe "Test bracket-pair insertions (and redo)" do
-      it "inserts foo(bar" do
+      it "Inserts foo(bar" do
           vim.feedkeys('i(\<esc>')
           expect(vim.echo('getline(".")')).to eq "()«»"
           vim.feedkeys 'ofoo(bar\<esc>'
@@ -56,7 +61,7 @@ RSpec.describe "autoload/lh/map.vim" do
           vim.type(".")
           expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
       end
-      it "inserts foo(bar)foo" do
+      it "Inserts foo(bar)foo" do
           vim.feedkeys('ofoo(bar)foo\<esc>')
           expect(vim.echo('getline(".")')).to eq "foo(bar)foo"
           vim.type(".")
