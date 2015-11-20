@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.4
+" Version:      2.3.5
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -14,7 +14,7 @@
 "               examples are the parenthesis, brackets, <,>, etc.
 "               The definitions can be buffer-relative or global.
 "
-"               This command is used by different ftplugins:
+"               This :Bracket command is used by different ftplugins:
 "               <vim_brackets.vim>, <c_brackets.vim> <ML_brackets.vim>,
 "               <html_brackets.vim>, <php_brackets.vim> and <tex_brackets.vim>
 "               -- available on my github respos.
@@ -23,6 +23,9 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 2.3.5:
+"               * Fix regression on
+"                 :Brackets #if\ 0 #else!mark!\n#endif -insert=0 -nl -trigger=,1
 " Version 2.3.4:
 "               * Fix surrounding and -newline
 " Version 2.3.0:
@@ -65,9 +68,9 @@
 "               approach has been deprecated
 " TODO:
 " * Update doc
-" * Move brackets manipulation functions in this autoload plugin
 " * -surround=function('xxx') option
 " * Try to use it to insert stuff like "while() {}" ?
+" * have :Brackets -insert=1 automatically exclude visual and normal modes
 " }}}1
 "=============================================================================
 
@@ -245,6 +248,15 @@ augroup END
 
 " ## Brackets definition functions {{{1
 "------------------------------------------------------------------------
+
+" s:String(s) {{{2
+function! s:String(s)
+  if type(a:s) == type(function('has()'))
+    return string(a:s)
+  endif
+  return '"'.escape(a:s, '"').'"'
+  " return string(a:s)
+endfunction
 
 " s:UnMap(m) {{{2
 function! s:UnMap(m) abort
@@ -586,6 +598,11 @@ function! lh#brackets#define(bang, ...) abort
       endif
       " let Close = close =~ "^function" ? {close} : close   ## don't work with function()
     else
+      " <f-args> double backslash characters other than "\ " or "\\" => we
+      " need to reinterpret them correctly to what they should have been
+      " Let's just fix '\' followed by a letter
+      " exe 'let p = "'.p.'"'
+
       call add(options, p)
     endif
   endfor
@@ -603,10 +620,10 @@ function! lh#brackets#define(bang, ...) abort
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
     let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').',"'.(nl).
-          \'",'. string(Open).','.string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
+          \'",'. s:String(Open).','.s:String(Close).','.string(areSameTriggers).','.string(Exceptions).')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
-      let inserter = 'lh#brackets#closer('.string(options[1]).','.string (Close).','.string(Exceptions).')'
+      let inserter = 'lh#brackets#closer('.s:String(options[1]).','.s:String (Close).','.s:String(Exceptions).')'
       call s:DefineImap(options[1], inserter, isLocal)
       if len(options[1])
         " TODO: enrich <bs> & <del> imaps for the close triggers
@@ -618,11 +635,11 @@ function! lh#brackets#define(bang, ...) abort
   if visual
     if strlen(nl) > 0
       let action = ' <c-\><c-n>@=lh#map#surround('.
-            \ string(options[0].'!cursorhere!').', '.
-            \ string(options[1].'!mark!').", 1, 1, '', 1, ".string(trigger).")\<cr>"
+            \ s:String(options[0].'!cursorhere!').', '.
+            \ s:String(options[1].'!mark!').", 1, 1, '', 1, ".s:String(trigger).")\<cr>"
     else
       let action = ' <c-\><c-n>@=lh#map#surround('.
-            \ string(options[0]).', '.string(options[1]).", 0, 0, '`>ll', 1)\<cr>"
+            \ s:String(options[0]).', '.s:String(options[1]).", 0, 0, '`>ll', 1)\<cr>"
     endif
     call s:DefineMap(s:k_vmap_type.'nore', trigger, action, isLocal, 0)
 
