@@ -2,6 +2,7 @@ require 'tmpdir'
 require 'vimrunner'
 require 'vimrunner/rspec'
 require_relative './support/vim'
+require 'rspec/expectations'
 # require 'simplecov'
 
 # SimpleCov.start
@@ -9,22 +10,26 @@ require_relative './support/vim'
 Vimrunner::RSpec.configure do |config|
   config.reuse_server = true
 
-  vim_brackets_path = File.expand_path('.')
+  vim_plugin_path = File.expand_path('.')
   vim_flavor_path   = ENV['HOME']+'/.vim/flavors'
 
   config.start_vim do
     vim = Vimrunner.start_gvim
     # vim = Vimrunner.start_vim
     vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
-    pp vim_flavor_path
+    vim.prepend_runtimepath(vim_plugin_path)
+
+    vim_UT_path      = File.expand_path('../../../vim-UT', __FILE__)
+    vim.add_plugin(vim_UT_path, 'plugin/UT.vim')
+
+    # pp vim_flavor_path
     # LetIfUndef
-    # vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
     vim_lib_path      = File.expand_path('../lh-vim-lib', __FILE__)
     vim.add_plugin(vim_lib_path, 'plugin/let.vim')
     # :Brackets
-    vim.add_plugin(vim_brackets_path, 'plugin/common_brackets.vim')
+    vim.add_plugin(vim_plugin_path, 'plugin/common_brackets.vim')
     # !mark!
-    vim.add_plugin(vim_brackets_path, 'plugin/bracketing.base.vim')
+    vim.add_plugin(vim_plugin_path, 'plugin/bracketing.base.vim')
     pp vim.echo('&rtp')
 
     has_redo = vim.echo('has("patch-7.4.849")')

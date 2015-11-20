@@ -14,7 +14,13 @@ end
 
 task :test    => :spec
 
-task :install do
-  sh 'bundle exec vim-flavor install'
+task :spec do
+  # 'spec' is implicitly run as well
+  sh 'rspec ~/.vim-flavor/repos/LucHermitte_vim-UT/spec'
 end
 
+
+task :install do
+  sh 'cat VimFlavor >> tests/VimFlavor'
+  sh 'cd tests && bundle exec vim-flavor install'
+end
