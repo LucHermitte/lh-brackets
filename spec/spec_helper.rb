@@ -1,7 +1,7 @@
 require 'tmpdir'
 require 'vimrunner'
 require 'vimrunner/rspec'
-require_relative './support/vim'
+require 'support/vim'
 require 'rspec/expectations'
 # require 'simplecov'
 

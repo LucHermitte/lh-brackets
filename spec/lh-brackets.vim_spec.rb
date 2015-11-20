@@ -1,22 +1,23 @@
 # encoding: UTF-8
 require 'spec_helper'
 require 'pp'
+require 'support/vim_matchers'
 
 RSpec.describe "autoload/lh/map.vim" do
   # after(:all) do
     # vim.kill
   # end
 
-  describe "Dependent plugins are available" do
-      it "Has lh-vim-lib" do
+  describe "Checks dependent plugins are available", :deps => true do
+      it "has lh-vim-lib" do
           expect(vim.echo('&rtp')).to match(/lh-vim-lib/)
           expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to eq "1"
-          expect(vim.command("scriptnames")).to match(/autoload.lh.option\.vim/)
+          expect(/autoload.lh.option\.vim/).to be_sourced
       end
       it "Has lh-dev" do
           expect(vim.echo('&rtp')).to match(/lh-dev/)
           expect(vim.echo('lh#dev#version()')).to be >= "135"
-          expect(vim.command("scriptnames")).to match(/autoload.lh.dev\.vim/)
+          expect(/autoload.lh.dev\.vim/).to be_sourced
       end
   end
 
