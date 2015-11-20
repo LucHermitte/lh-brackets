@@ -28,7 +28,7 @@ function! s:Test_split()
   let head = 'toooooooooooooooooooooooooooooooooo oooooooooooooooooooooooooo'
   let before = '*ttvvabcdefg'
   let after1 = 'hijklmnopqrstuvwxtttt tttt'
-  let after2 = 'hijklmnopqrstuvwxtttttttt'
+  let after2 = ' hijklmnopqrstuvwxtttttttt'
 
   AssertEquals(lh#brackets#_split_line(line1, 76, tw), [head, before, after1])
   AssertEquals(lh#brackets#_split_line(line2, 76, tw), [head, before, after2])
