@@ -33,13 +33,13 @@ RSpec.describe "autoload/lh/map.vim" do
       it "Checks brackets are activated" do
           expect(vim.echo("lh#option#get('cb_no_default_brackets', 0)")).to eq "0"
       end
-      it "Checks there is an imapping to (" do
+      it "has an imapping to (" do
           expect(vim.command("imap (")).to match(/lh#brackets#opener/)
       end
   end
 
-  describe "Test bracket-pair insertions (and redo)" do
-      it "Inserts foo(bar" do
+  describe "Test bracket-pair insertions (and redo)", :brackets => true do
+      specify "Inserts foo(bar", :redo => true do
           has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('i(\<esc>')
           assert_line_contents <<-EOF
@@ -54,7 +54,7 @@ RSpec.describe "autoload/lh/map.vim" do
               expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
           end
       end
-      it "Inserts foo(bar)foo" do
+      specify "Inserts foo(bar)foo", :redo => true do
           has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('ofoo(bar)foo\<esc>')
           assert_line_contents <<-EOF
@@ -68,10 +68,10 @@ RSpec.describe "autoload/lh/map.vim" do
           end
       end
 
-      it "Inserts Brackets with newline" do
+      specify "Inserts Brackets with newline", :newline => true do
           vim.command('Brackets <+ +> -nl')
 
-          vim.normal('ggdG')
+          clear_buffer
           vim.feedkeys 'i<+\<esc>'
           assert_buffer_contents <<-EOF
               <+
@@ -79,7 +79,7 @@ RSpec.describe "autoload/lh/map.vim" do
               +>«»
           EOF
 
-          vim.normal('ggdG')
+          clear_buffer
           vim.feedkeys 'i<+foo\<esc>'
           assert_buffer_contents <<-EOF
               <+
@@ -87,7 +87,7 @@ RSpec.describe "autoload/lh/map.vim" do
               +>«»
           EOF
 
-          vim.normal('ggdG')
+          clear_buffer
           vim.feedkeys 'i<+foo!jump!bar\<esc>'
           assert_buffer_contents <<-EOF
               <+
@@ -96,8 +96,8 @@ RSpec.describe "autoload/lh/map.vim" do
           EOF
       end
 
-      it "Surround with backets" do
-          vim.normal('ggdG')
+      specify "Surround with backets", :surround => true do
+          clear_buffer
           vim.insert('foo bar foo<esc>')
           assert_buffer_contents <<-EOF
             foo bar foo
