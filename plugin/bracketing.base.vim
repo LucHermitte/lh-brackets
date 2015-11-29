@@ -75,7 +75,7 @@
 "               * Add compatibility with vim-latex::imaps.vim
 "       09th dec 2002   by LH
 "               * First steps to support encodings different than latin1
-"                 - ¡...! mappings changed to !...!
+"                 - Â¡...! mappings changed to !...!
 "                 - using nr2char(char2nr("\xab"))
 "               * Name of the <Plug> mappings changed
 "       20th nov 2002   by LH
@@ -114,10 +114,10 @@
 "
 "------------------------------------------------------------------------
 " Options:      {{{1
-" b:marker_open         -> the characters that opens the marker  ; default '«'
-" b:marker_close        -> the characters that closes the marker ; default '»'
+" b:marker_open         -> the characters that opens the marker  ; default 'Â«'
+" b:marker_close        -> the characters that closes the marker ; default 'Â»'
 "       They are buffer-relative in order to be assigned to different values
-"       regarding the filetype of the current buffer ; e.g. '«»' is not an
+"       regarding the filetype of the current buffer ; e.g. 'Â«Â»' is not an
 "       appropriate marker with LaTeX files.
 "
 " g:marker_prefers_select                                       ; default 1
@@ -210,6 +210,8 @@ imap <Plug>MarkersJumpB !jumpB!
 
 " Commands {{{1
 " ========
+command! -nargs=+ SetMarker :call lh#marker#_set(<f-args>, &enc)<bar>:call <sid>UpdateHighlight()
+
 :command! -nargs=0 -range MP exe ":normal <Plug>MarkersJumpB"
 :command! -nargs=0 -range MN exe ":normal <Plug>MarkersJumpF"
 :command! -nargs=* -range MI :call s:MarkerInsert(<q-args>)
@@ -249,7 +251,7 @@ endfunction
 " * @" isn't messed thanks to Srinath Avadhanula (/Benji Fisher ?)
 "
 function! Marker_Jump(param) " {{{2
-  " ¿ forward([1]) or backward(0) ?
+  " Â¿ forward([1]) or backward(0) ?
   let direction = get(a:param, 'direction') ? '' : 'b'
   let delete    = get(a:param, 'delete', 0)
   let mode      = get(a:param, 'mode')
@@ -272,14 +274,14 @@ function! Marker_Jump(param) " {{{2
     "    the second pair.
     " 2- Then, in order to be sure we did jump to a match of the open marker,
     "    we search forward for its closing counter-part.
-    "    Test: with open='«', close = 'ééé', and the text:{{{
-    "       blah «»
-    "       «1ééé  «2ééé
-    "       «3ééé foo
-    "       «4ééé
+    "    Test: with open='Â«', close = 'Ã©Ã©Ã©', and the text:{{{
+    "       blah Â«Â»
+    "       Â«1Ã©Ã©Ã©  Â«2Ã©Ã©Ã©
+    "       Â«3Ã©Ã©Ã© foo
+    "       Â«4Ã©Ã©Ã©
     "    with the cursor on any character. }}}
     "    Without this second test, the cursor would have been moved to the end
-    "    of "blah «" which is not the beginning of a marker.
+    "    of "blah Â«" which is not the beginning of a marker.
     " }}}
     if searchpair('\V'.emo, '', '\V'.substitute(emc, '.$', '\\zs\0', ''), 'b')
       echo '1-'.string(getpos('.'))
@@ -340,11 +342,11 @@ function! s:DoSelect(emo, emc, delete, position, mode)
     if !a:delete &&
           \ (s:Select_Empty_Mark() ||
           \ (matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''))
-      " Case:           Marker containing a tag, e.g.: «tag»
+      " Case:           Marker containing a tag, e.g.: Â«tagÂ»
       " Treatment:      The marker is selected, going into SELECT-mode
       return mode_prefix.select."\<c-g>"
     else
-      " Case:           Empty marker, i.e. not containing a tag, e.g.: «»
+      " Case:           Empty marker, i.e. not containing a tag, e.g.: Â«Â»
       " Treatment:      The marker is deleted, going into INSERT-mode.
       if a:position.lnum == line('.') && a:mode == 'i'
         " Then we can move the cursor instead

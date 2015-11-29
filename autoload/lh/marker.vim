@@ -62,17 +62,17 @@ function! lh#marker#open() abort
   if !exists("b:marker_open")
     " :call Decho( "b:marker_open is not set")
     " Note: \xab <=> <C-K><<
-    call s:SetMarker("\xab", '')
+    call lh#marker#_set("\xab", '')
     " :call Decho( "b:last_encoding_used is set to ".&enc)
     let b:last_encoding_used = &enc
   else
     if !exists('s:last_encoding_used')
       " :call Decho( "s:last_encoding_used is not set")
-      call s:SetMarker(b:marker_open, b:marker_close, &enc)
+      call lh#marker#_set(b:marker_open, b:marker_close, &enc)
       " :call Decho( "b:last_encoding_used is set to ".&enc)
       let b:last_encoding_used = &enc
     elseif &enc != b:last_encoding_used
-      call s:SetMarker(b:marker_open, b:marker_close, b:last_encoding_used)
+      call lh#marker#_set(b:marker_open, b:marker_close, b:last_encoding_used)
       " :call Decho( "b:last_encoding_used is changed to ".&enc)
       let b:last_encoding_used = &enc
     endif
@@ -93,13 +93,13 @@ function! lh#marker#close() abort
   if !exists("b:marker_close")
     " :call Decho( "b:marker_close is not set")
     " Note: \xbb <=> <C-K>>>
-    call s:SetMarker('', "\xbb")
+    call lh#marker#_set('', "\xbb")
     " :call Decho( "b:last_encoding_used is set to ".&enc)
     let b:last_encoding_used = &enc
   else " if exists('s:last_encoding_used')
     if &enc != b:last_encoding_used
       " :call Decho( "b:last_encoding_used is different from current")
-      call s:SetMarker(b:marker_open, b:marker_close, b:last_encoding_used)
+      call lh#marker#_set(b:marker_open, b:marker_close, b:last_encoding_used)
       " :call Decho( "b:last_encoding_used is changed from ".b:last_encoding_used." to ".&enc)
       let b:last_encoding_used = &enc
     endif
@@ -139,12 +139,12 @@ function! s:Option(name, default) " {{{2
   endif
 endfunction
 
-function! s:SetMarker(open, close, ...) " {{{2
+function! lh#marker#_set(open, close, ...) abort " {{{2
   if a:close != '' && a:close == &enc
     throw ":SetMarker: two arguments expected"
   endif
   let from = (a:0!=0) ? a:1 : 'latin1'
-  " :call Dfunc('s:SetMarker('.a:open.','.a:close.','.from.')')
+  " :call Dfunc('lh#marker#_set('.a:open.','.a:close.','.from.')')
 
   " let ret = ''
   if '' != a:open
@@ -155,7 +155,7 @@ function! s:SetMarker(open, close, ...) " {{{2
     let b:marker_close = lh#encoding#iconv(a:close, from, &enc)
     " let ret = ret . "  b:close=".b:marker_close
   endif
-  " :call Dret("s:SetMarker".ret)
+  " :call Dret("lh#marker#_set".ret)
 
   " Exploits Tom Link Stakeholders plugin if installed
   " http://www.vim.org/scripts/script.php?script_id=3326
@@ -165,7 +165,6 @@ function! s:SetMarker(open, close, ...) " {{{2
     runtime autoload/stakeholders.vim
   endif
 endfunction
-command! -nargs=+ SetMarker :call <sid>SetMarker(<f-args>, &enc)<bar>:call <sid>UpdateHighlight()
 
 
 "------------------------------------------------------------------------
