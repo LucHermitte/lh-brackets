@@ -12,6 +12,7 @@
 " History:      {{{1
 "       10th Dec 2015:  by LH
 "               * !mark! & co have been deprecated as mappings
+"               * Support for closing all markers and jumping to the last one
 "       20th Mar 2012:  by LH
 "               * lh-cpp-> GPLv3
 "       03rd Jan 2011:  by LH
@@ -197,6 +198,15 @@ endif
 if !hasmapto('<Plug>MarkersJumpB') && (mapcheck("<M-S-Del>") == "")
   map <unique> <M-S-Del> <Plug>MarkersJumpB
 endif
+if !hasmapto('<Plug>MarkersCloseAllAndJumpToLast', 'v') && (mapcheck("<M-End") == "")
+  vmap <silent> <unique> <M-eNd> <Plug>MarkersCloseAllAndJumpToLast
+endif
+if !hasmapto('<Plug>MarkersCloseAllAndJumpToLast', 'n') && (mapcheck("<M-End") == "")
+  nmap <silent> <unique> <M-End> <Plug>MarkersCloseAllAndJumpToLast
+endif
+if !hasmapto('<Plug>MarkersCloseAllAndJumpToLast', 'i') && (mapcheck("<M-End") == "")
+  imap <silent> <unique> <M-End> <Plug>MarkersCloseAllAndJumpToLast
+endif
 
 inoremap <silent> <Plug>MarkersInsertMark <c-r>=lh#marker#txt()<cr>
 imap     <silent> <Plug>MarkersMark       <Plug>MarkersInsertMark<C-R>=LHMoveWithinMarker()<cr>
@@ -219,6 +229,9 @@ vnoremap <silent> <Plug>MarkersJumpAndDelB <C-\><C-N>@=Marker_Jump({'direction':
 nnoremap <silent> <Plug>MarkersJumpAndDelB @=Marker_Jump({'direction':0, 'mode':'n', 'delete':1})<cr>
 imap     <silent> <Plug>MarkersJumpAndDelB <ESC><Plug>MarkersJumpFAndDel
 
+nnoremap <silent> <Plug>MarkersCloseAllAndJumpToLast a<c-r>=lh#brackets#close_all_and_jump_to_last_on_line(lh#brackets#closing_chars())<cr>
+vmap     <silent> <Plug>MarkersCloseAllAndJumpToLast <C-\><C-N>`><Plug>MarkersCloseAllAndJumpToLast
+imap     <silent> <Plug>MarkersCloseAllAndJumpToLast <c-r>=lh#brackets#close_all_and_jump_to_last_on_line(lh#brackets#closing_chars())<cr>
 " Note: don't add "<script>" within the previous <Plug>-mappings or else they
 " won't work anymore.
 " }}}

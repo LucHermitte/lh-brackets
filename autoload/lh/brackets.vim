@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.5
+" Version:      3.0.0
 " Created:      28th Feb 2008
 "------------------------------------------------------------------------
 " Description:
@@ -23,6 +23,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.0:
+"               * Support for closing all markers and jumping to the last one
 " Version 2.3.5:
 "               * Fix regression on
 "                 :Brackets #if\ 0 #else!mark!\n#endif -insert=0 -nl -trigger=,1
@@ -454,7 +456,7 @@ function! s:JumpOverAllClose(chars, ...) abort
   let del_mark = ''
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
-  let m = matchstr(ll, '^\(['.a:chars.']\|'.lh#marker#txt('.\{-}').'\)\+')
+  let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#txt('.{-}').')+')
   " echomsg ll.'##'.m.'##'
   let lm = strwidth(m)
   let len_match = lh#encoding#strlen(m)
@@ -476,6 +478,19 @@ function! s:JumpOverAllClose(chars, ...) abort
   " echomsg "-->".strtrans(del_mark)
 
   return s:k_move_prefix."\<right>".del_mark
+endfunction
+
+"------------------------------------------------------------------------
+" Function: lh#brackets#closing_chars() {{{3
+function! lh#brackets#closing_chars() abort
+  " TODO: compute from the mappings registered
+  return ']})"'''
+endfunction
+
+"------------------------------------------------------------------------
+" Function: lh#brackets#close_all_and_jump_to_last_on_line(chars, ...) {{{2
+function! lh#brackets#close_all_and_jump_to_last_on_line(chars, ...) abort
+  return call('s:JumpOverAllClose', [a:chars]+a:000)
 endfunction
 
 "------------------------------------------------------------------------

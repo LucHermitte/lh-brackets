@@ -16,6 +16,9 @@ This subsystem provides functions and mappings to:
     See the help about `!mark!`, `lh#marker#txt()`, and `<Plug>MarkersMark`
   * jump forward and backward to those places.  
     See the help about `!jump!`, and `<Plug>MarkersJumpF`
+  * close all placeholders on the same line that are after closing bracket-like
+    characters and jump to the last one -- see
+    `<Plug>MarkersCloseAllAndJumpToLast` which is binded by default to `<M-End>`.
 
 The marker/placeholder characters:
   * default to the French quote characters («»),
@@ -111,7 +114,7 @@ ActivateAddons lh-brackets
 ```
   * or with [vim-flavor](https://github.com/kana/vim-flavor) (which also support dependencies)
 ```
-flavor LucHermitte/lh-brackets
+flavor 'LucHermitte/lh-brackets'
 ```
   * or you can clone the git repositories
 ```vim

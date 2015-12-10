@@ -547,6 +547,17 @@ like: >
         imap <C-<>      <Plug>MarkersMark
         nmap <C-<>      <Plug>MarkersMark
         xmap <C-<>      <Plug>MarkersMark
+<
+
+                            *M-END* *<M-End>* *<Plug>MarkersCloseAllAndJumpToLast*
+I map also `<Plug>MarkersCloseAllAndJumpToLast` to <M-End>.
+This mapping closes all placeholders after the cursor which following closing
+bracket-like characters, and jumps to the last placeholder.
+If you'd rather use other keybindings, then add into your .vimrc something
+like: >
+        imap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
+        nmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
+        vmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
 
 
 Plugins developpers~
