@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v2.3.4)
-*lh-brackets*           For Vim version 7.+     Last change: 17th Nov 2015
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.0.0)
+*lh-brackets*           For Vim version 7.+     Last change: 10th Dec 2015
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -447,6 +447,14 @@ and, to jump to them.
 In visual-mode (and select-mode), |!mark!| will toggle the presence of the
 pair of marker-string around the visual selection.
 
+                                                *g:use_old_bracketting_macros*
+Since version 3.0.0, !mark! and co have bben deprecated has mapping. In
+interactive mode, they won't be available. However, they are still the only
+way to write placeholders and jump between them in lh-brackets functions.
+
+Set `g:use_old_bracketting_macros` to 1 if you want them in INSERT, NORMAL ou
+VISUAL mode.
+
 
                                                 *marker*
                                                 *b:marker_open* *b:marker_close*
@@ -526,9 +534,10 @@ I have also added some other features:
 
                                             *M-INSERT* *M-DELETE* *M-S-DELETE*
                                             *<M-Ins>* *<M-Del>* *<M-S-Del>*
-                    *<Plug>MarkersJumpF* *<Plug>MarkersJumpB* *<Plug>MarkersMark*
-BTW, I map |!mark!| to <M-Insert>, |!jump!| to <M-Delete>, and |!jumpB!| to
-<M-S-Del>.
+                                *<Plug>MarkersInsertMark* *<Plug>MarkersMark*
+                                *<Plug>MarkersJumpF* *<Plug>MarkersJumpB*
+BTW, I map `<Plug>MarkersInsertMark` to <M-Insert>, `<Plug>MarkersJumpF` to
+<M-Delete>, and `<Plug>MarkersJumpB` to <M-S-Del>.
 If you'd rather use other keybindings, then add into your .vimrc something
 like: >
         imap <C-J>      <Plug>MarkersJumpF
@@ -549,9 +558,10 @@ plugins or template-files.
 Note: the marker-string are automatically converted to match the current
 'encoding'.
 
-Also, two mappings *!jump-and-del!* and *!bjump-and-del!* always jump to the
-next/previous marker and delete it whatever the options are. It ensures that
-the (ft)plugins that depend on these mappings will always do the same thing.
+Also, two fake-mappings *!jump-and-del!* and *!bjump-and-del!* always jump to
+the next/previous marker and delete it whatever the options are. It ensures
+that the (ft)plugins that depend on these mappings will always do the same
+thing.
 
                                                 *g:marker_highlight*
 By default markers will be highlighted in a darkdray background when 'bg'

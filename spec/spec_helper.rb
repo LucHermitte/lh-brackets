@@ -19,17 +19,27 @@ Vimrunner::RSpec.configure do |config|
     vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
     vim.prepend_runtimepath(vim_plugin_path)
 
+    # lh-UT
     vim_UT_path      = File.expand_path('../../../vim-UT', __FILE__)
-    vim.add_plugin(vim_UT_path, 'plugin/UT.vim')
+    vim.prepend_runtimepath(vim_UT_path)
+    vim.command('runtime plugin/UT.vim')
 
     # pp vim_flavor_path
-    # LetIfUndef
+    # l-vim-lib
     vim_lib_path      = File.expand_path('../lh-vim-lib', __FILE__)
-    vim.add_plugin(vim_lib_path, 'plugin/let.vim')
-    # :Brackets
-    vim.add_plugin(vim_plugin_path, 'plugin/common_brackets.vim')
-    # !mark!
-    vim.add_plugin(vim_plugin_path, 'plugin/bracketing.base.vim')
+    vim.prepend_runtimepath(vim_lib_path)
+    vim.command('runtime plugin/let.vim') # LetIfUndef
+
+    # lh-brackets
+    vim_brackets_path = File.expand_path('../../../lh-brackets', __FILE__)
+    vim.prepend_runtimepath(vim_brackets_path)
+    vim.command('runtime plugin/misc_map.vim') # Inoreab
+    vim.command('runtime plugin/common_brackets.vim') # Brackets
+    vim.command('runtime plugin/bracketing.base.vim') # !jump!
+    vim.command('vmap <silent> !jump!  <Plug>MarkersJumpF')
+    vim.command('imap <silent> !jump!  <Plug>MarkersJumpF')
+    vim.command('nmap <silent> !jump!  <Plug>MarkersJumpF')
+
     pp vim.echo('&rtp')
 
     has_redo = vim.echo('has("patch-7.4.849")')

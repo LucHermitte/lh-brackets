@@ -3,13 +3,15 @@
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.2
+"               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
+" Version:      3.0.0
 "
 "       Stephen Riehm's braketing macros for vim
 "       Customizations by Luc Hermitte.
 " ======================================================================
 " History:      {{{1
+"       10th Dec 2015:  by LH
+"               * !mark! & co have been deprecated as mappings
 "       20th Mar 2012:  by LH
 "               * lh-cpp-> GPLv3
 "       03rd Jan 2011:  by LH
@@ -196,16 +198,29 @@ if !hasmapto('<Plug>MarkersJumpB') && (mapcheck("<M-S-Del>") == "")
   map <unique> <M-S-Del> <Plug>MarkersJumpB
 endif
 
-" imap <Plug>MarkersMark  !mark!<C-R>=<sid>MoveWithinMarker()<cr>
-imap <Plug>MarkersMark  !mark!<C-R>=LHMoveWithinMarker()<cr>
-vmap <Plug>MarkersMark  !mark!
-nmap <Plug>MarkersMark  !mark!
-map  <Plug>MarkersJumpF !jump!
-imap <Plug>MarkersJumpF !jump!
-map  <Plug>MarkersJumpB !jumpB!
-imap <Plug>MarkersJumpB !jumpB!
-" Note: don't add "<script>" within the four previous <Plug>-mappings or else
-" they won't work anymore.
+inoremap <silent> <Plug>MarkersInsertMark <c-r>=lh#marker#txt()<cr>
+imap     <silent> <Plug>MarkersMark       <Plug>MarkersInsertMark<C-R>=LHMoveWithinMarker()<cr>
+vnoremap <silent> <Plug>MarkersMark       <C-\><C-N>@=LHToggleMarkerInVisual()<cr>
+nmap     <silent> <Plug>MarkersMark       viw<Plug>MarkersMark
+
+" <C-\><C-N> is like '<ESC>', but without any screen flash. Here, we unselect
+" the current selection and go into normal mode.
+vnoremap <silent> <Plug>MarkersJumpF <C-\><C-N>@=Marker_Jump({'direction':1, 'mode':'v'})<cr>
+inoremap <silent> <Plug>MarkersJumpF <C-R>=Marker_Jump({'direction':1, 'mode':'i'})<cr>
+nnoremap <silent> <Plug>MarkersJumpF @=Marker_Jump({'direction':1, 'mode':'n'})<cr>
+vnoremap <silent> <Plug>MarkersJumpB <C-\><C-N>`<@=Marker_Jump({'direction':0, 'mode':'v'})<cr>
+nnoremap <silent> <Plug>MarkersJumpB @=Marker_Jump({'direction':0, 'mode':'n'})<cr>
+inoremap <silent> <Plug>MarkersJumpB <C-R>=Marker_Jump({'direction':0, 'mode':'i'})<cr>
+
+vnoremap <silent> <Plug>MarkersJumpAndDelF <C-\><C-N>@=Marker_Jump({'direction':1, 'mode':'v', 'delete':1})<cr>
+nnoremap <silent> <Plug>MarkersJumpAndDelF @=Marker_Jump({'direction':1, 'mode':'n', 'delete':1})<cr>
+imap     <silent> <Plug>MarkersJumpAndDelF <ESC><Plug>MarkersJumpFAndDel
+vnoremap <silent> <Plug>MarkersJumpAndDelB <C-\><C-N>@=Marker_Jump({'direction':0, 'mode':'v', 'delete':1})<cr>
+nnoremap <silent> <Plug>MarkersJumpAndDelB @=Marker_Jump({'direction':0, 'mode':'n', 'delete':1})<cr>
+imap     <silent> <Plug>MarkersJumpAndDelB <ESC><Plug>MarkersJumpFAndDel
+
+" Note: don't add "<script>" within the previous <Plug>-mappings or else they
+" won't work anymore.
 " }}}
 
 " Commands {{{1
@@ -228,9 +243,9 @@ function! s:MarkerInsert(text) range
         \ ")\n.  =(".line(".").','.virtcol("."). ")\n\n Mode ?",
         \ "&Visual\n&Normal\n&Insert", 1)
   if mode == 1
-    normal gv!mark!
+    exe "normal gv\<Plug>MarkersMark"
   elseif mode == 2
-    normal viw!mark!
+    exe "normal viw\<Plug>MarkersMark"
   elseif mode == 3
     "<c-o>:MI titi toto<cr>
     let text = lh#marker#txt(a:text)
@@ -471,30 +486,30 @@ endif
 
 " Internal mappings {{{1
 " =================
-" Defines: !mark! and !jump!
-" Note: these mappings are the one used by some other (ft)plugins I maintain.
+if get(g:, 'use_old_bracketting_macros', 0)
+  " Defines: !mark! and !jump!
+  " Note: these mappings are the one used by some other (ft)plugins I maintain.
 
-" Set a marker ; contrary to <Plug>!mark!, !mark! doesn't move the cursor
-" between the marker characters.
-inoremap <silent> !mark! <c-r>=lh#marker#txt()<cr>
-vnoremap <silent> !mark! <C-\><C-N>@=LHToggleMarkerInVisual()<cr>
-nmap     <silent> !mark! viw!mark!
+  " Set a marker ; contrary to <Plug>MarkersInsertMark, !mark! doesn't move the
+  " cursor between the marker characters.
+  imap <silent> !mark! <Plug>MarkersMark
+  vmap <silent> !mark! <Plug>MarkersMark
+  nmap <silent> !mark! <Plug>MarkersMark
 
-" <C-\><C-N> is like '<ESC>', but without any screen flash. Here, we unselect
-" the current selection and go into normal mode.
-vnoremap <silent> !jump!  <C-\><C-N>@=Marker_Jump({'direction':1, 'mode':'v'})<cr>
-inoremap <silent> !jump!  <C-R>=Marker_Jump({'direction':1, 'mode':'i'})<cr>
-nnoremap <silent> !jump!  @=Marker_Jump({'direction':1, 'mode':'n'})<cr>
-vnoremap <silent> !jumpB! <C-\><C-N>`<@=Marker_Jump({'direction':0, 'mode':'v'})<cr>
-nnoremap <silent> !jumpB! @=Marker_Jump({'direction':0, 'mode':'n'})<cr>
-inoremap <silent> !jumpB! <C-R>=Marker_Jump({'direction':0, 'mode':'i'})<cr>
+  vmap <silent> !jump!  <Plug>MarkersJumpF
+  imap <silent> !jump!  <Plug>MarkersJumpF
+  nmap <silent> !jump!  <Plug>MarkersJumpF
+  vmap <silent> !jumpB! <Plug>MarkersJumpB
+  nmap <silent> !jumpB! <Plug>MarkersJumpB
+  imap <silent> !jumpB! <Plug>MarkersJumpB
 
-vnoremap <silent> !jump-and-del!  <C-\><C-N>@=Marker_Jump({'direction':1, 'mode':'v', 'delete':1})<cr>
-nnoremap <silent> !jump-and-del!  @=Marker_Jump({'direction':1, 'mode':'n', 'delete':1})<cr>
-imap     <silent> !jump-and-del!  <ESC>!jump-and-del!
-vnoremap <silent> !bjump-and-del! <C-\><C-N>@=Marker_Jump({'direction':0, 'mode':'v', 'delete':1})<cr>
-nnoremap <silent> !bjump-and-del! @=Marker_Jump({'direction':0, 'mode':'n', 'delete':1})<cr>
-imap     <silent> !bjump-and-del! <ESC>!bjump-and-del!
+  vmap <silent> !jump-and-del!  <Plug>MarkersJumpAndDelF
+  nmap <silent> !jump-and-del!  <Plug>MarkersJumpAndDelF
+  imap <silent> !jump-and-del!  <Plug>MarkersJumpAndDelF
+  vmap <silent> !bjump-and-del! <Plug>MarkersJumpAndDelB
+  nmap <silent> !bjump-and-del! <Plug>MarkersJumpAndDelB
+  imap <silent> !bjump-and-del! <Plug>MarkersJumpAndDelB
+endif
 
 " }}}1
 " ============================================================================
@@ -503,108 +518,110 @@ imap     <silent> !bjump-and-del! <ESC>!bjump-and-del!
 "
 
 "
-"       Quoting/bracketting macros
-"       Note: The z cut-buffer is used to temporarily store data!
-"
-"       double quotes
-imap !"! <C-V>"<C-V>"!mark!<ESC>F"i
-vmap !"! "zc"<C-R>z"<ESC>
-"       single quotes
-imap !'! <C-V>'<C-V>'!mark!<ESC>F'i
-vmap !'! "zc'<C-R>z'<ESC>
-"       stars
-imap !*! <C-V>*<C-V>*!mark!<ESC>F*i
-vmap !*! "zc*<C-R>z*<ESC>
-"       braces
-imap !(! <C-V>(<C-V>)!mark!<ESC>F)i
-vmap !(! "zc(<C-R>z)<ESC>
-"       braces - with padding
-imap !)! <C-V>(  <C-V>)!mark!<ESC>F i
-vmap !)! "zc( <C-R>z )<ESC>
-"       underlines
-imap !_! <C-V>_<C-V>_!mark!<ESC>F_i
-vmap !_! "zc_<C-R>z_<ESC>
-"       angle-brackets
-imap !<! <C-V><<C-V>>!mark!<ESC>F>i
-vmap !<! "zc<<C-R>z><ESC>
-"       angle-brackets with padding
-imap !>! <C-V><  <C-V>>!mark!<ESC>F i
-vmap !>! "zc< <C-R>z ><ESC>
-"       square brackets
-imap ![! <C-V>[<C-V>]!mark!<ESC>F]i
-vmap ![! "zc[<C-R>z]<ESC>
-"       square brackets with padding
-imap !]! <C-V>[  <C-V>]!mark!<ESC>F i
-vmap !]! "zc[ <C-R>z ]<ESC>
-"       back-quotes
-imap !`! <C-V>`<C-V>`!mark!<ESC>F`i
-vmap !`! "zc`<C-R>z`<ESC>
-"       curlie brackets
-imap !{! <C-V>{<C-V>}!mark!<ESC>F}i
-vmap !{! "zc{<C-R>z}<ESC>
-"       new block bound by curlie brackets
-imap !}! <ESC>o{<C-M>!mark!<ESC>o}!mark!<ESC>^%!jump!
-vmap !}! >'<O{<ESC>'>o}<ESC>^
-"       spaces :-)
-imap !space! .  !mark!<ESC>F.xa
-vmap !space! "zc <C-R>z <ESC>
-"       Nroff bold
-imap !nroffb! \fB\fP!mark!<ESC>F\i
-vmap !nroffb! "zc\fB<C-R>z\fP<ESC>
-"       Nroff italic
-imap !nroffi! \fI\fP!mark!<ESC>F\i
-vmap !nroffi! "zc\fI<C-R>z\fP<ESC>
+if get(g:, 'use_old_bracketting_macros', 0)
+  "       Quoting/bracketting macros
+  "       Note: The z cut-buffer is used to temporarily store data!
+  "
+  "       double quotes
+  imap !"! <C-V>"<C-V>"!mark!<ESC>F"i
+  vmap !"! "zc"<C-R>z"<ESC>
+  "       single quotes
+  imap !'! <C-V>'<C-V>'!mark!<ESC>F'i
+  vmap !'! "zc'<C-R>z'<ESC>
+  "       stars
+  imap !*! <C-V>*<C-V>*!mark!<ESC>F*i
+  vmap !*! "zc*<C-R>z*<ESC>
+  "       braces
+  imap !(! <C-V>(<C-V>)!mark!<ESC>F)i
+  vmap !(! "zc(<C-R>z)<ESC>
+  "       braces - with padding
+  imap !)! <C-V>(  <C-V>)!mark!<ESC>F i
+  vmap !)! "zc( <C-R>z )<ESC>
+  "       underlines
+  imap !_! <C-V>_<C-V>_!mark!<ESC>F_i
+  vmap !_! "zc_<C-R>z_<ESC>
+  "       angle-brackets
+  imap !<! <C-V><<C-V>>!mark!<ESC>F>i
+  vmap !<! "zc<<C-R>z><ESC>
+  "       angle-brackets with padding
+  imap !>! <C-V><  <C-V>>!mark!<ESC>F i
+  vmap !>! "zc< <C-R>z ><ESC>
+  "       square brackets
+  imap ![! <C-V>[<C-V>]!mark!<ESC>F]i
+  vmap ![! "zc[<C-R>z]<ESC>
+  "       square brackets with padding
+  imap !]! <C-V>[  <C-V>]!mark!<ESC>F i
+  vmap !]! "zc[ <C-R>z ]<ESC>
+  "       back-quotes
+  imap !`! <C-V>`<C-V>`!mark!<ESC>F`i
+  vmap !`! "zc`<C-R>z`<ESC>
+  "       curlie brackets
+  imap !{! <C-V>{<C-V>}!mark!<ESC>F}i
+  vmap !{! "zc{<C-R>z}<ESC>
+  "       new block bound by curlie brackets
+  imap !}! <ESC>o{<C-M>!mark!<ESC>o}!mark!<ESC>^%!jump!
+  vmap !}! >'<O{<ESC>'>o}<ESC>^
+  "       spaces :-)
+  imap !space! .  !mark!<ESC>F.xa
+  vmap !space! "zc <C-R>z <ESC>
+  "       Nroff bold
+  imap !nroffb! \fB\fP!mark!<ESC>F\i
+  vmap !nroffb! "zc\fB<C-R>z\fP<ESC>
+  "       Nroff italic
+  imap !nroffi! \fI\fP!mark!<ESC>F\i
+  vmap !nroffi! "zc\fI<C-R>z\fP<ESC>
 
-"
-" Extended / Combined macros
-"       mostly of use to programmers only
-"
-"       typical function call
-imap !();!  <C-V>(<C-V>);!mark!<ESC>F)i
-imap !(+);! <C-V>(  <C-V>);!mark!<ESC>F i
-"       variables
-imap !$! $!{!
-vmap !$! "zc${<C-R>z}<ESC>
-"       function definition
-imap !func! !)!!mark!!jump!!}!!mark!<ESC>kk0!jump!
-vmap !func! !}!'<kO!)!!mark!!jump!<ESC>I
+  "
+  " Extended / Combined macros
+  "       mostly of use to programmers only
+  "
+  "       typical function call
+  imap !();!  <C-V>(<C-V>);!mark!<ESC>F)i
+  imap !(+);! <C-V>(  <C-V>);!mark!<ESC>F i
+  "       variables
+  imap !$! $!{!
+  vmap !$! "zc${<C-R>z}<ESC>
+  "       function definition
+  imap !func! !)!!mark!!jump!!}!!mark!<ESC>kk0!jump!
+  vmap !func! !}!'<kO!)!!mark!!jump!<ESC>I
 
-"
-" Special additions:
-"
-"       indent mail
-vmap !mail! :s/^[^ <TAB>]*$/> &/<C-M>
-map  !mail! :%s/^[^ <TAB>]*$/> &/<C-M>
-"       comment marked lines
-imap !#comment! <ESC>0i# <ESC>A
-vmap !#comment! :s/^/# /<C-M>
-map  !#comment! :s/^/# /<C-M>j
-imap !/comment! <ESC>0i// <ESC>A
-vmap !/comment! :s,^,// ,<C-M>
-map  !/comment! :s,^,// ,<C-M>j
-imap !*comment! <ESC>0i/* <ESC>A<TAB>*/<ESC>F<TAB>i
-vmap !*comment! :s,.*,/* &      */,<C-M>
-map  !*comment! :s,.*,/* &      */,<C-M>j
-"       uncomment marked lines (strip first few chars)
-"       doesn't work for /* comments */
-vmap !stripcomment! :s,^[ <TAB>]*[#>/]\+[ <TAB>]\=,,<C-M>
-map  !stripcomment! :s,^[ <TAB>]*[#>/]\+[ <TAB>]\=,,<C-M>j
+  "
+  " Special additions:
+  "
+  "       indent mail
+  vmap !mail! :s/^[^ <TAB>]*$/> &/<C-M>
+  map  !mail! :%s/^[^ <TAB>]*$/> &/<C-M>
+  "       comment marked lines
+  imap !#comment! <ESC>0i# <ESC>A
+  vmap !#comment! :s/^/# /<C-M>
+  map  !#comment! :s/^/# /<C-M>j
+  imap !/comment! <ESC>0i// <ESC>A
+  vmap !/comment! :s,^,// ,<C-M>
+  map  !/comment! :s,^,// ,<C-M>j
+  imap !*comment! <ESC>0i/* <ESC>A<TAB>*/<ESC>F<TAB>i
+  vmap !*comment! :s,.*,/* &      */,<C-M>
+  map  !*comment! :s,.*,/* &      */,<C-M>j
+  "       uncomment marked lines (strip first few chars)
+  "       doesn't work for /* comments */
+  vmap !stripcomment! :s,^[ <TAB>]*[#>/]\+[ <TAB>]\=,,<C-M>
+  map  !stripcomment! :s,^[ <TAB>]*[#>/]\+[ <TAB>]\=,,<C-M>j
 
-"
-" HTML Macros
-" ===========
-"
-"       turn the current word into a HTML tag pair, ie b -> <b></b>
-imap !Htag! <ESC>"zyiwciw<<C-R>z></<C-R>z>!mark!<ESC>F<i
-vmap !Htag! "zc<!mark!><C-R>z</!mark!><ESC>`<!jump!
-"
-"       set up a HREF
-imap !Href! <a href="!mark!">!mark!</a>!mark!<ESC>`[!jump!
-vmap !Href! "zc<a href="!mark!"><C-R>z</a>!mark!<ESC>`<!jump!
-"
-"       set up a HREF name (tag)
-imap !Hname! <a name="!mark!">!mark!</a>!mark!<ESC>`[!jump!
-vmap !Hname! "zc<a name="!mark!"><C-R>z</a>!mark!<ESC>`<!jump!
+  "
+  " HTML Macros
+  " ===========
+  "
+  "       turn the current word into a HTML tag pair, ie b -> <b></b>
+  imap !Htag! <ESC>"zyiwciw<<C-R>z></<C-R>z>!mark!<ESC>F<i
+  vmap !Htag! "zc<!mark!><C-R>z</!mark!><ESC>`<!jump!
+  "
+  "       set up a HREF
+  imap !Href! <a href="!mark!">!mark!</a>!mark!<ESC>`[!jump!
+  vmap !Href! "zc<a href="!mark!"><C-R>z</a>!mark!<ESC>`<!jump!
+  "
+  "       set up a HREF name (tag)
+  imap !Hname! <a name="!mark!">!mark!</a>!mark!<ESC>`[!jump!
+  vmap !Hname! "zc<a name="!mark!"><C-R>z</a>!mark!<ESC>`<!jump!
+endif
 
 " }}}1
 " ======================================================================

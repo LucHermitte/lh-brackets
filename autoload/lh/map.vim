@@ -3,17 +3,18 @@
 " Author:       Luc Hermitte <EMAIL:hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      2.3.4
-let s:k_version = '234'
+"               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
+" Version:      3.0.0
+let s:k_version = '300'
 " Created:      03rd Nov 2015
-" Last Update:  17th Nov 2015
+" Last Update:  10th Dec 2015
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.0.0 !mark! & co have been deprecated as mappings
 "       v2.3.0 functions moved from plugin/misc_map.vim
 " TODO:
 " * Simplify the way mappings are defined, hopefully to get rid of
@@ -168,13 +169,23 @@ endfunction
 " It considers that every «!.\{-}!» pattern is associated to an INSERT-mode
 " mapping and expands it.
 " It is used to define marked mappings ; cf <ftplugin/c/c_snippets.vim>
+let s:k_mappings_translation = {
+      \ '!mark!'         : '<Plug>MarkersInsertMark',
+      \ '!jump!'         : '<Plug>MarkersJumpF',
+      \ '!jumpB!'        : '<Plug>MarkersJumpB',
+      \ '!jump-and-del!' : '<Plug>MarkersJumpAndDelF',
+      \ '!bjump-and-del!': '<Plug>MarkersJumpAndDelB'
+      \ }
+
 function! lh#map#build_map_seq(seq) abort
   let r = ''
   let s = a:seq
   while strlen(s) != 0 " For every '!.*!' pattern, extract it
-    let r .= substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\1', '')
-    let c =  substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\3', '')
-    let s =  substitute(s,'^\(.\{-}\)\(\(!\k\{-1,}!\)\(.*\)\)\=$', '\4', '')
+    let r .= substitute(s,'\v^(.{-})((!\k{-1,}!)(.*))=$', '\1', '')
+    let c =  substitute(s,'\v^(.{-})((!\k{-1,}!)(.*))=$', '\3', '')
+    let s =  substitute(s,'\v^(.{-})((!\k{-1,}!)(.*))=$', '\4', '')
+    " !mark! & cie need translation now
+    let c = get(s:k_mappings_translation, c, c)
     let m = maparg(c,'i')
     if strlen(m) != 0
       silent exe 'let m="' . substitute(m, '<\(.\{-1,}\)>', '"."\\<\1>"."', 'g') . '"'
@@ -203,7 +214,7 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
   let rhs = escape(a:expr, '\')
   " Strip marks (/placeholders) if they are not wanted
   if ! lh#brackets#usemarks()
-    let rhs = substitute(rhs, '!mark!\|<+\k*+>', '', 'g')
+    let rhs = substitute(rhs, '\v!mark!|\<+\k*+\>', '', 'g')
   endif
   " Interpret the sequence if it is meant to
   if rhs =~ '\m!\(mark\%(here\)\=\|movecursor\)!'

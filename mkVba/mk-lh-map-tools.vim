@@ -3,11 +3,11 @@
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.4
-let s:version = '2.3.4'
+"               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
+" Version:	3.0.0
+let s:version = '3.0.0'
 " Created:	06th Nov 2007
-" Last Update:  17th Nov 2015
+" Last Update:  10th Dec 2015
 "------------------------------------------------------------------------
 cd <sfile>:p:h
 try
