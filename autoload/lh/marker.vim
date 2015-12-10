@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.0
-let s:k_version = 230
+" Version:      3.0.0
+let s:k_version = 300
 " Created:      27th Nov 2013
 "------------------------------------------------------------------------
 " Description:
@@ -112,22 +112,23 @@ function! lh#marker#txt(...) abort
   return lh#marker#open() . ((a:0>0) ? a:1 : '') . lh#marker#close()
 endfunction
 
-" Function: lh#marker#is_a_marker() {{{3
+" Function: lh#marker#is_a_marker(...) {{{3
 " Returns whether the text currently selected matches a marker and only one.
-function! lh#marker#is_a_marker() abort
-  if line("'<") == line("'>") " I suppose markers don't spread over several lines
-    " Extract the selected text
-    let a = lh#visual#selection()
-
+function! lh#marker#is_a_marker(...) abort
+  if a:0 > 0
     " Check whether the selected text matches a marker (and only one)
-    if (a =~ '^'.lh#marker#txt('.\{-}').'$')
-          \ && (a !~ '\%(.*'.lh#marker#close().'\)\{2}')
-      " If so, return {a:begin}, or {im_seq} if provided
-      " return 'gv"_c'.((a:0>0) ? (a:1) : (a:begin))
-      return 1
+    return (a:1 =~ '^'.lh#marker#txt('.\{-}').'$')
+          \ && (a:1 !~ '\%(.*'.lh#marker#close().'\)\{2}')
+  else
+    if line("'<") == line("'>") " I suppose markers don't spread over several lines
+      " Extract the selected text
+      let a = lh#visual#selection()
+
+      " Check whether the selected text matches a marker (and only one)
+      return lh#marker#is_a_marker(a)
     endif
+    return 0
   endif
-  return 0
 endfunction
 
 "------------------------------------------------------------------------
