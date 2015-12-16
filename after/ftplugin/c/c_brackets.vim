@@ -75,6 +75,11 @@ if exists(':Brackets')
   "}
   :Brackets { } -visual=0 -insert=1 -open=function('lh#cpp#brackets#close_curly')
 
+  " Support for C++11 [[atributes]]
+  :Brackets [ ] -visual=0 -insert=1
+        \ -open=function('lh#cpp#brackets#square_open')
+        \ -clos=function('lh#cpp#brackets#square_close')
+
   " Doxygen surround action
   :Brackets <tt> </tt> -visual=1 -insert=0 -trigger=<localleader>tt
   " :Brackets /* */ -visual=0

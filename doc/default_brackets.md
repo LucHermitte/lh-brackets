@@ -22,6 +22,8 @@ The following mappings apply to all filetypes (unless specified otherwise, or sp
 | **keys**                | expands into ..             | surrounds the selection with ... <sup>2</sup> | surrounds the current ... |
 | `(`                     | `(<cursor>)«»`              | `(<selection>)`                               | word                      |
 | `[`                     | `[<cursor>]«»`              | <sup>1</sup>                                  | <sup>1</sup>              |
+| `[` after a `[`         | `[[<cursor>]]«»`            | n/a                                           | n/a                       |
+| `]` before `]]`         | close all `]]`              | n/a                                           | n/a                       |
 | `<leader>[`             |                             | `[<selection>]`                               | word                      |
 | `{`                     | `{<cursor>}«»`<sup>3</sup>  | `{<selection>}`                               | word                      |
 | `<leader>{`             |                             | `{\n<selection>\n}«»`                         | line                      |
