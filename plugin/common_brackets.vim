@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.4
+" Version:	2.4.0
 " Purpose:      {{{1
 " 		This file defines a command (:Brackets) that simplifies
 " 		the definition of mappings that insert pairs of caracters when
@@ -20,6 +20,8 @@
 " 		BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 2.4.0:
+" 		* More brackets manipulations
 " Version 2.3.x:
 "               * File deprecated. Use autoload/lh/map.vim instead
 " Version 2.2.0:
@@ -296,45 +298,51 @@ function! s:DeleteBrackets() " {{{
   endif
 endfunction " }}}
 
-function! s:ChangeCurly() " {{{
-  let s_matchpairs = &matchpairs
-  set matchpairs+=<:>,(:),{:},[:]
-  let s:c = getline(line("."))[col(".") - 1]
-  if s:c =~ '[\|(\|<'     | normal! %r}``r{
-  elseif s:c =~ ']\|)\|>' | normal! %%r}``r{%
+function! s:ChangeTo(open_close) abort " {{{
+  let line = getline(line("."))
+  let off = col(".") - 1
+  let c = line[off]
+  " matchpairs only accept different pair characters
+  if c =~ '[''/"`]'
+    " let's suppose everything is on the same line
+    " let's ignore vim comments
+    " let's ignore embedded stuff like "'"
+
+    " need to detect to which pair the character belongs to
+    let m = len(lh#string#matches(line[:off], c))
+    let lline = split(line, '\zs')
+    if m % 2 == 0
+      let c2 = matchend(line[:off-1], '.*'.c)
+      if c2 >= 0
+	let lline[c2-1] = a:open_close[0]
+	let lline[off]  = a:open_close[1]
+	let line = join(lline, '')
+	call setline(line('.'), line)
+      endif
+    else
+      let c2 = stridx(line, c, off+1 )
+      if c2 >= 0
+	let lline[c2] = a:open_close[1]
+	let lline[off]  = a:open_close[0]
+	let line = join(lline, '')
+	call setline(line('.'), line)
+      endif
+    endif
+
+    return
   endif
-  let &matchpairs = s_matchpairs
+  let cleanup = lh#on#exit()
+	\.restore('&matchpairs')
+  try
+    set matchpairs+=<:>,(:),{:},[:]
+    if has_key(s:k_pairs, c) | exe 'normal! %r'.(a:open_close[1]).'``r'.(a:open_close[0])
+    elseif c =~ '[)>}\]]'    | exe 'normal! %%r'.(a:open_close[1]).'``r'.(a:open_close[0])
+    endif
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction " }}}
 
-function! s:ChangeSquare() " {{{ " {{{
-  let s_matchpairs = &matchpairs
-  set matchpairs+=<:>,(:),{:},[:]
-  let s:c = getline(line("."))[col(".") - 1]
-  if s:c =~ '[(<{]'     | normal! %r]``r[
-  elseif s:c =~ '[)}>]' | normal! %%r]``r[%
-  endif
-  let &matchpairs = s_matchpairs
-endfunction " }}} " }}}
-
-function! s:ChangeAngle() " {{{ " {{{
-  let s_matchpairs = &matchpairs
-  set matchpairs+=<:>,(:),{:},[:]
-  let s:c = getline(line("."))[col(".") - 1]
-  if s:c =~ '[[({]'       | normal! %r>``r<
-  elseif s:c =~ ')\|}\|]' | normal! %%r>``r<``
-  endif
-  let &matchpairs = s_matchpairs
-endfunction " }}} " }}}
-
-function! s:ChangeRound() " {{{
-  let s_matchpairs = &matchpairs
-  set matchpairs+=<:>,(:),{:},[:]
-  let s:c = getline(line("."))[col(".") - 1]
-  if s:c =~ '[\|{\|<'     | normal! %r)``r(
-  elseif s:c =~ ']\|}\|>' | normal! %%r)``r(%
-  endif
-  let &matchpairs = s_matchpairs
-endfunction " }}}
 
 function! s:ToggleBackslash() " {{{
   let s:b = getline(line("."))[col(".") - 2]
@@ -350,22 +358,31 @@ function! s:ToggleBackslash() " {{{
   endif
 endfunction " }}}
 
+" TODO: get the current pairs from the one registered in lh#brackets
+let s:k_pairs = {
+      \ '(' : [ '(', ')' ],
+      \ '[' : [ '[', ']' ],
+      \ '{' : [ '{', '}' ],
+      \ '<' : [ '<', '>' ],
+      \ '"' : [ '"', '"' ],
+      \ '`' : [ '`', '`' ],
+      \ '/' : [ '/', '/' ],
+      \ "'" : [ "'", "'" ]
+      \ }
 function! BracketsManipMode(starting_key) " {{{
   redraw! " clear the msg line
   echohl StatusLineNC
-  echo "\r-- brackets manipulation mode (/x/(/[/{/</\\/<F1>/q/)"
+  echo "\r-- brackets manipulation mode (x ( [ { < ' \" ` \\ <F1> q)"
   echohl None
   let key = getchar()
   let bracketsManip=nr2char(key)
-  if (-1 != stridx("x([{<\\q",bracketsManip)) ||
+  if (-1 != stridx("x".join(keys(s:k_pairs), '')."\\q",bracketsManip)) ||
         \ (key =~ "\\(\<F1>\\|\<Del>\\)")
     if     bracketsManip == "x"      || key == "\<Del>"
-      call s:DeleteBrackets() | redraw! | return ''
-    elseif bracketsManip == "("      | call s:ChangeRound()
-    elseif bracketsManip == "["      | call s:ChangeSquare()
-    elseif bracketsManip == "{"      | call s:ChangeCurly()
-    elseif bracketsManip == "<"      | call s:ChangeAngle()
-    elseif bracketsManip == "\\"     | call s:ToggleBackslash()
+      call s:DeleteBrackets()    | redraw! | return ''
+    elseif bracketsManip == "\\" | call s:ToggleBackslash()
+    elseif has_key(s:k_pairs, bracketsManip)
+      call s:ChangeTo(s:k_pairs[bracketsManip])
     elseif key == "\<F1>"
       redraw! " clear the msg line
       echo "\r *x* -- delete the current brackets pair\n"
@@ -373,6 +390,9 @@ function! BracketsManipMode(starting_key) " {{{
       echo " *[* -- change the current brackets pair to square brackets []\n"
       echo " *{* -- change the current brackets pair to curly brackets {}\n"
       echo " *<* -- change the current brackets pair to angle brackets <>\n"
+      echo " *'* -- change the current brackets pair to single quotes ''\n"
+      echo " *\"* -- change the current brackets pair to double quotes \"\"\n"
+      echo " *`* -- change the current brackets pair to back quotes ''\n"
       echo " *\\* -- toggle a backslash before the current brackets pair\n"
       echo " *q* -- quit the mode\n"
       continue
