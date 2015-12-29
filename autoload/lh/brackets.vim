@@ -262,9 +262,13 @@ endfunction
 
 " s:UnMap(m) {{{2
 function! s:UnMap(m) abort
-  let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
-  if &verbose >= 1 | echomsg cmd | endif
-  exe cmd
+  try
+    let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
+    if &verbose >= 1 | echomsg cmd | endif
+    exe cmd
+  catch /.*No such mapping.*/
+    if &verbose >= 1 | echomsg "no mapping for: ".cmd | endif
+  endtry
 endfunction
 
 " s:Map(m) {{{2
