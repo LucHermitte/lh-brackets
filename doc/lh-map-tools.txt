@@ -538,7 +538,7 @@ I have also added some other features:
                                 *<Plug>MarkersJumpF* *<Plug>MarkersJumpB*
 BTW, I map `<Plug>MarkersInsertMark` to <M-Insert>, `<Plug>MarkersJumpF` to
 <M-Delete>, and `<Plug>MarkersJumpB` to <M-S-Del>.
-If you'd rather use other keybindings, then add into your .vimrc something
+If you'd rather use other keybindings, then add into your |.vimrc| something
 like: >
         imap <C-J>      <Plug>MarkersJumpF
          map <C-J>      <Plug>MarkersJumpF
@@ -553,7 +553,7 @@ like: >
 I map also `<Plug>MarkersCloseAllAndJumpToLast` to <M-End>.
 This mapping closes all placeholders after the cursor which following closing
 bracket-like characters, and jumps to the last placeholder.
-If you'd rather use other keybindings, then add into your .vimrc something
+If you'd rather use other keybindings, then add into your |.vimrc| something
 like: >
         imap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
         nmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
@@ -641,15 +641,16 @@ The options are:
                                                         *:Brackets-!*
 (*) When the command is called with a {bang}[!], the mappings defined will be
     global. Otherwise, the mappings will be local to the current buffer.
-    Banged calls are expected to be done in the |.vimrc|, while the non-banged
-    ones are expected to be done in a ftplugin (see |:Brackets-notes|).
+    Banged calls are expected to be done in the |.vimrc|, after lh-brackets
+    has been loaded by your plugin manager, while the non-banged ones are
+    expected to be done in a ftplugin (see |:Brackets-notes|).
     A global mapping can be neutralized in filetypes thanks to the
     |:Brackets-but| option, or by forcing the trigger to do nothing when in
     specific filetypes. For instance, by adding the following in
     {rtp}/ftplugin/help.vim  (:h |:map-<buffer>|) >
         inoremap <buffer> { {
 <   the default behaviour will be enforced. We can also override a mapping
-   this way, or by using :Bracket, but un-banged. e.g. in
+   this way, or by using `:Bracket`, but un-banged. e.g. in
    {rtp}/ftplugin/tex.vim: >
        :Bracket ( ) -esc
 <
@@ -659,7 +660,7 @@ The options are:
    leaders in your mappings, your will have to execute |:Brackets| from
    |ftplugin|s placed in the |after-directory|.
 
-(*) -insert=(Boolean: 0|[1])                            *:Brackets-insert*
+(*) `-insert=`(Boolean: `0`|[`1`])                            *:Brackets-insert*
     Tells whether a mapping should be provided in insert mode. Default is 1.
     A typical insert mode mapping will:
     - be triggered on {open} (unless |:Brackets-trigger| is specified)
@@ -670,14 +671,14 @@ The options are:
     sequence under the cursor.
     NB: not tested with sequences of several characters
 
-(*) -visual=(Boolean: 0|[1])                            *:Brackets-visual*
+(*) `-visual=`(Boolean: `0`|[`1`])                            *:Brackets-visual*
     Tells whether a mapping should be provided in visual mode. Default is 1.
     A typical visual mode mapping will:
     - be triggered on {open} (unless |:Brackets-trigger| is specified)
     - insert {open} and {close} around the text selected,
     - and leave the cursor in NORMAL-mode on the {close} sequence.
 
-(*) -normal={select-sequence}                           *:Brackets-normal*
+(*) `-normal=`{select-sequence}                           *:Brackets-normal*
     Tells how the surrounding mapping is applied from the normal mode.
     If |:Brackets-visual|, or |:Brackets-normal|, is set to 0, no NORMAL-mode
     mapping will be provided.
@@ -688,33 +689,33 @@ The options are:
     ("vap", "vi(", "|vi,|", etc.)
 
 
-(*) -open=({text}|"function({function-name})")          *:Brackets-open*
-(*) -close=({text}|"function({function-name})")         *:Brackets-close*
+(*) `-open=`({text}|"function({function-name})")          *:Brackets-open*
+(*) `-close=`({text}|"function({function-name})")         *:Brackets-close*
     These options override the sequence to insert in the INSERT-mode mapping.
     The forced value can be any {text} other than {open} (/resp {close}, or
     even a |function()| that can return one string or another depending on the
     context.
 
-(*) -but=({text}|"function({function-name})")           *:Brackets-but*
+(*) `-but=`({text}|"function({function-name})")           *:Brackets-but*
     This option permits to specify a filetype context for which the expansion
     won't be triggered. It is specially designed for |:Brackets-!|.
     Typical uses are: >
         :Brackets! { } -insert=1 -visual=0 -but=help\\\\|^$
         :Brackets! ' ' -insert=1 -visual=0 -but=function('lh#ft#is_text()')
 
-(*) -nl=(0|[1])                                         *:Brackets-nl*
+(*) `-nl=`(Boolean: `0`|[`1`])                                         *:Brackets-nl*
     This option tells the mappings will insert newline characters between the
     {open}, the cursor or the surrounded text, and {close}.
     In VISUAL-mode, it will set the cursor on the line after {open}, and leave
     a |marker| after {close}
     In NORMAL-mode, it will use |V|, by default, to select the current line.
 
-(*) -trigger={keys-sequence}                            *:Brackets-trigger*
+(*) `-trigger=`{keys-sequence}                            *:Brackets-trigger*
     This option permit to trigger the mapping on anything but {open}.
     This is particularly useful to have simultaneously different mappings, on a
     same pair of brackets, that surround with newlines, and without.
 
-(*) -escapable=(Boolean: [0]|1)                         *:Brackets-escapable*
+(*) `-escapable=`(Boolean: [`0`]|`1`)                         *:Brackets-escapable*
     This option tells that INSERT-mode mappings may expand into
     {open}<cursor>\{close} is there is a "\" before the cursor.
     This does not mean anything in VISUAL- and NORMAL-modes.
@@ -790,7 +791,7 @@ Dynamic (de-)activations~
 
 The macros defined here can be activated and deactivated as a whole by
 pressing <F9>. In order to use another keybinding for this feature, add the
-following lines into your .vimrc:
+following lines into your |.vimrc|: >
    nmap <leader>TB <Plug>ToggleBrackets
    imap <leader>TB <Plug>ToggleBrackets
 
@@ -841,12 +842,12 @@ common_brackets.vim -- they are not useful only to LaTeX editing.
     opening character of a pair of "brackets", then another backslash is added
     before the closing "bracket".
 (*) In |normal-mode|, we can:
-    - delete a pair of brackets                  : with <M-b>x or <M-b><Delete>
-    - change a pair of brackets to parenthesis   : with <M-b>(
-    - change a pair of brackets to square ones   : with <M-b>[
-    - change a pair of brackets to curly ones    : with <M-b>{
-    - change a pair of brackets to angle ones    : with <M-b><
-    - toggle the backslash on a pair of brackets : with <M-b>\
+    - delete a pair of brackets                 : with <M-b>x or <M-b><Delete>
+    - change a pair of brackets to parenthesis  : with <M-b>(
+    - change a pair of brackets to square ones  : with <M-b>[
+    - change a pair of brackets to curly ones   : with <M-b>{
+    - change a pair of brackets to angle ones   : with <M-b><
+    - toggle the backslash on a pair of brackets: with <M-b>\
 
 
                                                 *brackets_manipulation_mode*
@@ -855,17 +856,19 @@ enter a brackets manipulation mode (much like |i_CTRL-X|). From there, you can
 hit 'x', '<delete>', '(', '[', '{', '<', or '<F1>' that will behave like
 exposed earlier, or display a little help message.
 
-If you don't want of this brackets manipulation mode, in your .vimrc enforce
-*g:cb_want_mode* to 0. It values 1 by default.
+If you don't want of this brackets manipulation mode, in your |.vimrc| enforce
+*g:cb_want_mode* to 0 -- before lh-brackets is loaded by your plugin manager.
+It values 1 by default.
 
                     *BracketsManipMode()*
                     *<Plug>DeleteBrackets* *<Plug>ChangeToRoundBrackets*
                     *<Plug>ChangeToSquareBrackets* *<Plug>ChangeToCurlyBrackets*
                     *<Plug>ToggleBackslash*
 Again, if you don't like the default keybinding, with Vim 6.0+ you can change
-them into your .vimrc with something like: >
+them into your |.vimrc| (before lh-brackets is loaded by your plugin manager)
+with something like: >
         :noremap <silent> <C-L>b        :call BracketsManipMode("\<C-L>b")<cr>
-otherwise, if |g:cb_want_mode| is left to 1, define: >
+otherwise, if |g:cb_want_mode| is set to 0, define: >
             :map        <C-L>bx         <Plug>DeleteBrackets
             :map        <C-L>b<del>     <Plug>DeleteBrackets
             :map        <C-L>b(         <Plug>ChangeToRoundBrackets
@@ -893,8 +896,10 @@ These plugins can be obtained ...
   of the dependencies. >
   ActivateAddons lh-brackets
 
+- ... thanks to |vim-flavor|, which also support dependencies. >
+  flavor 'LucHermitte/lh-brackets'
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2015 <http://github.com/LucHermitte/lh-brackets, CC by SA 3.0 {{{1
+ © Luc Hermitte, 2001-2016 <http://github.com/LucHermitte/lh-brackets, CC by SA 3.0 {{{1
  VIM: let b:VS_language = 'american'
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:
