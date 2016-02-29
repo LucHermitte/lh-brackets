@@ -1,5 +1,5 @@
 *lh-map-tools.txt*      Tools for helping mappings-definitions (v3.0.0)
-*lh-brackets*           For Vim version 7.+     Last change: 10th Dec 2015
+*lh-brackets*           For Vim version 7.+     Last change: 29th Feb 2016
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr

@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
+" Version:	3.0.0
 " Created:	24th Mar 2008
 "------------------------------------------------------------------------
 " Description:
@@ -27,12 +27,17 @@
 
 " Buffer-local Definitions {{{1
 " Avoid local reinclusion {{{2
+if &ft == 'markdown'
+  " We don't want these mappings in markdown
+  finish
+endif
+
 if exists("b:loaded_ftplug_html_brackets") && !exists('g:force_reload_ftplug_html_brackets')
   finish
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_html_brackets = 222
+let b:loaded_ftplug_html_brackets = 300
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------
