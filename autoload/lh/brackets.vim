@@ -3,9 +3,10 @@
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      3.0.0
+"               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
+" Version:      3.0.1
 " Created:      28th Feb 2008
+" Last Update:  01st Mar 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -23,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.1:
+"               * Support older versions of vim, thanks to Troy Curtis Jr
 " Version 3.0.0:
 "               * Support for closing all markers and jumping to the last one
 " Version 2.3.5:
@@ -410,10 +413,10 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
       " Now the mapping is a :map-<expr>, we cannot break the line with a
       " :setline(), we'll have to move the cursor
       if 0
-	call setline(line('.'), head)
-	" An undo break is added here. I'll have to investigate that someday
-	let before = "\<cr>".substitute(before, '^\s\+', '', '')
-	return lh#map#insert_seq(a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after)
+        call setline(line('.'), head)
+        " An undo break is added here. I'll have to investigate that someday
+        let before = "\<cr>".substitute(before, '^\s\+', '', '')
+        return lh#map#insert_seq(a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after)
       endif
       let delta_to_line_cut = lh#encoding#strlen(before)
       let delta_to_insertion = lh#encoding#strlen(substitute(before, '^\s\+', '', ''))
@@ -462,10 +465,9 @@ function! s:JumpOverAllClose(chars, ...) abort
   let ll = getline('.')[p : ] " ignore char under cursor, look after
   let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#txt('.{-}').')+')
   " echomsg ll.'##'.m.'##'
-  let lm = strwidth(m)
   let len_match = lh#encoding#strlen(m)
   if lm
-    let del_mark = repeat("\<del>", lm)
+    let del_mark = repeat("\<del>", len_match)
     let del_mark .= substitute(m, '[^'.a:chars.']', '', 'g')
   endif
   " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
@@ -473,7 +475,7 @@ function! s:JumpOverAllClose(chars, ...) abort
     let remaining = ll[len_match : ]
     " echomsg "rem: <<".remaining.">>"
     let match_rem = matchstr(remaining, '^\('.lh#marker#txt('.\{-}').'\)*'.a:1.'\('.lh#marker#txt('.\{-}').'\)*')
-    let len_match_rem = strwidth(match_rem)
+    let len_match_rem = lh#encoding#strlen(match_rem)
     if len_match_rem
       let del_mark = repeat("\<del>", len_match_rem).del_mark
     endif
@@ -506,7 +508,7 @@ function! s:Jump() abort
   let ll = getline('.')[p : ]
   " echomsg ll
   let m = matchstr(ll, '^'.lh#marker#txt('.\{-}'))
-  let lm = strwidth(m)
+  let lm = lh#encoding#strlen(m)
   let del_mark = repeat("\<del>", lm)
   return s:k_move_prefix."\<right>".del_mark
 endfunction

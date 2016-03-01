@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.0
-let s:version = 300
+" Version:      3.0.1
+let s:version = 301
 " Purpose:      {{{1
 "               This file defines a command (:Brackets) that simplifies
 "               the definition of mappings that insert pairs of caracters when
@@ -21,6 +21,8 @@ let s:version = 300
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 3.0.1:
+"               * Fix issue with old vim 7.2 version, thanks to Troy Curtis Jr
 " Version 3.0.0:
 "               * More brackets manipulations
 "               * <Plug>Mappings for brackets manipulations are now always defined.
@@ -216,6 +218,11 @@ endif
 
 "# Default brackets definitions {{{2
 if ! lh#option#get('cb_no_default_brackets', 0)
+  " Older vim versions do not properly autoload `lh#ft#is_text` wrapped in
+  " `function()`.
+  if !has('patch-7.2-061') 
+    call lh#ft#version()
+  endif
   :Brackets! ( )
   :Brackets! [ ] -visual=0
   :Brackets! [ ] -insert=0 -trigger=<leader>[

@@ -4,16 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.0
-let s:k_version = '300'
+" Version:      3.0.1
+let s:k_version = '301'
 " Created:      03rd Nov 2015
-" Last Update:  10th Dec 2015
+" Last Update:  01st Mar 2016
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.0.1 Support older versions of vim, thanks to Troy Curtis Jr
 "       v3.0.0 !mark! & co have been deprecated as mappings
 "       v2.3.0 functions moved from plugin/misc_map.vim
 " TODO:
@@ -513,7 +514,7 @@ endfunction
 " See vim patch 7.4.849
 function! lh#map#_move_cursor_on_the_current_line(offset) abort
   let move = a:offset > 0 ? "\<right>" : "\<left>"
-  return repeat(s:k_move_prefix.move, abs(a:offset))
+  return repeat(s:k_move_prefix.move, lh#math#abs(a:offset))
 endfunction
 
 "------------------------------------------------------------------------
