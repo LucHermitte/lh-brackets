@@ -513,7 +513,7 @@ endfunction
 " See vim patch 7.4.849
 function! lh#map#_move_cursor_on_the_current_line(offset) abort
   let move = a:offset > 0 ? "\<right>" : "\<left>"
-  return repeat(s:k_move_prefix.move, abs(a:offset))
+  return repeat(s:k_move_prefix.move, lh#math#abs(a:offset))
 endfunction
 
 "------------------------------------------------------------------------

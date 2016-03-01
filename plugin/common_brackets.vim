@@ -216,6 +216,11 @@ endif
 
 "# Default brackets definitions {{{2
 if ! lh#option#get('cb_no_default_brackets', 0)
+  " For some reason older vim versions do not properly autoload the
+  " lh#ft#is_text wrapped in function() later in this definition.  Calling
+  " this verbose autoload function first will make sure the lh/ft.vim module
+  " is properly sourced.
+  let s:unneededverboseval = lh#ft#verbose()
   :Brackets! ( )
   :Brackets! [ ] -visual=0
   :Brackets! [ ] -insert=0 -trigger=<leader>[

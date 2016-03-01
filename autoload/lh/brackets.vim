@@ -462,7 +462,7 @@ function! s:JumpOverAllClose(chars, ...) abort
   let ll = getline('.')[p : ] " ignore char under cursor, look after
   let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#txt('.{-}').')+')
   " echomsg ll.'##'.m.'##'
-  let lm = strwidth(m)
+  let lm = lh#string#strwidth(m)
   let len_match = lh#encoding#strlen(m)
   if lm
     let del_mark = repeat("\<del>", lm)
@@ -473,7 +473,7 @@ function! s:JumpOverAllClose(chars, ...) abort
     let remaining = ll[len_match : ]
     " echomsg "rem: <<".remaining.">>"
     let match_rem = matchstr(remaining, '^\('.lh#marker#txt('.\{-}').'\)*'.a:1.'\('.lh#marker#txt('.\{-}').'\)*')
-    let len_match_rem = strwidth(match_rem)
+    let len_match_rem = lh#string#strwidth(match_rem)
     if len_match_rem
       let del_mark = repeat("\<del>", len_match_rem).del_mark
     endif
@@ -506,7 +506,7 @@ function! s:Jump() abort
   let ll = getline('.')[p : ]
   " echomsg ll
   let m = matchstr(ll, '^'.lh#marker#txt('.\{-}'))
-  let lm = strwidth(m)
+  let lm = lh#string#strwidth(m)
   let del_mark = repeat("\<del>", lm)
   return s:k_move_prefix."\<right>".del_mark
 endfunction
