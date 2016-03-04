@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.1
+" Version:      3.0.2
 " Created:      28th Feb 2008
-" Last Update:  01st Mar 2016
+" Last Update:  04th Mar 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.2:
+"               * Fix regression introduced by the support of older versions
 " Version 3.0.1:
 "               * Support older versions of vim, thanks to Troy Curtis Jr
 " Version 3.0.0:
@@ -466,7 +468,7 @@ function! s:JumpOverAllClose(chars, ...) abort
   let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#txt('.{-}').')+')
   " echomsg ll.'##'.m.'##'
   let len_match = lh#encoding#strlen(m)
-  if lm
+  if len_match
     let del_mark = repeat("\<del>", len_match)
     let del_mark .= substitute(m, '[^'.a:chars.']', '', 'g')
   endif
