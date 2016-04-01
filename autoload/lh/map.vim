@@ -4,16 +4,19 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.1
-let s:k_version = '301'
+" Version:      3.0.4
+let s:k_version = '303'
 " Created:      03rd Nov 2015
-" Last Update:  01st Mar 2016
+" Last Update:  01st Apr 2016
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.0.4 Support definitions like ":Bracket \Q{ } -trigger=µ"
+"              Some olther mappings may not work anymore. Alas I have no tests
+"              for them ^^'
 "       v3.0.1 Support older versions of vim, thanks to Troy Curtis Jr
 "       v3.0.0 !mark! & co have been deprecated as mappings
 "       v2.3.0 functions moved from plugin/misc_map.vim
@@ -212,7 +215,9 @@ endfunction
 
 " Function: lh#map#smart_insert_seq2(key, expr, ...) {{{3
 function! lh#map#smart_insert_seq2(key, expr, ...) abort
-  let rhs = escape(a:expr, '\')
+  " let rhs = escape(a:expr, '\')
+  let rhs = a:expr
+
   " Strip marks (/placeholders) if they are not wanted
   if ! lh#brackets#usemarks()
     let rhs = substitute(rhs, '\v!mark!|\<+\k*+\>', '', 'g')
@@ -220,13 +225,15 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
   " Interpret the sequence if it is meant to
   if rhs =~ '\m!\(mark\%(here\)\=\|movecursor\)!'
     " may be, the regex should be '\m!\S\{-}!'
-    let rhs = lh#map#build_map_seq(escape(rhs, '\'))
+    " let rhs = lh#map#build_map_seq(escape(rhs, '\'))
+    let rhs = lh#map#build_map_seq(rhs)
   elseif rhs =~ '<+.\{-}+>'
     " @todo: add a move to cursor + jump/select
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "!cursorhere!&", '')
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "\<c-r>=lh#marker#txt(".string('\1').")\<cr>", 'g')
     let rhs .= "!movecursor!"
-    let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
+    " let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
+    let rhs = lh#map#build_map_seq(rhs."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
   endif
   " Build & return the context dependent sequence to insert
   if a:0 > 0

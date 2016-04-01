@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.3
+" Version:      3.0.4
 " Created:      28th Feb 2008
 " Last Update:  01st Apr 2016
 "------------------------------------------------------------------------
@@ -24,9 +24,13 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.4:
+"               * Support definitions like ":Bracket \Q{ } -trigger=µ"
+"                 Some olther mappings may not work anymore. Alas I have no tests
+"                 for them ^^'
 " Version 3.0.3:
 "               * Fix JumpOverAllClose when marker characters contains active
-"               characters in very-magic regex ':h /\v'
+"                 characters in very-magic regex ':h /\v'
 " Version 3.0.2:
 "               * Fix regression introduced by the support of older versions
 " Version 3.0.1:
@@ -264,7 +268,7 @@ function! s:String(s)
   if type(a:s) == type(function('has()'))
     return string(a:s)
   endif
-  return '"'.escape(a:s, '"').'"'
+  return '"'.escape(a:s, '"\').'"'
   " return string(a:s)
 endfunction
 
@@ -375,7 +379,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
   elseif a:escapable
-    let e = (escaped ? '\\' : "")
+    let e = (escaped ? '\' : "")
     " todo: support \%(\) with vim
     " let open = '\<c-v\>'.a:Open
     " let close = e.'\<c-v\>'.a:Close
