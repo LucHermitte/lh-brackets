@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.2
+" Version:      3.0.3
 " Created:      28th Feb 2008
-" Last Update:  04th Mar 2016
+" Last Update:  01st Apr 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,9 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.3:
+"               * Fix JumpOverAllClose when marker characters contains active
+"               characters in very-magic regex ':h /\v'
 " Version 3.0.2:
 "               * Fix regression introduced by the support of older versions
 " Version 3.0.1:
@@ -465,7 +468,7 @@ function! s:JumpOverAllClose(chars, ...) abort
   let del_mark = ''
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
-  let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#txt('.{-}').')+')
+  let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#very_magic('.{-}').')+')
   " echomsg ll.'##'.m.'##'
   let len_match = lh#encoding#strlen(m)
   if len_match

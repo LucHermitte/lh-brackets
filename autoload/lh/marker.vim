@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      3.0.0
-let s:k_version = 300
+" Version:      3.0.3
+let s:k_version = 303
 " Created:      27th Nov 2013
 "------------------------------------------------------------------------
 " Description:
@@ -110,6 +110,14 @@ endfunction
 " Function: lh#marker#txt({text}) {{{2
 function! lh#marker#txt(...) abort
   return lh#marker#open() . ((a:0>0) ? a:1 : '') . lh#marker#close()
+endfunction
+
+" Function: lh#marker#very_magic(...) {{{3
+function! s:EscapeVeryMagic(text)
+  return escape(a:text, '$.*~()|\.{}<+>')
+endfunction
+function! lh#marker#very_magic(...) abort
+  return s:EscapeVeryMagic(lh#marker#open()) . ((a:0>0) ? a:1 : '') . s:EscapeVeryMagic(lh#marker#close())
 endfunction
 
 " Function: lh#marker#is_a_marker(...) {{{3
