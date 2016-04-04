@@ -4,16 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.4
-let s:k_version = '303'
+" Version:      3.0.5
+let s:k_version = '305'
 " Created:      03rd Nov 2015
-" Last Update:  01st Apr 2016
+" Last Update:  04th Apr 2016
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.0.5 Use lh#log() framework
 "       v3.0.4 Support definitions like ":Bracket \Q{ } -trigger=µ"
 "              Some olther mappings may not work anymore. Alas I have no tests
 "              for them ^^'
@@ -41,17 +42,19 @@ function! lh#map#version()
 endfunction
 
 " # Debug   {{{2
-if !exists('s:verbose')
-  let s:verbose = 0
-endif
+let s:verbose = get(s:, 'verbose', 0)
 function! lh#map#verbose(...)
   if a:0 > 0 | let s:verbose = a:1 | endif
   return s:verbose
 endfunction
 
-function! s:Verbose(expr)
+function! s:Log(...)
+  call call('lh#log#this', a:000)
+endfunction
+
+function! s:Verbose(...)
   if s:verbose
-    echomsg a:expr
+    call call('s:Log', a:000)
   endif
 endfunction
 
@@ -444,17 +447,17 @@ function! lh#map#_cursor_here(...) abort
   " NB: ``|'' requires virtcol() but cursor() requires col()
   " let s:gotomark = line('.') . 'normal! '.virtcol('.')."|"
   " let s:gotomark = 'call cursor ('.line('.').','.col('.').')'
+  let s:old_indent = indent(line('.'))
   if a:0 > 0
     let s:goto_lin_{a:1} = line('.')
     let s:goto_col_{a:1} = virtcol('.')
+    call s:Verbose("Repos %1 at %2normal! %3|   indent=%4", a:1, s:goto_lin_{a:1}, s:goto_col_{a:1}, s:old_indent)
     " let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
   else
     let s:goto_lin = line('.')
     let s:goto_col = virtcol('.')
-    " let g:repos = "Repos at: ". s:goto_lin . 'normal! ' . s:goto_col . '|'
+    call s:Verbose("Repos at %1normal! %2|   indent=%3", s:goto_lin, s:goto_col, s:old_indent)
   endif
-  let s:old_indent = indent(line('.'))
-  " let g:repos .= "   indent=".s:old_indent
   return ''
 endfunction
 
@@ -520,8 +523,10 @@ endfunction
 " the text inserted.
 " See vim patch 7.4.849
 function! lh#map#_move_cursor_on_the_current_line(offset) abort
+  let abs_offset = lh#math#abs(a:offset)
+  call s:Verbose("Moving cursor %1 x %2", abs_offset, a:offset>0 ? "right" : "left")
   let move = a:offset > 0 ? "\<right>" : "\<left>"
-  return repeat(s:k_move_prefix.move, lh#math#abs(a:offset))
+  return repeat(s:k_move_prefix.move, abs_offset)
 endfunction
 
 "------------------------------------------------------------------------

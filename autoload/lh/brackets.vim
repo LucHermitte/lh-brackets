@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.4
+" Version:      3.0.5
 " Created:      28th Feb 2008
-" Last Update:  01st Apr 2016
+" Last Update:  04th Apr 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.5:
+"               * Use lh#log() framework
 " Version 3.0.4:
 "               * Support definitions like ":Bracket \Q{ } -trigger=µ"
 "                 Some olther mappings may not work anymore. Alas I have no tests
@@ -92,13 +94,19 @@ let s:cpo_save=&cpo
 set cpo&vim
 
 " ## Debug {{{1
-function! lh#brackets#verbose(level) abort
-  let s:verbose = a:level
+let s:verbose = get(s:, 'verbose', 0)
+function! lh#brackets#verbose(...) abort
+  if a:0 > 0 | let s:verbose = a:1 | endif
+  return s:verbose
 endfunction
 
-function! s:Verbose(expr) abort
-  if exists('s:verbose') && s:verbose
-    echomsg a:expr
+function! s:Log(...)
+  call call('lh#log#this', a:000)
+endfunction
+
+function! s:Verbose(...)
+  if s:verbose
+    call call('s:Log', a:000)
   endif
 endfunction
 
@@ -402,6 +410,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     return lh#map#insert_seq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
   else
     let c = virtcol('.')
+    " call s:Verbose(c)
     let current = matchstr(line, '.*\%'.(c).'c\S*')
     if 0 && &tw > 0 && lh#encoding#strlen(current.open.close.lh#marker#txt()) > &tw
       " v2.3.0 update:
