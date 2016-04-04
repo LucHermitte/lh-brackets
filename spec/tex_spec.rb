@@ -24,6 +24,7 @@ RSpec.describe "TeX snippets", :tex => true do
     expect(vim.echo('&sw')).to eq "2"
     expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener('"'{',1,"'"","{","}",0,' "'')"
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
+    expect(vim.echo('&indentexpr')).to eq 'GetTeXIndent()'
     vim.feedkeys('i{\<esc>')
     assert_buffer_contents <<-EOF
       {}<++>
@@ -34,6 +35,19 @@ RSpec.describe "TeX snippets", :tex => true do
     assert_buffer_contents <<-EOF
       {}<++>
       \\{\\}<++>
+    EOF
+    # Check indenting and embedded curly-brackets
+    set_buffer_contents <<-EOF
+     \\begin{itemize}
+       \\item foobar
+         \\note[item]{bla}
+    EOF
+    vim.normal("G$")
+    vim.feedkeys('i{foo\<esc>')
+    assert_buffer_contents <<-EOF
+     \\begin{itemize}
+       \\item foobar
+         \\note[item]{bla{foo}<++>}
     EOF
   end
 
@@ -56,4 +70,3 @@ RSpec.describe "TeX snippets", :tex => true do
 end
 
 # vim:set sw=2:
-

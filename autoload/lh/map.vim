@@ -15,6 +15,8 @@ let s:k_version = '305'
 "------------------------------------------------------------------------
 " History:
 "       v3.0.5 Use lh#log() framework
+"              Fix Indenting issue when indentation changes between opening and
+"              closing brackets
 "       v3.0.4 Support definitions like ":Bracket \Q{ } -trigger=µ"
 "              Some olther mappings may not work anymore. Alas I have no tests
 "              for them ^^'
@@ -236,7 +238,7 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "\<c-r>=lh#marker#txt(".string('\1').")\<cr>", 'g')
     let rhs .= "!movecursor!"
     " let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
-    let rhs = lh#map#build_map_seq(rhs."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
+    let rhs = lh#map#build_map_seq(rhs."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>")
   endif
   " Build & return the context dependent sequence to insert
   if a:0 > 0
@@ -267,6 +269,7 @@ function! lh#map#insert_seq(key, seq, ...) abort
     " purge the dummy mappings
     call cleanup.finalize()
   endtry
+  call s:Verbose(strtrans(res))
   return res
 endfunction
 
@@ -473,7 +476,9 @@ function! lh#map#_goto_mark(...) abort
   endif
   " let g:fix_indent = s:fix_indent
   if s:old_indent != 0
-    let s:goto_col += s:old_indent
+    " let s:goto_col += s:old_indent
+    let s:goto_col -= s:fix_indent
+    call s:Verbose('goto_col -= %1 (old_indent:%3 - crt_indent:%4) => %2', s:fix_indent, s:goto_col, s:old_indent, crt_indent)
   endif
   let new_behaviour = (a:0 > 0) ? (!a:1) : 1
   if new_behaviour && s:goto_lin == line('.')
@@ -484,6 +489,7 @@ function! lh#map#_goto_mark(...) abort
     return move
   else
     " " uses {lig}'normal! {col}|' because of the possible reindent
+    call s:Verbose("Restore cursor to %1normal! %2|", s:goto_lin, s:goto_col)
     execute s:goto_lin . 'normal! ' . (s:goto_col) . '|'
     " call cursor(s:goto_lin, s:goto_col)
     return ''
