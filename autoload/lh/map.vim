@@ -4,16 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.5
-let s:k_version = '305'
+" Version:      3.0.6
+let s:k_version = '306'
 " Created:      03rd Nov 2015
-" Last Update:  04th Apr 2016
+" Last Update:  04th May 2016
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.0.6 Fix Indenting regression
 "       v3.0.5 Use lh#log() framework
 "              Fix Indenting issue when indentation changes between opening and
 "              closing brackets
@@ -376,7 +377,7 @@ function! lh#map#surround(begin, end, isLine, isIndented, goback, mustInterpret,
   " Call the function that really insert the text around the selection
   :'<,'>call lh#map#insert_around_visual(begin, end, a:isLine, a:isIndented)
   " Return the nomal-mode sequence to execute at the end.
-  " let g:goback =goback
+  let g:goback =goback
   return goback
 endfunction
 
@@ -431,7 +432,12 @@ function! lh#map#insert_around_visual(begin,end,isLine,isIndented) range abort
     endif
     " The substitute is here to compensate a little problem with HTML tags
     " let g:action= "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
-    silent exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
+    call s:Verbose(strtrans("normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR))
+    if s:verbose >= 2
+      debug exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
+    else
+      silent exe "normal! gv". BL.substitute(a:end,'>',"\<c-v>>",'').BR.HL.a:begin.HR
+    endif
     " 'gv' is used to refocus on the current visual zone
     "  call confirm(strtrans( "normal! gv". BL.a:end.BR.HL.a:begin.HR), "&Ok")
   finally
@@ -454,12 +460,11 @@ function! lh#map#_cursor_here(...) abort
   if a:0 > 0
     let s:goto_lin_{a:1} = line('.')
     let s:goto_col_{a:1} = virtcol('.')
-    call s:Verbose("Repos %1 at %2normal! %3|   indent=%4", a:1, s:goto_lin_{a:1}, s:goto_col_{a:1}, s:old_indent)
-    " let g:repos = "Repos (".a:1.") at: ". s:goto_lin_{a:1} . 'normal! ' . s:goto_col_{a:1} . '|'
+    call s:Verbose("Record cursor %1 at %2normal! %3|   indent=%4", a:1, s:goto_lin_{a:1}, s:goto_col_{a:1}, s:old_indent)
   else
     let s:goto_lin = line('.')
     let s:goto_col = virtcol('.')
-    call s:Verbose("Repos at %1normal! %2|   indent=%3", s:goto_lin, s:goto_col, s:old_indent)
+    call s:Verbose("Record cursor at %1normal! %2|   indent=%3", s:goto_lin, s:goto_col, s:old_indent)
   endif
   return ''
 endfunction
@@ -468,15 +473,9 @@ endfunction
 function! lh#map#_goto_mark(...) abort
   " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
   let crt_indent = indent(s:goto_lin)
-  if crt_indent < s:old_indent
-    let s:fix_indent = s:old_indent - crt_indent
-  else
-    let s:old_indent = crt_indent - s:old_indent
-    let s:fix_indent = 0
-  endif
-  " let g:fix_indent = s:fix_indent
-  if s:old_indent != 0
-    " let s:goto_col += s:old_indent
+  let s:fix_indent = s:old_indent - crt_indent
+  call s:Verbose('fix indent <- %1 (old_indent:%2 - crt_indent:%3)', s:fix_indent, s:old_indent, crt_indent)
+  if s:fix_indent != 0
     let s:goto_col -= s:fix_indent
     call s:Verbose('goto_col -= %1 (old_indent:%3 - crt_indent:%4) => %2', s:fix_indent, s:goto_col, s:old_indent, crt_indent)
   endif
@@ -520,7 +519,8 @@ endfunction
 
 " Function: lh#map#_fix_indent() {{{3
 function! lh#map#_fix_indent() abort
-  return repeat( ' ', s:fix_indent)
+  return ''
+  " return repeat( ' ', s:fix_indent)
 endfunction
 
 

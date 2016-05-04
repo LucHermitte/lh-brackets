@@ -41,6 +41,8 @@ RSpec.describe "autoload/lh/map.vim" do
 
   describe "Test bracket-pair insertions (and redo)", :brackets => true do
       specify "Inserts foo(bar", :redo => true do
+          vim.command('SetMarker « »')
+          clear_buffer
           has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('i(\<esc>')
           assert_line_contents <<-EOF

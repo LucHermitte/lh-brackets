@@ -7,6 +7,15 @@ require 'rspec/expectations'
 
 # SimpleCov.start
 
+module Vimrunner
+  class Client
+    def runtime(script)
+        script_path = Path.new(script)
+        command("runtime #{script_path}")
+    end
+  end
+end
+
 Vimrunner::RSpec.configure do |config|
   config.reuse_server = true
 
@@ -25,10 +34,15 @@ Vimrunner::RSpec.configure do |config|
     vim.command('runtime plugin/UT.vim')
 
     # pp vim_flavor_path
-    # l-vim-lib
+    # lh-vim-lib
     vim_lib_path      = File.expand_path('../lh-vim-lib', __FILE__)
     vim.prepend_runtimepath(vim_lib_path)
     vim.command('runtime plugin/let.vim') # LetIfUndef
+
+    # lh-dev
+    vim_dev_path = File.expand_path('../../../lh-dev', __FILE__)
+    vim.prepend_runtimepath(vim_dev_path)
+    vim.runtime('plugin/dev.vim') # AddStyle
 
     # lh-brackets
     vim_brackets_path = File.expand_path('../../../lh-brackets', __FILE__)
