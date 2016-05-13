@@ -54,7 +54,9 @@ RSpec.describe "TeX snippets", :tex => true do
   specify "test_with_backslash", :backslash => true do
     expect(vim.echo('&ft')).to eq "tex"
     expect(vim.echo('&sw')).to eq "2"
-    vim.command('Brackets \\Q{ } -trigger=µ')
+    # 4 needed, each must be doubled for rspec
+    vim.command('Brackets \\\\\\\\Q{ } -trigger=µ')
+    expect(vim.echo('maparg("µ", "i")')).to eq 'lh#brackets#opener('"'µ',0,"'"","\\\\Q{","}",0,' "'')"
     vim.feedkeys('iµ\<esc>')
     assert_buffer_contents <<-EOF
       \\Q{}<++>
