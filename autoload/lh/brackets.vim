@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.5
+" Version:      3.0.7
 " Created:      28th Feb 2008
 " Last Update:  04th Apr 2016
 "------------------------------------------------------------------------
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.7:
+"               * Refactoring: simplify lh#brackets#define() debugging
 " Version 3.0.5:
 "               * Use lh#log() framework
 " Version 3.0.4:
@@ -596,15 +598,14 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
 endfunction
 "------------------------------------------------------------------------
 " lh#brackets#define(bang, ...) {{{2
-function! lh#brackets#define(bang, ...) abort
-  " Parse Options {{{3
-  let isLocal    = a:bang != "!"
+function! s:DecodeDefineOptions(a000)
   let nl         = ''
   let insert     = 1
   let visual     = 1
   let normal     = 'default=1'
+  let escapable  = 0
   let options    = []
-  for p in a:000
+  for p in a:a000
     if     p =~ '-l\%[list]'        | call s:ListMappings(isLocal)  | return
     elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(isLocal) | return
     elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
@@ -654,11 +655,20 @@ function! lh#brackets#define(bang, ...) abort
   if !exists('Close')      | let Close      = options[1] | endif
   if !exists('Exceptions') | let Exceptions = ''         | endif
 
+  return [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable]
+endfunction
+
+function! lh#brackets#define(bang, ...) abort
+  " Parse Options {{{3
+  let isLocal    = a:bang != "!"
+  let [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable]
+        \ = s:DecodeDefineOptions(a:000)
+
   " INSERT-mode open {{{3
   if insert
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
-    let inserter = 'lh#brackets#opener('.string(trigger).','. exists('escapable').',"'.(nl).
+    let inserter = 'lh#brackets#opener('.string(trigger).','. escapable.',"'.(nl).
           \'",'. s:String(Open).','.s:String(Close).','.string(areSameTriggers).','.string(Exceptions).')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
