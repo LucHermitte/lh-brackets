@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.7
+" Version:      3.0.8
 " Created:      28th Feb 2008
-" Last Update:  13th May 2016
+" Last Update:  17th May 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,13 +24,15 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.0.8:
+"               * Fix issue8, regression introduced in v3.0.7 with double-quotes
 " Version 3.0.7:
 "               * Refactoring: simplify lh#brackets#define() debugging
 "               * Fix lh#brackets#_string() to have <localleader>1 works in
 "               C&C++
 "               * Revert v3.0.4 changes, the mapping shall be done with:
 "                 ":Bracket \\\\Q{ } -trigger=µ"
-"                 This is related to command mode handling of backslash: 
+"                 This is related to command mode handling of backslash:
 "                 - Odd number backslashes are an oddity that are sometimes
 "                   interpreted by the command line (e.g. "\ ", "\|"),
 "                   sometimes not (most other cases like "\n", "\Q", ...)
@@ -299,7 +301,8 @@ function! lh#brackets#_string(s)
   " See Version 3.0.7 comment note.
   " return '"'.substitute(a:s, '\v(\\\\|\\[a-z]\@!)', '&&', 'g').'"'
   " return '"'.escape(a:s, '"\').'"'  " version that works with most keys, like \\
-  return '"'.a:s.'"'                " version that works with \n
+  return '"'.escape(a:s, '"').'"'  " version that works with double quote and \n
+  " return '"'.a:s.'"'                " version that works with \n
   " return string(a:s) " version that doesn't work: need to return something enclosed in double quotes
 endfunction
 

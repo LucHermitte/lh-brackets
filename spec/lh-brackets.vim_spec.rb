@@ -40,7 +40,7 @@ RSpec.describe "autoload/lh/map.vim" do
   end
 
   describe "Test bracket-pair insertions (and redo)", :brackets => true do
-      specify "Inserts foo(bar", :redo => true do
+      specify "Inserts foo(bar", :redo, :paren => true do
           vim.command('SetMarker « »')
           clear_buffer
           has_redo = vim.echo('has("patch-7.4.849")')
@@ -57,7 +57,7 @@ RSpec.describe "autoload/lh/map.vim" do
               expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
           end
       end
-      specify "Inserts foo(bar)foo", :redo => true do
+      specify "Inserts foo(bar)foo", :redo, :paren => true do
           has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('ofoo(bar)foo\<esc>')
           assert_line_contents <<-EOF
@@ -67,6 +67,37 @@ RSpec.describe "autoload/lh/map.vim" do
               vim.type(".")
               assert_line_contents <<-EOF
                 foo(bar)foo
+              EOF
+          end
+      end
+
+      specify "Inserts foo\"bar", :redo, :quote => true do
+          vim.command('SetMarker « »')
+          clear_buffer
+          has_redo = vim.echo('has("patch-7.4.849")')
+          vim.feedkeys('i"\<esc>')
+          assert_line_contents <<-EOF
+            ""«»
+          EOF
+          vim.feedkeys 'ofoo"bar\<esc>'
+          assert_line_contents <<-EOF
+            foo"bar"«»
+          EOF
+          if has_redo == "1"
+              vim.type(".")
+              expect(vim.echo('getline(".")')).to eq "foo\"bar\"«»"
+          end
+      end
+      specify "Inserts foo\"bar\"foo", :redo, :quote => true do
+          has_redo = vim.echo('has("patch-7.4.849")')
+          vim.feedkeys('ofoo"bar"foo\<esc>')
+          assert_line_contents <<-EOF
+            foo"bar"foo
+          EOF
+          if has_redo == "1"
+              vim.type(".")
+              assert_line_contents <<-EOF
+                foo"bar"foo
               EOF
           end
       end
