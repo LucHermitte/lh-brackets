@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.0.0)
-*lh-brackets*           For Vim version 7.+     Last change: 29th Feb 2016
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.1.0)
+*lh-brackets*           For Vim version 7.+     Last change: 20th May 2016
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -40,7 +40,7 @@ API: autoload/lh/map.vim~
 This plugin defines several functions and commands to use when you want to
 program smart-mappings and abbreviations:
 |lh#map#context()|              for context dependent mappings,
-|lh#map#4_these_contexts|
+|lh#map#4_these_contexts()|
 |lh#map#no_context()|
 |lh#map#no_context2()|
 |lh#map#insert_around_visual()| that inserts a pair of tokens around a visual area,
@@ -57,6 +57,7 @@ The typical way to use these helpers is addressed into |mm-How-To|.
                                         *MapNoContext()* *MapNoContext2()*
                                         *lh#map#no_context()* *lh#map#no_context2()*
 lh#map#no_context({key}, {sequence}) & lh#map#no_context2({k},{s})~
+MapNoContext(), MapNoContext2() [deprecated]~
 
 These two functions enable to define context-dependent macros -- |mapping|s
 and |abbreviations|. Regarding the context of the character under the current
@@ -85,6 +86,7 @@ backslash. Thus <esc> becomes '\<esc\>'.
                                                 *MapContext()*
                                                 *lh#map#context()*
 lh#map#context({key}, {syn-ctx1} {seq1}, {syn-ctx2}, {seq2}, ... [, {default-seq}])~
+MapContext() [deprecated]~
 
 This function also enables to define context-dependent macros.
 However this function is more precise than |lh#map#no_context()|.
@@ -106,12 +108,11 @@ Regarding the format of the {sequences} to interpret, every special character
 must see its greater-than and lesser-than symbols escaped with
 backslash. Thus <esc> becomes '\<esc\>'.
 
-Note: Works with Vim 6+ only.
-
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                *Map4_theseContexts*
-                                                *lh#map#4_these_contexts*
+                                                *Map4_theseContexts()*
+                                                *lh#map#4_these_contexts()*
 lh#map#4_these_contexts({key}, {syn-ctx1} {seq1}, {syn-ctx2}, {seq2}, ... [, {default-seq}])~
+Map4_theseContexts() [deprecated]~
 
 This function also enables to define context-dependent macros.
 This function is even more precise than |lh#map#context()|.
@@ -127,8 +128,6 @@ cursor, the function returns either:
 Regarding the format of the {sequences} to interpret, every special character
 must see its greater-than and lesser-than symbols escaped with
 backslash. Thus <esc> becomes '\<esc\>'.
-
-Note: Works with Vim 6+ only.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                                 *InsertAroundVisual()*
@@ -670,6 +669,16 @@ The options are:
     set, it will insert the {close} sequence, or jump after the {close}
     sequence under the cursor.
     NB: not tested with sequences of several characters
+
+(*) `-context=`{syn-context} (Regex)                      *:Brackets-context*
+    In INSERT-more bracket-mappings (|:Brackets-insert|), restricts the
+    expansion to the syntax modes that matches {syn-context}. The default
+    behaviour restricts the expansion to string and comment contexts (see
+    |lh#map#no_context()|).
+    Be aware of |:bar| issues. i.e. to have "`" expanded only in comment and
+    Doxygen contexts, use 3x\: 1 before the bar, and two that the cmdline will
+    collapse into one, i.e. >
+      :Brackets ` ` -insert=1 -visual=0 -normal=0 -context=comment\\\|doxygen
 
 (*) `-visual=`(Boolean: `0`|[`1`])                            *:Brackets-visual*
     Tells whether a mapping should be provided in visual mode. Default is 1.

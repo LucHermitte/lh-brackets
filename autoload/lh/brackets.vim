@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.8
+" Version:      3.1.0
 " Created:      28th Feb 2008
-" Last Update:  17th May 2016
+" Last Update:  20th May 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.1.0:
+"               * New option to `:Bracket` -> `-context`
 " Version 3.0.8:
 "               * Fix issue8, regression introduced in v3.0.7 with double-quotes
 " Version 3.0.7:
@@ -398,17 +400,17 @@ function! s:thereIsAnException(Ft_exceptions) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers,Ft_exceptions) {{{2
+" Function: lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers,Ft_exception [,context]) {{{2
 " NB: this function is made public because IMAPs.vim need it to not be private
 " (s:)
-function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers, Ft_exceptions) abort
+function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTriggers, Ft_exceptions, ...) abort
   if s:thereIsAnException(a:Ft_exceptions)
     return a:trigger
   endif
   let line = getline('.')
   let escaped = line[col('.')-2] == '\'
   if type(a:Open) == type(function('has'))
-    let res = lh#map#insert_seq(a:trigger, a:Open())
+    let res = call('lh#map#insert_seq',[a:trigger, a:Open()]+a:000)
     return res
   elseif has('*IMAP')
     return s:ImapBrackets(a:trigger)
@@ -433,7 +435,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     " work and !cursorhere! does not provokes a reindentation
     "  :return lh#map#insert_seq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
     " hence the following solution
-    return lh#map#insert_seq(a:trigger, open.a:nl.close.'!mark!\<esc\>O')
+    return call('lh#map#insert_seq', [a:trigger, open.a:nl.close.'!mark!\<esc\>O']+a:000)
   else
     let c = virtcol('.')
     " call s:Verbose(c)
@@ -460,7 +462,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
         call setline(line('.'), head)
         " An undo break is added here. I'll have to investigate that someday
         let before = "\<cr>".substitute(before, '^\s\+', '', '')
-        return lh#map#insert_seq(a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after)
+        return call('lh#map#insert_seq', [a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after]+a:000)
       endif
       let delta_to_line_cut = lh#encoding#strlen(before)
       let delta_to_insertion = lh#encoding#strlen(substitute(before, '^\s\+', '', ''))
@@ -470,9 +472,9 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
 
       " echomsg "--> ".strtrans(prepare)
 
-      return lh#map#insert_seq(a:trigger, prepare.open.'!cursorhere!'.close.'!mark!')
+      return call('lh#map#insert_seq',[a:trigger, prepare.open.'!cursorhere!'.close.'!mark!']+a:000)
     endif
-    return lh#map#insert_seq(a:trigger, open.'!cursorhere!'.close.'!mark!')
+    return call('lh#map#insert_seq',[a:trigger, open.'!cursorhere!'.close.'!mark!']+a:000)
 endfunction
 
 "------------------------------------------------------------------------
@@ -628,6 +630,7 @@ function! s:DecodeDefineOptions(a000)
   let visual     = 1
   let normal     = 'default=1'
   let escapable  = 0
+  let context    = ''
   let options    = []
   for p in a:a000
     if     p =~ '-l\%[list]'        | call s:ListMappings(isLocal)  | return
@@ -638,6 +641,7 @@ function! s:DecodeDefineOptions(a000)
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
     elseif p =~ '-v\%[isual]'       | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
     elseif p =~ '-no\%[rmal]'       | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
+    elseif p =~ '-co\%[ntext]'      | let context   = matchstr(p, '-co\%[ntext]=\zs.*')
     elseif p =~ '-b\%[ut]'
       let exceptions= matchstr(p, '-b\%[ut]=\zs.*')
       if exceptions =~ "^function"
@@ -679,25 +683,26 @@ function! s:DecodeDefineOptions(a000)
   if !exists('Close')      | let Close      = options[1] | endif
   if !exists('Exceptions') | let Exceptions = ''         | endif
 
-  return [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable]
+  return [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable, context]
 endfunction
 
 " Function: lh#brackets#define(bang, ...) {{{2
 function! lh#brackets#define(bang, ...) abort
   " Parse Options {{{3
   let isLocal    = a:bang != "!"
-  let [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable]
+  let [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable, context]
         \ = s:DecodeDefineOptions(a:000)
 
   " INSERT-mode open {{{3
   if insert
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
+    let map_ctx = empty(context) ? '' : ','.string(context)
     let inserter = 'lh#brackets#opener('.string(trigger).','. escapable.',"'.(nl).
-          \'",'. lh#brackets#_string(Open).','.lh#brackets#_string(Close).','.string(areSameTriggers).','.string(Exceptions).')'
+          \'",'. lh#brackets#_string(Open).','.lh#brackets#_string(Close).','.string(areSameTriggers).','.string(Exceptions).map_ctx.')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
-      let inserter = 'lh#brackets#closer('.lh#brackets#_string(options[1]).','.lh#brackets#_string (Close).','.lh#brackets#_string(Exceptions).')'
+      let inserter = 'lh#brackets#closer('.lh#brackets#_string(options[1]).','.lh#brackets#_string (Close).','.lh#brackets#_string(Exceptions).map_ctx.')'
       call s:DefineImap(options[1], inserter, isLocal)
       if len(options[1])
         " TODO: enrich <bs> & <del> imaps for the close triggers
