@@ -1,11 +1,11 @@
 "=============================================================================
 " File:		ftplugin/c/c_brackets.vim                                {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://github.com/LucHermitte>
+"               <URL:http://github.com/LucHermitte/lh-brackets/>
 " License:      GPLv3 with exceptions
-"               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
-let s:k_version = 222
+"               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
+" Version:	3.1.0
+let s:k_version = 310
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -82,6 +82,12 @@ if exists(':Brackets')
 
   " Doxygen surround action
   :Brackets <tt> </tt> -visual=1 -insert=0 -trigger=<localleader>tt
+  " In insert mode, this needs to be expanded only in comment context
+  "  - first \\ becomes \ 
+  "  - last \ required before | to avoid confusion with :h :bar
+  "  -> \\\|
+  :Brackets ` ` -insert=1 -visual=0 -normal=0 -context=comment\\\|doxygen
+  :Brackets ` ` -insert=0 -visual=1 -normal=0
   " :Brackets /* */ -visual=0
   " :Brackets /** */ -visual=0 -trigger=/!
   "
