@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      3.0.3
-let s:k_version = 303
+" Version:      3.1.1
+let s:k_version = 311
 " Created:      27th Nov 2013
 "------------------------------------------------------------------------
 " Description:
@@ -29,55 +29,58 @@ function! lh#marker#version()
 endfunction
 
 " # Debug   {{{2
-let s:verbose = 0
+let s:verbose = get(s:, 'verbose', 0)
 function! lh#marker#verbose(...)
   if a:0 > 0 | let s:verbose = a:1 | endif
   return s:verbose
 endfunction
 
-function! s:Verbose(expr)
+function! s:Log(expr, ...)
+  call call('lh#log#this',[a:expr]+a:000)
+endfunction
+
+function! s:Verbose(expr, ...)
   if s:verbose
-    echomsg a:expr
+    call call('s:Log',[a:expr]+a:000)
   endif
 endfunction
 
-function! lh#marker#debug(expr)
+function! lh#marker#debug(expr) abort
   return eval(a:expr)
 endfunction
-
 
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
 
 " Function: lh#marker#open() {{{2
 function! lh#marker#open() abort
-  " call Dfunc('lh#marker#open()')
+  " ::call s:Verbose('lh#marker#open()')
   if s:Option('use_place_holders', 0) && exists('*IMAP_GetPlaceHolderStart')
     let m = IMAP_GetPlaceHolderStart()
-    if "" != m
-      " call Dret('lh#marker#open '.m.'  using IMAP placeholder characters')
+    if !empty(m)
+      ::call s:Verbose('lh#marker#open '.m.'  using IMAP placeholder characters')
       return m
     endif
   endif
   if !exists("b:marker_open")
-    " :call Decho( "b:marker_open is not set")
+    call s:Verbose( "b:marker_open is not set")
     " Note: \xab <=> <C-K><<
     call lh#marker#_set("\xab", '')
-    " :call Decho( "b:last_encoding_used is set to ".&enc)
+    ::call s:Verbose( "b:last_encoding_used is set to ".&enc)
     let b:last_encoding_used = &enc
   else
-    if !exists('s:last_encoding_used')
-      " :call Decho( "s:last_encoding_used is not set")
+    if !exists('b:last_encoding_used')
+      ::call s:Verbose( "b:last_encoding_used is not set")
       call lh#marker#_set(b:marker_open, b:marker_close, &enc)
-      " :call Decho( "b:last_encoding_used is set to ".&enc)
+      ::call s:Verbose( "b:last_encoding_used is set to ".&enc)
       let b:last_encoding_used = &enc
     elseif &enc != b:last_encoding_used
       call lh#marker#_set(b:marker_open, b:marker_close, b:last_encoding_used)
-      " :call Decho( "b:last_encoding_used is changed to ".&enc)
+      ::call s:Verbose( "b:last_encoding_used is changed to ".&enc)
       let b:last_encoding_used = &enc
     endif
   endif
-  " call Dret('lh#marker#open '.b:marker_open)
+  ::call s:Verbose('lh#marker#open '.b:marker_open)
   return b:marker_open
 endfunction
 
@@ -85,25 +88,26 @@ endfunction
 function! lh#marker#close() abort
   if s:Option('use_place_holders', 0) && exists('*IMAP_GetPlaceHolderEnd')
     let m = IMAP_GetPlaceHolderEnd()
-    if "" != m
-      " call Dret('lh#marker#close '.m.'  using IMAP placeholder characters')
+    if !empty(m)
+      ::call s:Verbose('lh#marker#close '.m.'  using IMAP placeholder characters')
       return m
     endif
   endif
   if !exists("b:marker_close")
-    " :call Decho( "b:marker_close is not set")
+    ::call s:Verbose( "b:marker_close is not set")
     " Note: \xbb <=> <C-K>>>
     call lh#marker#_set('', "\xbb")
-    " :call Decho( "b:last_encoding_used is set to ".&enc)
+    ::call s:Verbose( "b:last_encoding_used is set to ".&enc)
     let b:last_encoding_used = &enc
-  else " if exists('s:last_encoding_used')
+  else " if exists('b:last_encoding_used')
     if &enc != b:last_encoding_used
-      " :call Decho( "b:last_encoding_used is different from current")
+      ::call s:Verbose( "b:last_encoding_used is different from current")
       call lh#marker#_set(b:marker_open, b:marker_close, b:last_encoding_used)
-      " :call Decho( "b:last_encoding_used is changed from ".b:last_encoding_used." to ".&enc)
+      ::call s:Verbose( "b:last_encoding_used is changed from ".b:last_encoding_used." to ".&enc)
       let b:last_encoding_used = &enc
     endif
   endif
+  ::call s:Verbose('lh#marker#close '.b:marker_close)
   return b:marker_close
 endfunction
 
@@ -149,18 +153,18 @@ function! s:Option(name, default) " {{{2
 endfunction
 
 function! lh#marker#_set(open, close, ...) abort " {{{2
-  if a:close != '' && a:close == &enc
+  if !empty(a:close) && a:close == &enc
     throw ":SetMarker: two arguments expected"
   endif
   let from = (a:0!=0) ? a:1 : 'latin1'
   " :call Dfunc('lh#marker#_set('.a:open.','.a:close.','.from.')')
 
   " let ret = ''
-  if '' != a:open
+  if !empty(a:open)
     let b:marker_open  = lh#encoding#iconv(a:open, from, &enc)
     " let ret = ret. "  b:open=".b:marker_open
   endif
-  if '' != a:close
+  if !empty(a:close)
     let b:marker_close = lh#encoding#iconv(a:close, from, &enc)
     " let ret = ret . "  b:close=".b:marker_close
   endif
@@ -169,7 +173,7 @@ function! lh#marker#_set(open, close, ...) abort " {{{2
   " Exploits Tom Link Stakeholders plugin if installed
   " http://www.vim.org/scripts/script.php?script_id=3326
   if exists(':StakeholdersEnable') && exists('b:marker_open') && exists('b:marker_close')
-    let g:stakeholders#def = {'rx': b:marker_open.'\(..\{-}\)'.b:marker_close}
+    let g:stakeholders#def = {'rx': b:marker_open.'\v(..{-})'.b:marker_close}
     " Seems to be required to update g:stakeholders#def.Replace(text)
     runtime autoload/stakeholders.vim
   endif
