@@ -30,7 +30,8 @@ RSpec.describe "C&C++ snippets", :c => true do
     expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener('"'{',0,"'"",function(\'lh#cpp#brackets#close_curly\'),"}",0,' "'')"
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
     vim.feedkeys('i{\<esc>')
-    vim.feedkeys('i\<esc>') # pause
+    sleep 1
+    # vim.feedkeys('i\<esc>') # pause
     assert_buffer_contents <<-EOF
       {}<++>
     EOF
