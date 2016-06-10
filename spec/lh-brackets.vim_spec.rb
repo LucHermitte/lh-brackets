@@ -161,11 +161,11 @@ RSpec.describe "autoload/lh/map.vim" do
   describe "Test bracket-pair insertions (and redo) without placeholder", :brackets, :nomarks => true do
       before :all do
           vim.command('SetMarker « »')
-          vim.command(':let b:usemarks = 0')
+          vim.command('let b:usemarks = 0')
       end
 
       after :all do
-          vim.command(':unlet b:usemarks')
+          vim.command('unlet b:usemarks')
       end
 
       before :each do

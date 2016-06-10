@@ -5,11 +5,14 @@ require 'pp'
 RSpec.describe "C&C++ snippets", :c => true do
   let (:filename) { "test.c" }
 
-  before :each do
+  before :all do
     vim.command('runtime plugin/misc_map.vim') # Inoreab
+  end
+
+  before :each do
     vim.command('filetype plugin on')
     vim.set('ft=c')
-    vim.command('runtime after/ftplugin/c/c_brackets.vim') # Inoreab
+    vim.command('runtime after/ftplugin/c/c_brackets.vim')
     vim.command('SetMarker <+ +>')
     vim.set('expandtab')
     vim.set('sw=2')
@@ -27,6 +30,7 @@ RSpec.describe "C&C++ snippets", :c => true do
     expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener('"'{',0,"'"",function(\'lh#cpp#brackets#close_curly\'),"}",0,' "'')"
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
     vim.feedkeys('i{\<esc>')
+    vim.feedkeys('i\<esc>') # pause
     assert_buffer_contents <<-EOF
       {}<++>
     EOF
