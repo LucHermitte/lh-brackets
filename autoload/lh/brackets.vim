@@ -1,12 +1,12 @@
 "=============================================================================
 " File:         map-tools::lh#brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
-"               <URL:http://github.com/LucHermitte>
+"               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.1.0
+" Version:      3.1.3
 " Created:      28th Feb 2008
-" Last Update:  20th May 2016
+" Last Update:  10th Jun 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -312,17 +312,17 @@ endfunction
 function! s:UnMap(m) abort
   try
     let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
-    if &verbose >= 1 | echomsg cmd | endif
+    call s:Verbose(cmd)
     exe cmd
-  catch /.*No such mapping.*/
-    if &verbose >= 1 | echomsg "no mapping for: ".cmd | endif
+  catch /E31/
+    call s:Verbose("%1: %2", v:exception, cmd)
   endtry
 endfunction
 
 " Function: s:Map(m) {{{2
 function! s:Map(m) abort
   let cmd = a:m.mode.'map <silent> ' . a:m.expr . a:m.buffer . a:m.trigger .' '.a:m.action
-  if &verbose >= 1 | echomsg cmd | endif
+  call s:Verbose(cmd)
   exe cmd
 endfunction
 
@@ -347,7 +347,7 @@ function! s:DefineMap(mode, trigger, action, isLocal, isExpr) abort
     if crt_mapping.action != a:action
       call lh#common#warning_msg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action."  with ".a:action)
     elseif &verbose >= 2
-      echomsg "(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action." with ".a:action
+      call s:Log("(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action." with ".a:action)
     endif
     let crt_definitions[p] = crt_mapping
   endif
