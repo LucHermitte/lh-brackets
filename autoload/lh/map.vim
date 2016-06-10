@@ -4,8 +4,8 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.1.0
-let s:k_version = '310'
+" Version:      3.1.2
+let s:k_version = '312'
 " Created:      03rd Nov 2015
 " Last Update:  20th May 2016
 "------------------------------------------------------------------------
@@ -14,7 +14,7 @@ let s:k_version = '310'
 "
 "------------------------------------------------------------------------
 " History:
-"       v3.1.0
+"       v3.1.2 Fix Issue 9 (when g:usemarks is false)
 "       v3.0.8 Fix Indenting issue when surrounding
 "       v3.0.6 Fix Indenting regression
 "       v3.0.5 Use lh#log() framework
@@ -228,7 +228,7 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
 
   " Strip marks (/placeholders) if they are not wanted
   if ! lh#brackets#usemarks()
-    let rhs = substitute(rhs, '\v!mark!|\<+\k*+\>', '', 'g')
+    let rhs = substitute(rhs, '\v!mark!|\<+\k+\>', '', 'g')
   endif
   " Interpret the sequence if it is meant to
   if rhs =~ '\m!\(mark\%(here\)\=\|movecursor\)!'
