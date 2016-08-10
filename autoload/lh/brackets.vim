@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.1.3:
+"               * Fix syntax error in `lh#brackets#_string`
 " Version 3.1.0:
 "               * New option to `:Bracket` -> `-context`
 " Version 3.0.8:
@@ -222,7 +224,7 @@ endfunction
 
 " Function: Main function called to toggle bracket mappings. {{{3
 function! lh#brackets#toggle() abort
-  " todo: when entering a buffer, update the mappings depending on whether it
+  " TODO: when entering a buffer, update the mappings depending on whether it
   " has been toggled
   if exists('*IMAP')
     let g:Imap_FreezeImap = 1 - s:state.isActive
@@ -297,7 +299,7 @@ augroup END
 
 " Function: lh#brackets#_string(s) {{{2
 function! lh#brackets#_string(s)
-  if type(a:s) == type(function('has()'))
+  if type(a:s) == type(function('has'))
     return string(a:s)
   endif
   " See Version 3.0.7 comment note.
