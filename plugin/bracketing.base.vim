@@ -4,12 +4,14 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.0.0
+" Version:      3.2.0
 "
 "       Stephen Riehm's braketing macros for vim
 "       Customizations by Luc Hermitte.
 " ======================================================================
 " History:      {{{1
+"       08th Nov 2016:  by LH
+"               * Add <Plug>MarkersJumpOutside
 "       10th Dec 2015:  by LH
 "               * !mark! & co have been deprecated as mappings
 "               * Support for closing all markers and jumping to the last one
@@ -176,37 +178,11 @@ set cpo&vim
 " Mappings that can be redefined {{{1
 " ==============================
 " (LH) As I use <del> a lot, I use different keys than those proposed by SR.
-"
-if !hasmapto('<Plug>MarkersMark', 'n') && (mapcheck("<M-Insert>", "n") == "")
-  nmap <unique> <M-Insert> <Plug>MarkersMark
-endif
-if !hasmapto('<Plug>MarkersMark', 'v') && (mapcheck("<M-Insert>", "v") == "")
-  vmap <unique> <M-Insert> <Plug>MarkersMark
-endif
-if !hasmapto('<Plug>MarkersMark', 'i') && (mapcheck("<M-Insert>", "i") == "")
-  imap <unique> <M-Insert> <Plug>MarkersMark
-endif
-if !hasmapto('<Plug>MarkersJumpF', 'i') && (mapcheck("<M-Del>", "i") == "")
-  imap <unique> <M-Del> <Plug>MarkersJumpF
-endif
-if !hasmapto('<Plug>MarkersJumpF') && (mapcheck("<M-Del>") == "")
-  map <unique> <M-Del> <Plug>MarkersJumpF
-endif
-if !hasmapto('<Plug>MarkersJumpB', 'i') && (mapcheck("<M-S-Del>", "i") == "")
-  imap <unique> <M-S-Del> <Plug>MarkersJumpB
-endif
-if !hasmapto('<Plug>MarkersJumpB') && (mapcheck("<M-S-Del>") == "")
-  map <unique> <M-S-Del> <Plug>MarkersJumpB
-endif
-if !hasmapto('<Plug>MarkersCloseAllAndJumpToLast', 'v') && (mapcheck("<M-End") == "")
-  vmap <silent> <unique> <M-eNd> <Plug>MarkersCloseAllAndJumpToLast
-endif
-if !hasmapto('<Plug>MarkersCloseAllAndJumpToLast', 'n') && (mapcheck("<M-End") == "")
-  nmap <silent> <unique> <M-End> <Plug>MarkersCloseAllAndJumpToLast
-endif
-if !hasmapto('<Plug>MarkersCloseAllAndJumpToLast', 'i') && (mapcheck("<M-End") == "")
-  imap <silent> <unique> <M-End> <Plug>MarkersCloseAllAndJumpToLast
-endif
+call lh#mapping#plug('<M-Insert>',   '<Plug>MarkersMark',                  'inv')
+call lh#mapping#plug('<M-Del>',      '<Plug>MarkersJumpF',                 'inv')
+call lh#mapping#plug('<M-S-Del>',    '<Plug>MarkersJumpB',                 'inv')
+call lh#mapping#plug('<M-End>',      '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
+call lh#mapping#plug('<C-PageDown>', '<Plug>MarkersJumpOutside',           'insx')
 
 inoremap <silent> <Plug>MarkersInsertMark <c-r>=lh#marker#txt()<cr>
 imap     <silent> <Plug>MarkersMark       <Plug>MarkersInsertMark<C-R>=LHMoveWithinMarker()<cr>
@@ -232,6 +208,12 @@ imap     <silent> <Plug>MarkersJumpAndDelB <ESC><Plug>MarkersJumpFAndDel
 nnoremap <silent> <Plug>MarkersCloseAllAndJumpToLast a<c-r>=lh#brackets#close_all_and_jump_to_last_on_line(lh#brackets#closing_chars())<cr>
 vmap     <silent> <Plug>MarkersCloseAllAndJumpToLast <C-\><C-N>`><Plug>MarkersCloseAllAndJumpToLast
 imap     <silent> <Plug>MarkersCloseAllAndJumpToLast <c-r>=lh#brackets#close_all_and_jump_to_last_on_line(lh#brackets#closing_chars())<cr>
+
+inoremap <silent> <Plug>MarkersJumpOutside <C-R>=lh#brackets#jump_outside({'mode': 'i'})<cr>
+nnoremap <silent> <Plug>MarkersJumpOutside @=lh#brackets#jump_outside({'mode': 'n'})<cr>
+xnoremap <silent> <Plug>MarkersJumpOutside <C-\><C-N>@=lh#brackets#jump_outside({'mode': 'x'})<cr>
+    smap <silent> <Plug>MarkersJumpOutside <C-\><C-N>a<Plug>MarkersJumpOutside
+
 " Note: don't add "<script>" within the previous <Plug>-mappings or else they
 " won't work anymore.
 " }}}

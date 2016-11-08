@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.1.0)
-*lh-brackets*           For Vim version 7.+     Last change: 20th May 2016
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.2.0)
+*lh-brackets*           For Vim version 7.+     Last change: 08th Nov 2016
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -557,6 +557,19 @@ like: >
         imap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
         nmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
         vmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
+<
+
+                            *C-PAGEDOWN* *<C-PageDown>* *<Plug>MarkersJumpOutside*
+I map also `<Plug>MarkersJumpOutside`` to <C-PageDown>.
+This mapping move the cursor ouside current block according to the pairs
+currently defined in the current buffer.
+If you'd rather use other keybindings, then add into your |.vimrc| something
+like: >
+        imap <C-)>      <Plug>MarkersJumpOutside
+        nmap <C-)>      <Plug>MarkersJumpOutside
+        vmap <C-)>      <Plug>MarkersJumpOutside
+
+This feature requires Vim 7.3+.
 
 
 Plugins developpers~
@@ -891,7 +904,7 @@ otherwise, if |g:cb_want_mode| is set to 0, define: >
                                                         *mt-Download*
 Where to obtain these files ?~
 
-First don't forget to obtain |lh-vim-lib| and |lh-dev| as lh-brackets depends
+First don't forget to obtain |lh-vim-lib| v4.0.0+ and |lh-dev| as lh-brackets depends
 on it since its version 1.0.0.
       <http://github.com/LucHermitte/lh-vim-lib>
       <http://github.com/LucHermitte/lh-dev>

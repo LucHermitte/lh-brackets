@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.1.3
+" Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  10th Jun 2016
+" Last Update:  08th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.2.0:
+"               * Add `lh#brackets#jump_outside()`
 " Version 3.1.3:
 "               * Fix syntax error in `lh#brackets#_string`
 " Version 3.1.0:
@@ -165,6 +167,7 @@ endfunction
 "# Definitions {{{3
 if !exists('s:definitions') || exists('brackets_clear_definitions')
   let s:definitions = {}
+  let s:pairs       = {}
 endif
 
 "# Activation State {{{3
@@ -212,7 +215,8 @@ endfunction
 
 "# Functions {{{2
 
-" Function: Fetch the brackets defined for the current buffer. {{{3
+" Function: s:GetDefinitions(isLocal) {{{3
+" Fetch the brackets defined for the current buffer.
 function! s:GetDefinitions(isLocal) abort
   let bid = a:isLocal ? bufnr('%') : -1
   if !has_key(s:definitions, bid)
@@ -221,6 +225,25 @@ function! s:GetDefinitions(isLocal) abort
   let crt_definitions = s:definitions[bid]
   return crt_definitions
 endfunction
+
+" Function: s:GetPairs(isLocal) {{{3
+" Fetch the brackets defined for the current buffer.
+function! s:GetPairs(isLocal) abort
+  let bid = a:isLocal ? bufnr('%') : -1
+  if !has_key(s:pairs, bid)
+    let s:pairs[bid] = []
+  endif
+  let crt_pairs = s:pairs[bid]
+  return crt_pairs
+endfunction
+
+" Function: s:AddPair(isLocal, open, close) {{{3
+function! s:AddPair(isLocal, open, close) abort
+  let crt_pairs = s:GetPairs(a:isLocal)
+  let new_pair = [a:open, a:close]
+  call lh#list#push_if_new(crt_pairs, new_pair)
+endfunction
+
 
 " Function: Main function called to toggle bracket mappings. {{{3
 function! lh#brackets#toggle() abort
@@ -562,6 +585,93 @@ function! s:Jump() abort
 endfunction
 
 "------------------------------------------------------------------------
+" Function: s:outer_blocks() {{{2
+function! s:outer_blocks() abort
+  let crt_pairs = s:GetPairs(0)
+  call extend(copy(crt_pairs), s:GetPairs(1), 'force')
+  let matches = {}
+  for p in crt_pairs
+    if p[0] != p[1] " searchpos doesn't work in that case
+      let pos = searchpairpos(p[0], '', p[1], 'cWn', "lh#syntax#is_a_comment('.')")
+      call s:Verbose('Testing searchpos(%1) -> %2', p, pos)
+    elseif p[0] =~ '["'']'
+      " Stuff which can be checked with vi', vi"
+      let crt_pos = getpos('.')
+      let cleanup = lh#on#exit()
+            \.restore('@a')
+            \.register('call setpos(".", '.string(crt_pos).')')
+      try
+        let @a = ''
+        silent! exe 'normal! "aya'.p[0]
+        " 2 chars are to be expected for open and close
+        if lh#encoding#strlen(@a) >= lh#encoding#strlen(p[0].p[1])
+          " In two steps because it may fail
+          " -- it shouldn't though thanks to len(@a) >= 2 * len(open)
+          exe 'normal! v'
+          silent! exe 'normal! a'.p[0]
+          silent! exe "normal! \<esc>"
+          let pos = getpos('.')[1:2]
+        else
+          let pos = [0,0]
+        endif
+        if 0
+          " getpos doesn't seem to work...
+          let pos = getpos('`>')[1:2]
+          if getpos('`<')[1:2] == pos
+            let pos = [0,0]
+          endif
+        endif
+        call s:Verbose('Testing va%1 -> %2 - %3', p[0], pos, @a)
+      finally
+        call cleanup.finalize()
+      endtry
+    else
+      let pos = searchpos(p[0], 'cWnb', 'lh#syntax#is_a_comment(".")')
+      if  pos != [0,0]
+        let pos = searchpos(p[1], 'cWn', 'lh#syntax#is_a_comment(".")')
+      endif
+      call s:Verbose('Testing /%1 -> %2', p[0], pos)
+    endif
+    if pos != [0,0]
+      let matches[p[0]] = pos
+    endif
+  endfor
+  call s:Verbose('Containing bracket pairs: %1', matches)
+  return matches
+endfunction
+
+"------------------------------------------------------------------------
+" Function: lh#brackets#jump_outside(param) {{{2
+" In this flavour, we don't expect to be just before the current closing
+" character. Instead, search for the next character that closes the current
+" scope.
+function! lh#brackets#jump_outside(param) abort
+  let mode      = get(a:param, 'mode')
+
+  let matches = s:outer_blocks()
+  if empty(matches)
+    call s:Verbose('The cursor doesn''t belong to any block')
+    return ''
+  endif
+  let m2 = map(values(matches), '[0]+v:val')
+  call sort(m2, 'lh#position#compare')
+  let crt_pos = getpos('.')
+  let dest = m2[0]+[0]
+  " call assert_true(lh#position#is_before(crt_pos, dest))
+  " Insert mode, :map-<expr>
+  if mode =~ '[is]' && crt_pos[1] == dest[1] " same-line
+    " Need to know how many characters does this really represent, not the
+    " number of bytes!
+    let text = lh#position#extract(crt_pos, dest)
+    let offset = lh#encoding#strlen(text)+1
+    return lh#map#_move_cursor_on_the_current_line(offset)
+  else
+    call setpos('.', dest)
+    return mode == 'i' ? "\<Right>" : "a"
+  endif
+endfunction
+
+"------------------------------------------------------------------------
 " Function: s:ImapBrackets(obrkt, cbrkt, esc, nl)  {{{2
 " Internal function.
 " {obrkt}:      open bracket
@@ -694,6 +804,11 @@ function! lh#brackets#define(bang, ...) abort
   let isLocal    = a:bang != "!"
   let [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable, context]
         \ = s:DecodeDefineOptions(a:000)
+
+  if type(Open) != type(function('has')) &&  type(Close) != type(function('has'))
+    let esc = escapable ? '\\' : ''
+    call s:AddPair(isLocal, esc.Open, esc.Close)
+  endif
 
   " INSERT-mode open {{{3
   if insert
