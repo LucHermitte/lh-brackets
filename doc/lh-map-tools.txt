@@ -1,5 +1,5 @@
 *lh-map-tools.txt*      Tools for helping mappings-definitions (v3.2.0)
-*lh-brackets*           For Vim version 7.+     Last change: 08th Nov 2016
+*lh-brackets*           For Vim version 7.+     Last change: 10th Nov 2016
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -711,11 +711,15 @@ The options are:
     sequence under the cursor.
     NB: not tested with sequences of several characters
 
-(*) `-context=`{syn-context} (Regex)                      *:Brackets-context*
-    In INSERT-more bracket-mappings (|:Brackets-insert|), restricts the
-    expansion to the syntax modes that matches {syn-context}. The default
-    behaviour restricts the expansion to string and comment contexts (see
-    |lh#map#no_context()|).
+(*) `-context=`{syn-context} (Regex)  (a)                     *:Brackets-context*
+(*) `-context!=`{syn-context} (Regex) (b)
+    (a) In INSERT-more bracket-mappings (|:Brackets-insert|), restricts the
+        expansion to the syntax modes that match {syn-context}.
+    (b) In INSERT-more bracket-mappings (|:Brackets-insert|), restricts the
+        expansion to the syntax modes that DON'T match {syn-context}.
+
+    The default behaviour restricts the expansion to string and comment
+    contexts (see |lh#map#no_context()|).
     Be aware of |:bar| issues. i.e. to have "`" expanded only in comment and
     Doxygen contexts, use 3x\: 1 before the bar, and two that the cmdline will
     collapse into one, i.e. >

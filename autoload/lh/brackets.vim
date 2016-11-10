@@ -26,6 +26,8 @@
 " History:
 " Version 3.2.0:
 "               * Add `lh#brackets#jump_outside()`
+"               * Fix `Brackets -list`
+"               * Add `Brackets -context!=`
 " Version 3.1.3:
 "               * Fix syntax error in `lh#brackets#_string`
 " Version 3.1.0:
@@ -753,7 +755,8 @@ function! s:DecodeDefineOptions(isLocal, a000)
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
     elseif p =~ '-v\%[isual]'       | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
     elseif p =~ '-no\%[rmal]'       | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
-    elseif p =~ '-co\%[ntext]'      | let context   = matchstr(p, '-co\%[ntext]=\zs.*')
+    elseif p =~ '-co\%[ntext]='     | let context   = {'is'   : matchstr(p, '-co\%[ntext]=\zs.*')}
+    elseif p =~ '-co\%[ntext]!='    | let context   = {"isn't": matchstr(p, '-co\%[ntext]!=\zs.*')}
     elseif p =~ '-b\%[ut]'
       let exceptions= matchstr(p, '-b\%[ut]=\zs.*')
       if exceptions =~ "^function"
