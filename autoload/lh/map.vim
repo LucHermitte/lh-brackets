@@ -4,16 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.1.2
-let s:k_version = '312'
+" Version:      3.2.0
+let s:k_version = '320'
 " Created:      03rd Nov 2015
-" Last Update:  20th May 2016
+" Last Update:  10th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.2.0 Add `lh#map#4_this_context()`
 "       v3.1.2 Fix Issue 9 (when g:usemarks is false)
 "       v3.0.8 Fix Indenting issue when surrounding
 "       v3.0.6 Fix Indenting regression
@@ -67,6 +68,14 @@ function! lh#map#debug(expr)
   return eval(a:expr)
 endfunction
 
+" # Helpers  {{{2
+" s:getSNR([func_name]) {{{3
+function! s:getSNR(...)
+  if !exists("s:SNR")
+    let s:SNR=matchstr(expand('<sfile>'), '<SNR>\d\+_\zegetSNR$')
+  endif
+  return s:SNR . (a:0>0 ? (a:1) : '')
+endfunction
 
 "------------------------------------------------------------------------
 " ## Exported functions {{{1
@@ -87,6 +96,42 @@ function! lh#map#eat_char(pat) abort
 endfunction
 
 " # Sequence functions {{{2
+
+" Function: lh#map#4_this_context(key, rule, sequence[, default]) {{{3
+function! s:match(syn) dict
+  return a:syn =~? self.context
+endfunction
+function! s:dont_match(syn) dict
+  return a:syn !~? self.context
+endfunction
+function! s:new_matcher(context) abort
+  let matcher = lh#object#make_top_type({})
+  if type(a:context) == type('')
+    let matcher.recognizes = function(s:getSNR('match'))
+    let matcher.context    = a:context
+  elseif has_key(a:context, 'is')
+    let matcher.recognizes = function(s:getSNR('match'))
+    let matcher.context    = a:context.is
+  elseif has_key(a:context, "isn't")
+    let matcher.recognizes = function(s:getSNR('dont_match'))
+    let matcher.context    = a:context["isn't"]
+  else
+    throw "Unexpected argument ".string(a:context)
+  endif
+  return matcher
+endfunction
+
+function! lh#map#4_this_context(key, rule, sequence, ...) abort
+  let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
+  let context = s:new_matcher(a:rule)
+  if context.recognizes(syn)
+    return lh#dev#reinterpret_escaped_char(a:sequence)
+  elseif a:0 > 0
+    return lh#dev#reinterpret_escaped_char(a:1)
+  else
+    return a:key
+  endif
+endfunction
 
 " Function: lh#map#4_these_contexts(key, ...) {{{3
 " Exactly the same purpose than lh#map#context(), but even more precise. It does
@@ -245,7 +290,7 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
   endif
   " Build & return the context dependent sequence to insert
   if a:0 > 0
-    return lh#map#4_these_contexts(a:key, a:1, rhs)
+    return lh#map#4_this_context(a:key, a:1, rhs)
   else
     return lh#map#no_context(a:key,rhs)
   endif

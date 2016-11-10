@@ -40,6 +40,7 @@ API: autoload/lh/map.vim~
 This plugin defines several functions and commands to use when you want to
 program smart-mappings and abbreviations:
 |lh#map#context()|              for context dependent mappings,
+|lh#map#4_this_context()|
 |lh#map#4_these_contexts()|
 |lh#map#no_context()|
 |lh#map#no_context2()|
@@ -124,6 +125,33 @@ cursor, the function returns either:
 - the interpreted {seq1} when the context is {syn-ctx1}
 - ...
 - or, the interpreted {default-seq} otherwise ; default value: {key}.
+
+Regarding the format of the {sequences} to interpret, every special character
+must see its greater-than and lesser-than symbols escaped with
+backslash. Thus <esc> becomes '\<esc\>'.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                                *lh#map#4_this_context()*
+lh#map#4_this_context({key}, {syn-ctx}, {seq} [, {default-seq}])~
+
+This function also enables to define context-dependent macros.
+This function is even more precise than |lh#map#context()|.
+It does not make any assumption for strings-, comments-, characters- and
+doxygen-context.
+
+Regarding the context of the character under the current position of the
+cursor, the function returns either:
+- the interpreted {seq} when the context is compatible with {syn-ctx}
+- or, the interpreted {default-seq} otherwise ; default value: {key}.
+
+Unlike |lh#map#4_these_contexts()| where {syn-ctx*} have to be strings, in
+this function, the syntax context can be either a:
+- a string, in which case we expand {seq} iff the current context matches
+  {syn-ctx} ;
+- or a |dictionary| with the field `"is"`, in which case we expand {seq} iff
+  the current context matches the value associated ;
+- or a |dictionary| with the field `"isn't"`, in which case we expand {seq}
+  iff the current context DOESN'T match the value associated ;
 
 Regarding the format of the {sequences} to interpret, every special character
 must see its greater-than and lesser-than symbols escaped with
@@ -415,10 +443,10 @@ see |lh#map#surround()|, |v_CTRL-\_CTRL-N|, |@|, |!mark!|, |!cursorhere!|,
 
                                                             *mmht-cm*
 Which one(s) must I use to define a complex mapping ?~
-If you need to define a mapping for which |lh#map#insert_seq()| can not help you, it
-is likely that you are looking for a better management of the context. At this
-time, there is no function ready to use. You may have to write your own
-function that will delegate its work to |lh#map#4_these_contexts()|.
+If you need to define a mapping for which |lh#map#insert_seq()| cannot help
+you, it is likely that you are looking for a better management of the context.
+At this time, there is no function ready to use. You may have to write your
+own function that will delegate its work to |lh#map#4_these_contexts()|.
 
 If the problem only consists in expanding other custom mappings, then define
 an adapter (like the design pattern) mapping whose keybinding matches
