@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  08th Nov 2016
+" Last Update:  10th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -735,8 +735,8 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   call s:DefineImap(a:trigger, sCase, a:isLocal)
 endfunction
 "------------------------------------------------------------------------
-" Function: s:DecodeDefineOptions(a000)   {{{2
-function! s:DecodeDefineOptions(a000)
+" Function: s:DecodeDefineOptions(isLocal, a000)   {{{2
+function! s:DecodeDefineOptions(isLocal, a000)
   let nl         = ''
   let insert     = 1
   let visual     = 1
@@ -745,8 +745,8 @@ function! s:DecodeDefineOptions(a000)
   let context    = ''
   let options    = []
   for p in a:a000
-    if     p =~ '-l\%[list]'        | call s:ListMappings(isLocal)  | return
-    elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(isLocal) | return
+    if     p =~ '-l\%[list]'        | call s:ListMappings(a:isLocal)  | return []
+    elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(a:isLocal) | return []
     elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
@@ -802,8 +802,10 @@ endfunction
 function! lh#brackets#define(bang, ...) abort
   " Parse Options {{{3
   let isLocal    = a:bang != "!"
+  let res = s:DecodeDefineOptions(isLocal, a:000)
+  if empty(res) | return | endif
   let [nl, insert, visual, normal, options, trigger, Open, Close, Exceptions, escapable, context]
-        \ = s:DecodeDefineOptions(a:000)
+        \ = res
 
   if type(Open) != type(function('has')) &&  type(Close) != type(function('has'))
     let esc = escapable ? '\\' : ''
