@@ -216,7 +216,7 @@ Here is an example of what I have done with some C++ constructs: >
             \   . '\<cr\>!mark!\<cr\>}!mark!\<esc\>?(\<cr\>a')<CR>
 
         function! Def_Map(key, expr1, expr2)
-          if exists('g:usemarks') && g:usemarks
+          if lh#brackets#usemarks()
             return "\<c-r>=lh#map#no_context2('"
                \  . a:key."',lh#map#build_map_seq(\"".a:expr2."\"))\<cr>"
           else
@@ -224,7 +224,7 @@ Here is an example of what I have done with some C++ constructs: >
           endif
         endfunction
 <
-Then, within normal context, when |g:usemarks| is set, "for" is expanded into: >
+Then, within normal context, when |[bpg]:usemarks| is set, "for" is expanded into: >
         for (;«»;«») {
             «»
         }«»
@@ -265,7 +265,7 @@ typed. The result will be function of several things:
   - we can embed insert-mode mappings whose keybindings match '!.\{-}!' (see
     |lh#map#build_map_seq()|)
     A special treatment is applied on:
-    - |!mark!| : according to |g:usemarks|, it is replaced by |lh#marker#txt()|
+    - |!mark!| : according to |[bpg]:usemarks|, it is replaced by |lh#marker#txt()|
       or nothing
     - |!cursorhere!| : will move the cursor to that position in the sequence
       once it have been expanded.
@@ -320,7 +320,7 @@ Parameters:~
     Indicates whether we must try to find and expand mappings of the form
     "!.\{-1,}!" within {begin} and {end}
     When true:
-    - |g:usemarks| is taken into account: when |g:usemarks| is false, {begin}
+    - |[bpg]:usemarks| is taken into account: when |[bpg]:usemarks| is false, {begin}
       and {end} will be cleared from every occurrence of "|!mark!|".
     - if {begin} or {end} contain "|!cursorhere!|", {goback} will be ignored
       and replaced by a more appropriate value.
@@ -851,7 +851,7 @@ following lines into your |.vimrc|: >
 
 NB: Triggers.vim is not longer required to provide this feature.
 
-                                       *[bg]:usemarks* *b:usemarks* *g:usemarks*
+                                       *[bpg]:usemarks* *b:usemarks* *g:usemarks*
                                        *lh#brackets#usemarks()*
 In |insert-mode|, two operating modes are provided: one very classic, and one
 that takes advantage of Stephen Riehm's markers when the buffer-relative
@@ -868,7 +868,7 @@ The current state of the option can be obtained with the function
 
                                             *<Plug>ToggleMarkers* *<M-F9>*
                                             *lh#brackets#toggle_brackets()*
-The option |[bg]:usemarks| can be toggled by hitting the trigger <M-F9>. This
+The option |[bpg]:usemarks| can be toggled by hitting the trigger <M-F9>. This
 trigger key can be overriden thanks to the |<Plug>|-mapping |<Plug>ToggleMarkers|.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
