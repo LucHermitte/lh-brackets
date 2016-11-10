@@ -83,7 +83,7 @@ if exists(':Brackets')
   " Doxygen surround action
   :Brackets <tt> </tt> -visual=1 -insert=0 -trigger=<localleader>tt
   " In insert mode, this needs to be expanded only in comment context
-  "  - first \\ becomes \ 
+  "  - first \\ becomes \
   "  - last \ required before | to avoid confusion with :h :bar
   "  -> \\\|
   :Brackets ` ` -insert=1 -visual=0 -normal=0 -context=comment\\\|doxygen
@@ -97,7 +97,7 @@ if exists(':Brackets')
   " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
   if lh#dev#option#get('semicolon_closes_bracket', &ft, 1)
     call lh#brackets#define_imap(';',
-          \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".Marker_Txt(".\\{-}")."\\)\\=)\\+"',
+          \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=)\\+"',
           \   'action': 's:JumpOverAllClose(")", ";")'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
           \   'action': 's:JumpOverAllClose(";", "")'}],
