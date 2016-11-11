@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  10th Nov 2016
+" Last Update:  11th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -589,8 +589,8 @@ endfunction
 "------------------------------------------------------------------------
 " Function: s:outer_blocks() {{{2
 function! s:outer_blocks() abort
-  let crt_pairs = s:GetPairs(0)
-  call extend(copy(crt_pairs), s:GetPairs(1), 'force')
+  let crt_pairs = copy(s:GetPairs(0))
+  call extend(crt_pairs, s:GetPairs(1))
   let matches = {}
   for p in crt_pairs
     if p[0] != p[1] " searchpos doesn't work in that case
@@ -863,8 +863,10 @@ endfunction
 "------------------------------------------------------------------------
 " Function: lh#brackets#_match_any_bracket_pair() {{{2
 function! lh#brackets#_match_any_bracket_pair() abort
-  return getline(".")[col(".")-2:]=~'^\(()\|{}\|\[]\|""\|''\)'
-        \ || getline(".")[col(".")-3:]=~'^\(\\(\\)\|\\{\\}\|\\\[\\]\|\\"\\"\)'
+  let crt_pairs = copy(s:GetPairs(0))
+  call extend(crt_pairs, s:GetPairs(1))
+  let regex = '\('.join(map(copy(crt_pairs), 'escape(join(v:val,"\\%'.col('.').'c"), "[")'), '\|').'\)'
+  return getline(".")=~ regex
 endfunction
 
 "------------------------------------------------------------------------
