@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  11th Nov 2016
+" Last Update:  21st Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -811,8 +811,10 @@ function! lh#brackets#define(bang, ...) abort
         \ = res
 
   if type(Open) != type(function('has')) &&  type(Close) != type(function('has'))
-    let esc = escapable ? '\\' : ''
-    call s:AddPair(isLocal, esc.Open, esc.Close)
+    call s:AddPair(isLocal, Open, Close)
+    if escapable
+      call s:AddPair(isLocal, '\\'.Open, '\\'.Close)
+    endif
   endif
 
   " INSERT-mode open {{{3
@@ -865,7 +867,8 @@ endfunction
 function! lh#brackets#_match_any_bracket_pair() abort
   let crt_pairs = copy(s:GetPairs(0))
   call extend(crt_pairs, s:GetPairs(1))
-  let regex = '\('.join(map(copy(crt_pairs), 'escape(join(v:val,"\\%'.col('.').'c"), "[")'), '\|').'\)'
+  " let regex = '\V\('.join(map(copy(crt_pairs), 'escape(join(v:val,"\\%'.col('.').'c"), "\\")'), '\|').'\)'
+  let regex = '\V\('.join(map(crt_pairs, 'join(v:val,"\\%'.col('.').'c")'), '\|').'\)'
   return getline(".")=~ regex
 endfunction
 
