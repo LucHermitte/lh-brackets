@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  21st Nov 2016
+" Last Update:  24th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -331,7 +331,7 @@ function! lh#brackets#_string(s)
   " See Version 3.0.7 comment note.
   " return '"'.substitute(a:s, '\v(\\\\|\\[a-z]\@!)', '&&', 'g').'"'
   " return '"'.escape(a:s, '"\').'"'  " version that works with most keys, like \\
-  return '"'.escape(a:s, '"').'"'  " version that works with double quote and \n
+  return '"'.escape(a:s, '|"').'"'  " version that works with double quote and \n
   " return '"'.a:s.'"'                " version that works with \n
   " return string(a:s) " version that doesn't work: need to return something enclosed in double quotes
 endfunction
@@ -358,7 +358,7 @@ endfunction
 function! s:DefineMap(mode, trigger, action, isLocal, isExpr) abort
   let crt_definitions = s:GetDefinitions(a:isLocal)
   let crt_mapping = {}
-  let crt_mapping.trigger = a:trigger
+  let crt_mapping.trigger = escape(a:trigger, '|') " need to escape bar
   let crt_mapping.mode    = a:mode
   let crt_mapping.action  = a:action
   let crt_mapping.buffer  = a:isLocal ? '<buffer> ' : ''
@@ -823,7 +823,7 @@ function! lh#brackets#define(bang, ...) abort
     " INSERT-mode close
     let areSameTriggers = options[0] == options[1]
     let map_ctx = empty(context) ? '' : ','.string(context)
-    let inserter = 'lh#brackets#opener('.string(trigger).','. escapable.',"'.(nl).
+    let inserter = 'lh#brackets#opener('.lh#brackets#_string(trigger).','. escapable.',"'.(nl).
           \'",'. lh#brackets#_string(Open).','.lh#brackets#_string(Close).','.string(areSameTriggers).','.string(Exceptions).map_ctx.')'
     call s:DefineImap(trigger, inserter, isLocal)
     if ! areSameTriggers
@@ -859,7 +859,7 @@ function! lh#brackets#define(bang, ...) abort
     let normal = strlen(nl)>0 ? 'V' : 'viw'
   endif
   if type(normal)!=type(0) || normal != 0
-    call s:DefineMap('n', trigger, normal.trigger, isLocal, 0)
+    call s:DefineMap('n', trigger, normal.escape(trigger, '|'), isLocal, 0)
   endif
 endfunction
 

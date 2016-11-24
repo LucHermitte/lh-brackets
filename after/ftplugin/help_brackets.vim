@@ -2,10 +2,10 @@
 " File:         ftplugin/help.vim                                 {{{1
 " Author:       Luc Hermitte <EMAIL:luc {dot} hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte/lh-brackets>
-" Version:      2.4.0
-let s:k_version = 240
+" Version:      3.2.0
+let s:k_version = 320
 " Created:      14th Dec 2015
-" Last Update:  14th Dec 2015
+" Last Update:  24th Nov 2016
 "------------------------------------------------------------------------
 " Description:
 "       Mappings to insert help pairs
@@ -67,6 +67,7 @@ let g:loaded_ftplug_help_brackets = s:k_version
 " loaded, like functions that help building a vim-menu for this
 " ftplugin.
 " Functions }}}2
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
