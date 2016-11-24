@@ -45,7 +45,7 @@ if exists(':Brackets')
   :Brackets * * -visual=0
   :Brackets * * -insert=0 -trigger=<localleader>*
   :Brackets ` `
-  :Brackets \| \|
+  :Brackets | |
 endif
 
 "=============================================================================
