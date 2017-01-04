@@ -772,7 +772,7 @@ The options are:
 
 (*) `-escapable=`(Boolean: [`0`]|`1`)                         *:Brackets-escapable*
     This option tells that INSERT-mode mappings may expand into
-    {open}<cursor>\{close} is there is a "\" before the cursor.
+    `\{open}<cursor>\{close}` if there is a "\" before the cursor.
     This does not mean anything in VISUAL- and NORMAL-modes.
 
 Examples from {rtp}/after/ftplugin/c/c_brackets.vim: >
