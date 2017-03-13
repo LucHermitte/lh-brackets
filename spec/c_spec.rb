@@ -17,6 +17,8 @@ RSpec.describe "C&C++ snippets", :c => true do
     vim.set('expandtab')
     vim.set('sw=2')
     clear_buffer
+    vim.feedkeys('i\<esc>') # pause
+    sleep 1
   end
 
   it "has loaded c ftplugin", :deps => true do
@@ -31,7 +33,6 @@ RSpec.describe "C&C++ snippets", :c => true do
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
     vim.feedkeys('i{\<esc>')
     sleep 1
-    vim.feedkeys('i\<esc>') # pause
     assert_buffer_contents <<-EOF
       {}<++>
     EOF
