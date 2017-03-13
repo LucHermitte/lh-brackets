@@ -46,6 +46,7 @@ RSpec.describe "autoload/lh/map.vim" do
 
       before :each do
           clear_buffer
+          vim.set('ft=')
       end
 
       specify "Inserts foo(bar", :redo, :paren => true do
