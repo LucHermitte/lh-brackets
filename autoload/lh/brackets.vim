@@ -28,7 +28,8 @@
 "               * Add `lh#brackets#jump_outside()`
 "               * Fix `Brackets -list`
 "               * Add `Brackets -context!=`
-"               : Fix `<BS>` to clear any bracket pair
+"               * Fix `<BS>` to clear any bracket pair
+"               * Fix portability issue (type changes)
 " Version 3.1.3:
 "               * Fix syntax error in `lh#brackets#_string`
 " Version 3.1.0:
