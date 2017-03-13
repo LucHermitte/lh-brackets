@@ -17,6 +17,8 @@ RSpec.describe "C&C++ snippets", :c => true do
     vim.set('expandtab')
     vim.set('sw=2')
     clear_buffer
+    sleep 1
+    vim.feedkeys('i\<esc>') # pause
   end
 
   it "has loaded c ftplugin", :deps => true do
