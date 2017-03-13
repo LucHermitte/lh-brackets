@@ -34,7 +34,7 @@ RSpec.describe "C&C++ snippets", :c => true do
     vim.feedkeys('i\<esc>') # pause...
     vim.feedkeys('i{\<esc>')
     vim.feedkeys('i\<esc>') # pause...
-    sleep 1
+    sleep 3
     assert_buffer_contents <<-EOF
       {}<++>
     EOF
