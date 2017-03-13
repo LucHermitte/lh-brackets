@@ -31,7 +31,7 @@ RSpec.describe "C&C++ snippets", :c => true do
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
     vim.feedkeys('i{\<esc>')
     sleep 1
-    # vim.feedkeys('i\<esc>') # pause
+    vim.feedkeys('i\<esc>') # pause
     assert_buffer_contents <<-EOF
       {}<++>
     EOF
