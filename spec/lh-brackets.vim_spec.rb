@@ -55,6 +55,8 @@ RSpec.describe "autoload/lh/map.vim" do
             ()«»
           EOF
           vim.feedkeys 'ofoo(bar\<esc>'
+          vim.feedkeys('i(\<esc>')
+          sleep 1
           assert_line_contents <<-EOF
             foo(bar)«»
           EOF
