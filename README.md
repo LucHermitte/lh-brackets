@@ -7,7 +7,7 @@ map-tools provides various commands and functions to help design smart and advan
 It is made of three sub-systems:
   * [a placeholder subsystem](#the-placeholder-subsystem),
   * [the core bracketing-system](#the-bracketing-subsystem),
-  * [various VimL functions to support ftplugin definitions](#the-viml-library).
+  * [various Vim functions to support ftplugin definitions](#the-vim-library).
 
 ### The placeholder subsystem
 
@@ -91,7 +91,7 @@ By default, the [mappings are active for most filetypes](doc/default_brackets.md
 
 map-tools provides mappings (originally from auctex.vim) to replace a pair of bracket-characters by another pair of bracket-characters. See `:h brackets_manipulations` for more information.
 
-### The VimL library
+### The Vim library
 
 As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a few functions of its own. All these functions are specialized into the definition of smart abbreviations and INSERT-mode mappings.
 
@@ -107,7 +107,7 @@ As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a 
 
 
 # Installation
-  * Requirements: Vim 7.+ (7.4-849 in order to support redo), [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) v3.3.9+, [lh-dev](http://github.com/LucHermitte/lh-dev) v1.3.4+
+  * Requirements: Vim 7.+ (7.4-849 in order to support redo), [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) v4.4.0+, [lh-dev](http://github.com/LucHermitte/lh-dev) v1.3.4+. While required by lh-dev, [lh-tags](http://github.com/LucHermitte/lh-tags) is not required by lh-brackets.
   * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-brackets (this is the preferred method because of the dependencies)
 ```vim
 ActivateAddons lh-brackets
@@ -117,20 +117,21 @@ ActivateAddons lh-brackets
 flavor 'LucHermitte/lh-brackets'
 ```
   * or you can clone the git repositories
-```vim
+```bash
 git clone git@github.com:LucHermitte/lh-vim-lib.git
-git clone git@github.com:LucHermitte/lh-tags.git
 git clone git@github.com:LucHermitte/lh-dev.git
 git clone git@github.com:LucHermitte/lh-brackets.git
+# And a lh-dev dependency, not required by lh-brackets
+git clone git@github.com:LucHermitte/lh-tags.git
 ```
   * or with Vundle/NeoBundle:
 ```vim
 Bundle 'LucHermitte/lh-vim-lib'
-Bundle 'LucHermitte/lh-tags'
 Bundle 'LucHermitte/lh-dev'
 Bundle 'LucHermitte/lh-brackets'
+" And a lh-dev dependency, not required by lh-brackets
+Bundle 'LucHermitte/lh-tags'
 ```
-
 
 ## Credits
   * This bracketing system is actually a variation on [Stephen Riehm's original bracketing system](http://mywebpage.netscape.com/bbenjif/vim/Riehm/doc/) ;
