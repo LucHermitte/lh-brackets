@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.4
+" Version:	3.2.0
 "
 " Purpose:      API plugin: Several mapping-oriented functions
 "
@@ -98,7 +98,7 @@
 "               InsertSeq(), ... as we can not define mappings (/abbreviations)
 "               that contain "\<{keys}>" into the sequence to insert.
 " Note:         It accepts sequences containing double-quotes.
-" Deprecated:   Use lh#dev#reinterpret_escaped_char
+" Deprecated:   Use lh#mapping#reinterpret_escaped_char
 " }}}
 "---------------------------------------------------------------------------
 " Function:     InsertSeq(key, sequence, [context]) {{{
@@ -107,7 +107,7 @@
 "               things:
 "               - the {sequence} will be interpreted:
 "                 - special characters can be used: '\<cr\>', '\<esc\>', ...
-"                   (see lh#dev#reinterpret_escaped_char()) ; '\n'
+"                   (see lh#mapping#reinterpret_escaped_char()) ; '\n'
 "                 - we can embed insert-mode mappings whose keybindings match
 "                   '!.\{-}!' (see BuildMapSeq())
 "                   A special treatment is applied on:
@@ -198,32 +198,38 @@ if !exists('g:misc_map_loaded') || exists('g:force_reload_misc_map')
 "
 "---------------------------------------------------------------------------
 function! Map4TheseContexts(key, ...) abort " {{{
+  call lh#notify#deprecated('Map4TheseContexts', 'lh#map#4_these_contexts')
   return call('lh#map#4_these_contexts', [a:key] + a:000)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! MapContext(key, ...) abort " {{{
+  call lh#notify#deprecated('MapContext', 'lh#map#context')
   return call('lh#map#context', [a:key] + a:000)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! MapNoContext(key, seq) abort " {{{
+  call lh#notify#deprecated('MapNoContext', 'lh#map#no_context')
   return call('lh#map#no_context', [a:key, a:seq])
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! MapNoContext2(key, seq) abort " {{{
+  call lh#notify#deprecated('MapNoContext2', 'lh#map#no_context2')
   return call('lh#map#no_context2', [a:key, a:seq])
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! BuildMapSeq(seq) abort " {{{
+  call lh#notify#deprecated('BuildMapSeq', 'lh#map#build_map_seq')
   return lh#map#build_map_seq(a:seq)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 function! ReinterpretEscapedChar(seq) abort " {{{
-  return lh#dev#reinterpret_escaped_char(a:seq)
+  call lh#notify#deprecated('ReinterpretEscapedChar', 'lh#mapping#reinterpret_escaped_char')
+  return lh#mapping#reinterpret_escaped_char(a:seq)
 endfunction
 " }}}
 "---------------------------------------------------------------------------
@@ -232,6 +238,7 @@ function! MapAroundVisualLines(begin,end,isLine,isIndented) range abort " {{{
 endfunction " }}}
 
 function! InsertAroundVisual(begin,end,isLine,isIndented) range abort " {{{
+  call lh#notify#deprecated('InsertAroundVisual', 'lh#map#insert_around_visual')
   return call('lh#map#insert_around_visual', [a:begin,a:end,a:isLine,a:isIndented] + a:000)
 endfunction
 " }}}
@@ -246,6 +253,7 @@ endfunction
 " Todo: add support for <buffer>
 " Deprecated: use lh#map#eat_char()
 function! EatChar(pat)
+  call lh#notify#deprecated('EatChar', 'lh#map#eat_char')
   return lh#map#eat_char(a:pat)
 endfunction
 
@@ -257,33 +265,40 @@ command! -narg=+ Inoreabbr
 "---------------------------------------------------------------------------
 " In order to define things like '{'
 function! Smart_insert_seq1(key,expr1,expr2) abort " {{{
+  call lh#notify#deprecated('Smart_insert_seq1', 'lh#map#smart_insert_seq1')
   return lh#map#smart_insert_seq1(a:key, a:expr1, a:expr2)
 endfunction " }}}
 
 function! Smart_insert_seq2(key,expr,...) abort " {{{
+  call lh#notify#deprecated('Smart_insert_seq2', 'lh#map#smart_insert_seq2')
   return call('lh#map#smart_insert_seq2', [a:key, a:expr] + a:000)
 endfunction " }}}
 "---------------------------------------------------------------------------
 " Mark where the cursor should be at the end of the insertion {{{
 function! LHCursorHere(...) abort
+  call lh#notify#deprecated('LHCursorHere', 'lh#map#_cursor_here')
   return call('lh#map#_cursor_here', a:000)
 endfunction
 
 function! LHGotoMark() abort
+  call lh#notify#deprecated('LHGotoMark', 'lh#map#_goto_mark')
   call lh#map#_goto_mark()
 endfunction
 
 function! LHGotoEndMark() abort
+  call lh#notify#deprecated('LHGotoEndMark', 'lh#map#_goto_end_mark')
   call lh#map#_goto_end_mark()
 endfunction
 
 function! LHFixIndent() abort
+  call lh#notify#deprecated('LHFixIndent', 'lh#map#_fix_indent')
   return lh#map#_fix_indent()
 endfunction
 " }}}
 "---------------------------------------------------------------------------
 " Function: InsertSeq(key, seq, [context]) {{{
 function! InsertSeq(key,seq, ...)
+  call lh#notify#deprecated('InsertSeq', 'lh#map#insert_seq')
   return call('lh#map#insert_seq', [a:key, a:seq] + a:000)
 endfunction
 " }}}
@@ -292,6 +307,7 @@ endfunction
 " Returns whether the text currently selected matches a marker and only one.
 " Deprecated: Use lh#marker#is_a_marker()
 function! IsAMarker()
+  call lh#notify#deprecated('IsAMarker', 'lh#marker#is_a_marker')
   return lh#marker#is_a_marker()
 endfunction
 "}}}
@@ -300,12 +316,14 @@ endfunction
 " Function: Surround(begin,end, isIndented, goback, mustInterpret [, imSeq] ) {{{
 function! SurroundBySubstitute(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range abort
+  call lh#notify#deprecated('SurroundBySubstitute', 'lh#map#surround_by_substitute')
   return call('lh#map#surround_by_substitute',
         \ [a:begin, a:end, a:isLine, a:isIndented, a:goback, a:mustInterpret] + a:000)
 endfunction
 
 function! Surround(
       \ begin, end, isLine, isIndented, goback, mustInterpret, ...) range abort
+  call lh#notify#deprecated('Surround', 'lh#map#surround')
   return call('lh#map#surround',
         \ [a:begin, a:end, a:isLine, a:isIndented, a:goback, a:mustInterpret] + a:000)
 endfunction

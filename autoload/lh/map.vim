@@ -16,6 +16,7 @@ let s:k_version = '320'
 " History:
 "       v3.2.0 Add `lh#map#4_this_context()`
 "              Fix tw issue, again
+"              Deprecates lh#dev#reinterpret_escaped_char()
 "       v3.1.2 Fix Issue 9 (when g:usemarks is false)
 "       v3.0.8 Fix Indenting issue when surrounding
 "       v3.0.6 Fix Indenting regression
@@ -30,7 +31,7 @@ let s:k_version = '320'
 "       v2.3.0 functions moved from plugin/misc_map.vim
 " TODO:
 " * Simplify the way mappings are defined, hopefully to get rid of
-" lh#dev#reinterpret_escaped_char()
+" lh#mapping#reinterpret_escaped_char()
 " }}}1
 "=============================================================================
 
@@ -126,9 +127,9 @@ function! lh#map#4_this_context(key, rule, sequence, ...) abort
   let syn = synIDattr(synID(line('.'),col('.')-1,1),'name')
   let context = s:new_matcher(a:rule)
   if context.recognizes(syn)
-    return lh#dev#reinterpret_escaped_char(a:sequence)
+    return lh#mapping#reinterpret_escaped_char(a:sequence)
   elseif a:0 > 0
-    return lh#dev#reinterpret_escaped_char(a:1)
+    return lh#mapping#reinterpret_escaped_char(a:1)
   else
     return a:key
   endif
@@ -146,13 +147,13 @@ function! lh#map#4_these_contexts(key, ...) abort
   let i = 1
   while i < a:0
     if (a:{i} =~ '^\(\k\|\\|\)\+$') && (syn =~? a:{i})
-      return lh#dev#reinterpret_escaped_char(a:{i+1})
+      return lh#mapping#reinterpret_escaped_char(a:{i+1})
     endif
     let i += 2
   endwhile
   " Else: default case
   if i == a:0
-    return lh#dev#reinterpret_escaped_char(a:{a:0})
+    return lh#mapping#reinterpret_escaped_char(a:{a:0})
   else
     return a:key
   endif
@@ -193,7 +194,7 @@ function! lh#map#no_context(key, seq) abort
   if syn =~? 'comment\|string\|character\|doxygen'
     return a:key
   else
-    return lh#dev#reinterpret_escaped_char(a:seq)
+    return lh#mapping#reinterpret_escaped_char(a:seq)
   endif
 endfunction
 
@@ -216,7 +217,7 @@ function! lh#map#no_context2(key, sequence) abort
   elseif getline(l)[c-1] =~ '\k'
     return a:key
   else
-    return lh#dev#reinterpret_escaped_char(a:seq)
+    return lh#mapping#reinterpret_escaped_char(a:seq)
   endif
 endfunction
 
@@ -255,7 +256,7 @@ function! lh#map#build_map_seq(seq) abort
       let r .= c
     endif
   endwhile
-  return lh#dev#reinterpret_escaped_char(r)
+  return lh#mapping#reinterpret_escaped_char(r)
 endfunction
 
 " Function: lh#map#smart_insert_seq1(key, expr1, expr2) {{{3
@@ -302,7 +303,7 @@ function! lh#map#insert_seq(key, seq, ...) abort
   " TODO: if no escape nor newline -> use s:k_move_prefix
   let mark = a:seq =~ '!cursorhere!'
   let s:gotomark = ''
-  let seq  = lh#dev#reinterpret_escaped_char(a:seq)
+  let seq  = lh#mapping#reinterpret_escaped_char(a:seq)
   let seq .= (mark ? '!movecursor!' : '')
 
   let cleanup = lh#on#exit()

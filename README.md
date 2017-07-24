@@ -2,7 +2,7 @@
 
 ## Features
 
-map-tools provides various commands and functions to help design smart and advanced mappings dedicated to text insertion.
+lh-brackets (ex- map-tool) provides various commands and functions to help design smart and advanced mappings dedicated to text insertion.
 
 It is made of three sub-systems:
   * [a placeholder subsystem](#the-placeholder-subsystem),
@@ -107,7 +107,7 @@ As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a 
 
 
 # Installation
-  * Requirements: Vim 7.+ (7.4-849 in order to support redo), [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) v4.0.0+, [lh-dev](http://github.com/LucHermitte/lh-dev) v1.3.4+. While required by lh-dev, [lh-tags](http://github.com/LucHermitte/lh-tags) is not required by lh-brackets.
+  * Requirements: Vim 7.+ (7.4-849 in order to support redo), [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) v4.0.0+, [lh-dev](http://github.com/LucHermitte/lh-dev) v1.3.4+ for unit testing.
   * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-brackets (this is the preferred method because of the dependencies)
 ```vim
 ActivateAddons lh-brackets
@@ -119,18 +119,12 @@ flavor 'LucHermitte/lh-brackets'
   * or you can clone the git repositories
 ```bash
 git clone git@github.com:LucHermitte/lh-vim-lib.git
-git clone git@github.com:LucHermitte/lh-dev.git
 git clone git@github.com:LucHermitte/lh-brackets.git
-# And a lh-dev dependency, not required by lh-brackets
-git clone git@github.com:LucHermitte/lh-tags.git
 ```
   * or with Vundle/NeoBundle:
 ```vim
 Bundle 'LucHermitte/lh-vim-lib'
-Bundle 'LucHermitte/lh-dev'
 Bundle 'LucHermitte/lh-brackets'
-" And a lh-dev dependency, not required by lh-brackets
-Bundle 'LucHermitte/lh-tags'
 ```
 
 ## Credits
