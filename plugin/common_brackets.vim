@@ -196,7 +196,7 @@ if !hasmapto('<Plug>ToggleMarkers', 'i') && (mapcheck("<M-F9>", "i") == "")
 endif
 
 "# Delete empty brackets {{{2
-if lh#dev#option#get('cb_delete_empty_brackets', &ft, 1)
+if lh#ft#option#get('cb_delete_empty_brackets', &ft, 1)
   call lh#brackets#define_imap('<bs>',
         \ [{ 'condition': 'lh#brackets#_match_any_bracket_pair()',
         \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
@@ -220,7 +220,7 @@ endif
 if ! lh#option#get('cb_no_default_brackets', 0)
   " Older vim versions do not properly autoload `lh#ft#is_text` wrapped in
   " `function()`.
-  if !has('patch-7.2-061') 
+  if !has('patch-7.2-061')
     call lh#ft#version()
   endif
   :Brackets! ( )

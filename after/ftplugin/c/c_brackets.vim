@@ -95,7 +95,7 @@ if exists(':Brackets')
   " '(foo|«»)«»' + ';' --> '("foo");|'
   " '("foo|"«»)«»' + ';' --> '("foo");|'
   " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
-  if lh#dev#option#get('semicolon_closes_bracket', &ft, 1)
+  if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
     call lh#brackets#define_imap(';',
           \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=)\\+"',
           \   'action': 's:JumpOverAllClose(")", ";")'},
