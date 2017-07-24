@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  13th Mar 2017
+" Last Update:  24th Jul 2017
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -459,7 +459,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     let close = a:Close
   endif
 
-  if strlen(a:nl) > 0
+  if ! empty(a:nl)
     " Cannot use the following generic line because &inckey does not always
     " work and !cursorhere! does not provokes a reindentation
     "  :return lh#map#insert_seq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
