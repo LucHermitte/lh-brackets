@@ -593,7 +593,7 @@ function! lh#map#_goto_end_mark() abort
   let goto_col_2 = markpos_2[2]
 
   try
-    let crt_indent = indent(s:goto_lin)
+    let crt_indent = indent(goto_lin)
     if crt_indent < s:old_indent
       let s:fix_indent = s:old_indent - crt_indent
     else
