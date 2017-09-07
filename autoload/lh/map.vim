@@ -1,4 +1,4 @@
-"==0===========================================================================
+"=============================================================================
 " File:         autoload/lh/map.vim                               {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte>
