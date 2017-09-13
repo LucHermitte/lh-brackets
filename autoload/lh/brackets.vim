@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.2.0
 " Created:      28th Feb 2008
-" Last Update:  24th Jul 2017
+" Last Update:  13th Sep 2017
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -467,6 +467,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     return call('lh#map#insert_seq', [a:trigger, open.a:nl.close.'!mark!\<esc\>O']+a:000)
   else
     let c = virtcol('.')
+    let c = col('.')
     " call s:Verbose(c)
     let current = matchstr(line, '.*\%'.(c).'c\S*')
     if 0 && &tw > 0 && lh#encoding#strlen(current.open.close.lh#marker#txt()) > &tw
