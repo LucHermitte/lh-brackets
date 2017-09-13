@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.2.0
+" Version:      3.2.1
 " Created:      28th Feb 2008
 " Last Update:  13th Sep 2017
 "------------------------------------------------------------------------
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.2.1:
+"               * Fix regression with `set et`
 " Version 3.2.0:
 "               * Add `lh#brackets#jump_outside()`
 "               * Fix `Brackets -list`

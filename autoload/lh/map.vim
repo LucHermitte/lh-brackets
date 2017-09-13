@@ -4,8 +4,8 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.2.0
-let s:k_version = '320'
+" Version:      3.2.1
+let s:k_version = '321'
 " Created:      03rd Nov 2015
 " Last Update:  13th Sep 2017
 "------------------------------------------------------------------------
@@ -14,6 +14,7 @@ let s:k_version = '320'
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.2.1 Fix regression with `set et`
 "       v3.2.0 Add `lh#map#4_this_context()`
 "              Fix tw issue, again
 "              Deprecates lh#dev#reinterpret_escaped_char()
