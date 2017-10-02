@@ -21,9 +21,8 @@ let s:k_version = 330
 " 	Then, replace the calls to :Brackets
 "
 " History:
-"	v2.3.0  02nd Oct 2017
+"	v3.3.0  02nd Oct 2017
 "	        `;` jumps over `]`
-"	        `;` shall not jump over parenthesis in `for(`/`if(` contexts.
 "	v2.1.0  29th Jan 2014
 "	        Mappings factorized into plugin/common_brackets.vim
 "	v2.0.1  14th Aug 2013
@@ -106,7 +105,7 @@ if exists(':Brackets')
           \ [{'condition': 'getline(".")[0:col(".")-1]=~"\\v<for<bar>if>\\s*\\("',
           \   'action': '";"'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=[)\\]]\\+"',
-          \   'action': 's:JumpOverAllClose(")", ";")'},
+          \   'action': 's:JumpOverAllClose(")]", ";")'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
           \   'action': 's:JumpOverAllClose(";", "")'}],
           \1)

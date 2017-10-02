@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.2.1
+" Version:      3.3.0
 " Created:      28th Feb 2008
-" Last Update:  13th Sep 2017
+" Last Update:  02nd Oct 2017
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.3.0:  02nd Oct 2017
+"	        `;` jumps over `]`
 " Version 3.2.1:
 "               * Fix regression with `set et`
 " Version 3.2.0:
@@ -538,15 +540,16 @@ endfunction
 "------------------------------------------------------------------------
 " Function: s:JumpOverAllClose(chars) {{{2
 function! s:JumpOverAllClose(chars, ...) abort
+  let chars = escape(a:chars, ']')
   let del_mark = ''
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
-  let m = matchstr(ll, '\v^(['.a:chars.']|'.lh#marker#very_magic('.{-}').')+')
+  let m = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')+')
   " echomsg ll.'##'.m.'##'
   let len_match = lh#encoding#strlen(m)
   if len_match
     let del_mark = repeat("\<del>", len_match)
-    let del_mark .= substitute(m, '[^'.a:chars.']', '', 'g')
+    let del_mark .= substitute(m, '[^'.chars.']', '', 'g')
   endif
   " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
   if a:0 > 0
