@@ -26,6 +26,7 @@
 " History:
 " Version 3.3.0:  02nd Oct 2017
 "	        `;` jumps over `]`
+"	        Fix merging of trailling characters in JumpOverAllClose
 " Version 3.2.1:
 "               * Fix regression with `set et`
 " Version 3.2.0:
@@ -545,16 +546,18 @@ function! s:JumpOverAllClose(chars, ...) abort
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
   let m = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')+')
-  " echomsg ll.'##'.m.'##'
   let len_match = lh#encoding#strlen(m)
+  let nb_bytes_match = strlen(m)
+  call s:Verbose("In ##%1##  %3 characters/%4 bytes match: ##%2##", ll, m, len_match, nb_bytes_match)
   if len_match
     let del_mark = repeat("\<del>", len_match)
     let del_mark .= substitute(m, '[^'.chars.']', '', 'g')
   endif
   " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
   if a:0 > 0
-    let remaining = ll[len_match : ]
-    " echomsg "rem: <<".remaining.">>"
+    let nb_bytes_match = strlen(m)
+    let remaining = ll[nb_bytes_match : ]
+    call s:Verbose("rem: ##%1## VS %2", remaining, a:1)
     let match_rem = matchstr(remaining, '^\('.lh#marker#txt('.\{-}').'\)*'.a:1.'\('.lh#marker#txt('.\{-}').'\)*')
     let len_match_rem = lh#encoding#strlen(match_rem)
     if len_match_rem
@@ -562,7 +565,7 @@ function! s:JumpOverAllClose(chars, ...) abort
     endif
     let del_mark .= a:1
   endif
-  " echomsg "-->".strtrans(del_mark)
+  call s:Verbose("-> %1", strtrans(del_mark))
 
   return s:k_move_prefix."\<right>".del_mark
 endfunction
