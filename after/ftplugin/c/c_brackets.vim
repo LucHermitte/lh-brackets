@@ -22,7 +22,8 @@ let s:k_version = 330
 "
 " History:
 "	v2.3.0  02nd Oct 2017
-"	        `;`  jumps over `]`
+"	        `;` jumps over `]`
+"	        `;` shall not jump over parenthesis in `for(`/`if(` contexts.
 "	v2.1.0  29th Jan 2014
 "	        Mappings factorized into plugin/common_brackets.vim
 "	v2.0.1  14th Aug 2013
@@ -94,13 +95,17 @@ if exists(':Brackets')
   " :Brackets /** */ -visual=0 -trigger=/!
   "
   " eclipse (?) behaviour (placeholders are facultatives)
-  " '(foo|«»)«»' + ';' --> '("foo");|'
-  " '("foo|"«»)«»' + ';' --> '("foo");|'
+  " '(foo|«»)«»' + ';'     --> '("foo");|'
+  " '("foo|"«»)«»' + ';'   --> '("foo");|'
   " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
-  " '[foo|«»]«»' + ';' --> '["foo"];|'
+  " '[foo|«»]«»' + ';'     --> '["foo"];|'
+  " 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
+  " 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
   if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
     call lh#brackets#define_imap(';',
-          \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=[)\\]]\\+"',
+          \ [{'condition': 'getline(".")[0:col(".")-1]=~"\\v<for<bar>if>\\s*\\("',
+          \   'action': '";"'},
+          \  {'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=[)\\]]\\+"',
           \   'action': 's:JumpOverAllClose(")", ";")'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
           \   'action': 's:JumpOverAllClose(";", "")'}],

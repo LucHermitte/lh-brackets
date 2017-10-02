@@ -53,8 +53,8 @@ The main differences from the global table are:
     curly brackets (and newlines are introduced).
  * `<tt>` is recognized as an opening bracket (I use it a lot to write Doxygen
    _code_ instead of `\c` when I need to type several things).
- * `;` will try to close parenthesis.
- * `<bs>` take care of semi-colons after the closing curly-bracket.
+ * `;` will try to close parenthesis -- set `(bpg):[{ft}_]semicolon_closes_bracket` to 0 to inhibit this setting.
+ * `<bs>` take care of semi-colons after the closing curly-bracket -- set `(bpg):[{ft}_]semicolon_closes_bracket` to 0 to inhibit this setting.
 
 ### HTML mappings
 

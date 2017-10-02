@@ -32,6 +32,13 @@ Contents~
 
 
 ------------------------------------------------------------------------------
+                                                        *default-bracket-mappings*
+Default bracket settings~
+The extensive list of the mappings defined by default can be found in the
+`doc/default_brackets.md` file. Or also on
+https://github.com/LucHermitte/lh-brackets/blob/master/doc/default_brackets.md
+
+------------------------------------------------------------------------------
                                                         *misc_map.vim*
                                                         *lh/map.vim*
                                                         *lh#map-API*
@@ -56,7 +63,6 @@ want to program smart-mappings and abbreviations:
 The typical way to use these helpers is addressed into |mm-How-To|.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                        *MapNoContext()* *MapNoContext2()*
                                         *lh#map#no_context()* *lh#map#no_context2()*
 lh#map#no_context({key}, {sequence}) & lh#map#no_context2({k},{s})~
 MapNoContext(), MapNoContext2() [deprecated]~
@@ -85,7 +91,6 @@ must see its greater-than and lesser-than symbols escaped with
 backslash. Thus <esc> becomes '\<esc\>'.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                *MapContext()*
                                                 *lh#map#context()*
 lh#map#context({key}, {syn-ctx1} {seq1}, {syn-ctx2}, {seq2}, ... [, {default-seq}])~
 MapContext() [deprecated]~
@@ -111,7 +116,6 @@ must see its greater-than and lesser-than symbols escaped with
 backslash. Thus <esc> becomes '\<esc\>'.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                *Map4_theseContexts()*
                                                 *lh#map#4_these_contexts()*
 lh#map#4_these_contexts({key}, {syn-ctx1} {seq1}, {syn-ctx2}, {seq2}, ... [, {default-seq}])~
 Map4_theseContexts() [deprecated]~
@@ -159,8 +163,6 @@ must see its greater-than and lesser-than symbols escaped with
 backslash. Thus <esc> becomes '\<esc\>'.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                *InsertAroundVisual()*
-                                                *MapAroundVisualLine()*
                                                 *lh#map#insert_around_visual()*
 lh#map#insert_around_visual({begin}, {end}, {isLine}, {isIndented})~
 InsertAroundVisualLine({begin}, {end}, {isLine}, {isIndented}) [deprecated]~
@@ -196,7 +198,6 @@ a |marker| is selected, in select-mode, then we must prefer the function
 {begin} and {end}.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                        *BuildMapSeq()*
                                                         *lh#map#build_map_seq()*
 lh#map#build_map_seq( {sequence} )~
 
@@ -254,7 +255,6 @@ Moolenar, Benji Fisher and some other people on the VIM mailing list
 multi-byte characters for the moment.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                            *InsertSeq()*
                                                             *lh#map#insert_seq()*
 lh#map#insert_seq({key}, {sequence} [, {context}])~
 
@@ -291,7 +291,6 @@ Examples:~
         \ 0, 1, '', 1, 'while ')<cr>
 <
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                            *Surround()*
                                                             *lh#map#surround()*
 lh#map#surround({begin},{end},{isLine},{isIndented},{goback},{mustInterpret}[,{imSeq]})~
 
@@ -357,7 +356,6 @@ sequence to insert has been inserted and expanded.
 Unlike |!mark!|, there is no mapping associated to !cursorhere!.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                                                            *IsAMarker()*
                                                 *lh#marker#is_a_marker()*
 lh#marker#is_a_marker()~
 This function tells whether the currently selected text is actually a
@@ -1007,7 +1005,6 @@ Where to obtain these files ?~
 First don't forget to obtain |lh-vim-lib| v4.0.0+ and |lh-dev| as lh-brackets depends
 on it since its version 1.0.0.
       <http://github.com/LucHermitte/lh-vim-lib>
-      <http://github.com/LucHermitte/lh-dev>
 
 These plugins can be obtained ...
 - ... independently from each other directly on github ; browse from:
@@ -1022,6 +1019,6 @@ These plugins can be obtained ...
   flavor 'LucHermitte/lh-brackets'
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2016 <http://github.com/LucHermitte/lh-brackets, CC by SA 3.0 {{{1
+ © Luc Hermitte, 2001-2017 <http://github.com/LucHermitte/lh-brackets, CC by SA 3.0 {{{1
  VIM: let b:VS_language = 'american'
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:
