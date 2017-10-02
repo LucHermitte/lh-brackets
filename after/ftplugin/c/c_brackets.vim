@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:	3.1.0
-let s:k_version = 310
+" Version:	3.3.0
+let s:k_version = 330
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -21,6 +21,8 @@ let s:k_version = 310
 " 	Then, replace the calls to :Brackets
 "
 " History:
+"	v2.3.0  02nd Oct 2017
+"	        `;`  jumps over `]`
 "	v2.1.0  29th Jan 2014
 "	        Mappings factorized into plugin/common_brackets.vim
 "	v2.0.1  14th Aug 2013
@@ -95,9 +97,10 @@ if exists(':Brackets')
   " '(foo|«»)«»' + ';' --> '("foo");|'
   " '("foo|"«»)«»' + ';' --> '("foo");|'
   " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
+  " '[foo|«»]«»' + ';' --> '["foo"];|'
   if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
     call lh#brackets#define_imap(';',
-          \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=)\\+"',
+          \ [{'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=[)\\]]\\+"',
           \   'action': 's:JumpOverAllClose(")", ";")'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
           \   'action': 's:JumpOverAllClose(";", "")'}],
