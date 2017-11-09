@@ -1,4 +1,4 @@
-# lh-brackets [![Build Status](https://secure.travis-ci.org/LucHermitte/lh-brackets.png?branch=master)](http://travis-ci.org/LucHermitte/lh-brackets) [![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
+# lh-brackets [![Last release](https://img.shields.io/github/tag/LucHermitte/lh-brackets.svg)](https://github.com/LucHermitte/lh-brackets/releases) [![Build Status](https://secure.travis-ci.org/LucHermitte/lh-brackets.png?branch=master)](http://travis-ci.org/LucHermitte/lh-brackets) [![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
 
 ## Features
 
