@@ -1002,8 +1002,7 @@ Calling this function is actually equivalent to calling >
                                                         *mt-Download*
 Where to obtain these files ?~
 
-First don't forget to obtain |lh-vim-lib| v4.0.0+ and |lh-dev| as lh-brackets depends
-on it since its version 1.0.0.
+First don't forget to obtain |lh-vim-lib| v4.0.0+.
       <http://github.com/LucHermitte/lh-vim-lib>
 
 These plugins can be obtained ...

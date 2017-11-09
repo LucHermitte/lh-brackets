@@ -14,6 +14,7 @@ RSpec.describe "C snippets", :c => true do
     vim.set('sw=2')
     vim.command('SetMarker <+ +>')
     clear_buffer
+    vim.command('call lh#style#clear()')
   end
 
   it "has loaded vim ftplugin", :deps => true do
@@ -21,6 +22,8 @@ RSpec.describe "C snippets", :c => true do
   end
 
   specify "surround on V", :surround => true do
+    expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+    expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
     vim.runtime('spec/support/c-snippets.vim') # Inoreab
     expect(vim.echo('&ft')).to eq "c"
     expect(vim.echo('&sw')).to eq "2"
@@ -48,6 +51,8 @@ RSpec.describe "C snippets", :c => true do
   end
 
   specify "surround on v$ a badly indented code", :surround => true do
+    expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+    expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
     vim.runtime('spec/support/c-snippets.vim') # Inoreab
     expect(vim.echo('&ft')).to eq "c"
     expect(vim.echo('&sw')).to eq "2"

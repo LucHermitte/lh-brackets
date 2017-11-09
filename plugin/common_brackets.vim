@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.2.0
-let s:version = 320
+" Version:      3.4.0
+let s:version = 340
 " Purpose:      {{{1
 "               This file defines a command (:Brackets) that simplifies
 "               the definition of mappings that insert pairs of caracters when
@@ -21,6 +21,9 @@ let s:version = 320
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 3.4.0:
+"               * Replaces dependency to lh-dev to a dependency to
+"               lh-style in tests
 " Version 3.2.0:
 "               * Removes dependency to lh-dev
 " Version 3.0.1:

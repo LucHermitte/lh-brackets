@@ -1,2 +1,2 @@
 flavor 'LucHermitte/vim-UT', '>= 0.2.1'
-flavor 'LucHermitte/lh-dev', '>= 1.6.2'
+flavor 'LucHermitte/lh-style'

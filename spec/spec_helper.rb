@@ -39,10 +39,10 @@ Vimrunner::RSpec.configure do |config|
     vim.prepend_runtimepath(vim_lib_path)
     vim.command('runtime plugin/let.vim') # LetIfUndef
 
-    # lh-dev
-    vim_dev_path = File.expand_path('../../../lh-dev', __FILE__)
-    vim.prepend_runtimepath(vim_dev_path)
-    vim.runtime('plugin/dev.vim') # AddStyle
+    # lh-style
+    vim_style_path = File.expand_path('../../../lh-style', __FILE__)
+    vim.prepend_runtimepath(vim_style_path)
+    vim.runtime('plugin/lh-style.vim') # AddStyle
 
     # lh-brackets
     vim_brackets_path = File.expand_path('../../../lh-brackets', __FILE__)

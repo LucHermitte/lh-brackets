@@ -14,10 +14,10 @@ RSpec.describe "autoload/lh/map.vim" do
           expect(vim.echo('lh#option#is_unset(lh#option#unset())')).to eq "1"
           expect(/autoload.lh.option\.vim/).to be_sourced
       end
-      it "Has lh-dev" do
-          expect(vim.echo('&rtp')).to match(/lh-dev/)
-          expect(vim.echo('lh#dev#version()')).to be >= "135"
-          expect(/autoload.lh.dev\.vim/).to be_sourced
+      it "Has lh-style" do
+          expect(vim.echo('&rtp')).to match(/lh-style/)
+          expect(vim.echo('lh#style#version()')).to be >= "100"
+          expect(/autoload.lh.style\.vim/).to be_sourced
       end
   end
 
@@ -50,7 +50,6 @@ RSpec.describe "autoload/lh/map.vim" do
       end
 
       specify "Inserts foo(bar", :redo, :paren => true do
-          has_redo = vim.echo('has("patch-7.4.849")')
           vim.feedkeys('i(\<esc>')
           assert_line_contents <<-EOF
             ()«»
@@ -59,10 +58,12 @@ RSpec.describe "autoload/lh/map.vim" do
           assert_line_contents <<-EOF
             foo(bar)«»
           EOF
+          has_redo = vim.echo('has("patch-7.4.849")')
           if has_redo == "1"
               vim.type(".")
               expect(vim.echo('getline(".")')).to eq "foo(bar)«»"
           end
+          # vim.echo('input("pause")')
       end
       specify "Inserts foo(bar)foo", :redo, :paren => true do
           has_redo = vim.echo('has("patch-7.4.849")')
