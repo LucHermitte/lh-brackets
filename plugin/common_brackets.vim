@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.4.0
-let s:version = 340
+" Version:      3.4.2
+let s:version = 342
 " Purpose:      {{{1
 "               This file defines a command (:Brackets) that simplifies
 "               the definition of mappings that insert pairs of caracters when
@@ -21,6 +21,8 @@ let s:version = 340
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 3.4.2:
+"               * Mapping on <CR> will enrich any previous mapping
 " Version 3.4.0:
 "               * Replaces dependency to lh-dev to a dependency to
 "               lh-style in tests
@@ -216,8 +218,7 @@ if lh#option#get('cb_newline_within_empty_brackets', 1)
   call lh#brackets#enrich_imap('<cr>',
         \ {'condition': 'getline(".")[col(".")-2:col(".")-1]=="{}"',
         \   'action': 'lh#brackets#_add_newline_between_brackets()'},
-        \ 0,
-        \ '\<cr\>'
+        \ 0
         \ )
 endif
 
