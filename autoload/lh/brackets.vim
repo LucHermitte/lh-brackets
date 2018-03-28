@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.3.0
+" Version:      3.4.2
 " Created:      28th Feb 2008
-" Last Update:  09th Nov 2017
+" Last Update:  28th Mar 2018
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,10 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.4.2:  28th Mar 2018
+"               * Require lh-vim-lib 4.3.0
+"               * Move _switch functions to lh-vim-lib
+"               * enrich_imap will reuse a previous existing mapping
 " Version 3.3.0:  02nd Oct 2017
 "	        `;` jumps over `]`
 "	        Fix merging of trailling characters in JumpOverAllClose
@@ -343,6 +347,7 @@ function! lh#brackets#_string(s)
 endfunction
 
 " Function: s:UnMap(m) {{{2
+" TODO: move to lh#mapping
 function! s:UnMap(m) abort
   try
     let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
@@ -354,6 +359,7 @@ function! s:UnMap(m) abort
 endfunction
 
 " Function: s:Map(m) {{{2
+" TODO: move to lh#mapping
 function! s:Map(m) abort
   let cmd = a:m.mode.'map <silent> ' . a:m.expr . a:m.buffer . a:m.trigger .' '.a:m.action
   call s:Verbose(cmd)
@@ -715,36 +721,45 @@ endfunction
 "------------------------------------------------------------------------
 " Function: lh#brackets#_switch(trigger, cases) {{{2
 function! lh#brackets#_switch_int(trigger, cases) abort
-  for c in a:cases
-    if eval(c.condition)
-      return eval(c.action)
-    endif
-  endfor
-  return lh#mapping#reinterpret_escaped_char(eval(a:trigger))
+  call lh#notify#deprecated('lh#brackets#_switch_int', 'lh#mapping#_switch_int')
+  return lh#mapping#_switch_int(a:trigger, a:cases)
 endfunction
 
 function! lh#brackets#_switch(trigger, cases) abort
-  return lh#brackets#_switch_int(a:trigger, a:cases)
-  " debug return lh#brackets#_switch_int(a:trigger, a:cases)
+  call lh#notify#deprecated('lh#brackets#_switch', 'lh#mapping#_switch')
+  return lh#mapping#_switch(a:trigger, a:cases)
 endfunction
 
 " Function: lh#brackets#define_imap(trigger, cases, isLocal [,default=trigger]) {{{2
+" TODO: see how it can be move in lh#mapping
 function! lh#brackets#define_imap(trigger, cases, isLocal, ...) abort
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
   " lh#mapping#reinterpret_escaped_char(eval()), which requires nested strings...
   let default = (a:0>0) ? (a:1) : (a:trigger)
-  let sCases='lh#brackets#_switch('.string(string(default)).', '.string(a:cases).')'
+  let sCases='lh#mapping#_switch('.string(string(default)).', '.string(a:cases).')'
   call s:DefineImap(a:trigger, sCases, a:isLocal)
 endfunction
 
 " Function: lh#brackets#enrich_imap(trigger, case, isLocal [,default=trigger]) {{{2
+" TODO: see how it can be move in lh#mapping
 function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
   " lh#mapping#reinterpret_escaped_char(eval()), which requires nested strings...
-  let default = (a:0>0) ? (a:1) : (a:trigger)
-  let sCase='lh#brackets#_switch('.string(string(default)).', '.string([a:case]).')'
+  if a:0 == 0
+    let previous = maparg(a:trigger, 'i', 0, 1)
+    if !empty(previous) && previous.expr
+      " If not an expression, I do know yet how to forward a non expr mapping
+      " from an expr mapping definition
+      let default = lh#mapping#_build_rhs(previous)
+    else
+      let default = string(a:trigger)
+    endif
+  else
+    let default = string(a:1)
+  endif
+  let sCase='lh#mapping#_switch('.string(default).', '.string([a:case]).')'
   call s:DefineImap(a:trigger, sCase, a:isLocal)
 endfunction
 "------------------------------------------------------------------------
