@@ -105,9 +105,9 @@ if exists(':Brackets')
           \ [{'condition': 'getline(".")[0:col(".")-1]=~"\\v<for<bar>if>\\s*\\("',
           \   'action': '";"'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=[)\\]]\\+"',
-          \   'action': 's:JumpOverAllClose(")]", ";")'},
+          \   'action': 'lh#brackets#close_all_and_jump_to_last_on_line(")]", ";")'},
           \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
-          \   'action': 's:JumpOverAllClose(";", "")'}],
+          \   'action': 'lh#brackets#close_all_and_jump_to_last_on_line(";", "")'}],
           \1)
     " Override default definition from lh-brackets to take care of semi-colon
     call lh#brackets#define_imap('<bs>',
