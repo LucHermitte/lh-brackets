@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.4.2
+" Version:      3.5.0
 " Created:      28th Feb 2008
-" Last Update:  28th Mar 2018
+" Last Update:  16th May 2018
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,14 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.5.0:  16th May 2018
+"               * Require lh-vim-lib 4.4.0
+"               * Merge s:JumpOverAllClose into
+"                 lh#brackets#close_all_and_jump_to_last_on_line
+"               * Add parameter in
+"                 lh#brackets#close_all_and_jump_to_last_on_line() to merge
+"                 only with the first next lexeme
+"
 " Version 3.4.2:  28th Mar 2018
 "               * Require lh-vim-lib 4.3.0
 "               * Move _switch functions to lh-vim-lib
@@ -168,7 +176,7 @@ let s:k_vmap_type = lh#option#get('bracket_surround_in', 'x', 'g')
 let s:k_vim_supports_redo = has('patch-7.4.849')
 let s:k_move_prefix = s:k_vim_supports_redo ? "\<C-G>U" : ""
 
-" Function: lh#brackets#usemarks() {{{2
+" Function: lh#brackets#usemarks()                                                                           {{{2
 function! lh#brackets#usemarks() abort
   return lh#option#get('usemarks', 1)
 endfunction
@@ -176,7 +184,7 @@ endfunction
 "------------------------------------------------------------------------
 " ## Mappings Toggling {{{1
 "
-"# Globals {{{2
+"# Globals                                                                                                   {{{2
 "# Definitions {{{3
 if !exists('s:definitions') || exists('brackets_clear_definitions')
   let s:definitions = {}
@@ -226,7 +234,7 @@ function! s:state.mustDeactivate() dict abort
   return must
 endfunction
 
-"# Functions {{{2
+"# Functions                                                                                                 {{{2
 
 " Function: s:GetDefinitions(isLocal) {{{3
 " Fetch the brackets defined for the current buffer.
@@ -321,7 +329,7 @@ function! lh#brackets#toggle_usemarks() abort
   endif
 endfunction
 
-"# Autocommands {{{2
+"# Autocommands                                                                                              {{{2
 augroup LHBrackets
   au!
   au BufEnter * call s:UpdateMappingsActivationE()
@@ -333,8 +341,8 @@ augroup END
 " ## Brackets definition functions {{{1
 "------------------------------------------------------------------------
 
-" Function: lh#brackets#_string(s) {{{2
-function! lh#brackets#_string(s)
+" Function: lh#brackets#_string(s)                                                                           {{{2
+function! lh#brackets#_string(s) abort
   if type(a:s) == type(function('has'))
     return string(a:s)
   endif
@@ -346,11 +354,11 @@ function! lh#brackets#_string(s)
   " return string(a:s) " version that doesn't work: need to return something enclosed in double quotes
 endfunction
 
-" Function: s:UnMap(m) {{{2
+" Function: s:UnMap(m)                                                                                       {{{2
 " TODO: move to lh#mapping
 function! s:UnMap(m) abort
   try
-    let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.trigger
+    let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.lhs
     call s:Verbose(cmd)
     exe cmd
   catch /E31/
@@ -358,42 +366,42 @@ function! s:UnMap(m) abort
   endtry
 endfunction
 
-" Function: s:Map(m) {{{2
+" Function: s:Map(m)                                                                                         {{{2
 " TODO: move to lh#mapping
 function! s:Map(m) abort
-  let cmd = a:m.mode.'map <silent> ' . a:m.expr . a:m.buffer . a:m.trigger .' '.a:m.action
+  let cmd = a:m.mode.'map <silent> ' . a:m.expr . a:m.buffer . a:m.lhs .' '.a:m.rhs
   call s:Verbose(cmd)
   exe cmd
 endfunction
 
-" Function: s:DefineMap(mode, trigger, action, isLocal, isExpr) {{{2
+" Function: s:DefineMap(mode, trigger, action, isLocal, isExpr)                                              {{{2
 function! s:DefineMap(mode, trigger, action, isLocal, isExpr) abort
   let crt_definitions = s:GetDefinitions(a:isLocal)
   let crt_mapping = {}
-  let crt_mapping.trigger = escape(a:trigger, '|') " need to escape bar
+  let crt_mapping.lhs = escape(a:trigger, '|') " need to escape bar
   let crt_mapping.mode    = a:mode
-  let crt_mapping.action  = a:action
+  let crt_mapping.rhs  = a:action
   let crt_mapping.buffer  = a:isLocal ? '<buffer> ' : ''
   let crt_mapping.expr    = a:isExpr  ? '<expr> '   : ''
   if s:state.isActive
     call s:Map(crt_mapping)
   endif
   let p = lh#list#Find_if(crt_definitions,
-        \ 'v:val.mode==v:1_.mode && v:val.trigger==v:1_.trigger',
+        \ 'v:val.mode==v:1_.mode && v:val.lhs==v:1_.lhs',
         \ [crt_mapping])
   if p == -1
     call add(crt_definitions, crt_mapping)
   else
-    if crt_mapping.action != a:action
-      call lh#common#warning_msg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action."  with ".a:action)
+    if crt_mapping.rhs != a:action
+      call lh#common#warning_msg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].rhs."  with ".a:action)
     elseif &verbose >= 2
-      call s:Log("(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].action." with ".a:action)
+      call s:Log("(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].rhs." with ".a:action)
     endif
     let crt_definitions[p] = crt_mapping
   endif
 endfunction
 
-" Function: s:DefineImap(trigger, inserter, isLocal) {{{2
+" Function: s:DefineImap(trigger, inserter, isLocal)                                                         {{{2
 function! s:DefineImap(trigger, inserter, isLocal) abort
   if exists('*IMAP') && a:trigger !~? '<bs>\|<cr>\|<up>\|<down>\|<left>\|<right>'
     if a:isLocal
@@ -407,16 +415,16 @@ function! s:DefineImap(trigger, inserter, isLocal) abort
   endif
 endfunction
 
-" Function: s:ListMappings(isLocal) {{{2
+" Function: s:ListMappings(isLocal)                                                                          {{{2
 function! s:ListMappings(isLocal) abort
   let crt_definitions = s:GetDefinitions(a:isLocal)
   for m in crt_definitions
-    let cmd = m.mode.'map <silent> ' . m.buffer . m.trigger .' '.m.action
+    let cmd = m.mode.'map <silent> ' . m.buffer . m.lhs .' '.m.rhs
     echomsg cmd
   endfor
 endfunction
 
-" Function: s:ClearMappings(isLocal) {{{2
+" Function: s:ClearMappings(isLocal)                                                                         {{{2
 function! s:ClearMappings(isLocal) abort
   let crt_definitions = s:GetDefinitions(a:isLocal)
   if s:state.isActive
@@ -428,7 +436,7 @@ function! s:ClearMappings(isLocal) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:thereIsAnException(Ft_exceptions) {{{2
+" Function: s:thereIsAnException(Ft_exceptions)                                                              {{{2
 function! s:thereIsAnException(Ft_exceptions) abort
   if empty(a:Ft_exceptions)
     return 0
@@ -519,7 +527,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#closer(trigger, Action, Ft_exceptions) {{{2
+" Function: lh#brackets#closer(trigger, Action, Ft_exceptions)                                               {{{2
 function! lh#brackets#closer(trigger, Action, Ft_exceptions) abort
   if s:thereIsAnException(a:Ft_exceptions)
     return a:trigger
@@ -534,7 +542,7 @@ function! lh#brackets#closer(trigger, Action, Ft_exceptions) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:JumpOrClose(trigger) {{{2
+" Function: s:JumpOrClose(trigger)                                                                           {{{2
 function! s:JumpOrClose(trigger) abort
   if lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
     " todo: detect even if there is a newline in between
@@ -545,13 +553,22 @@ function! s:JumpOrClose(trigger) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:JumpOverAllClose(chars) {{{2
-function! s:JumpOverAllClose(chars, ...) abort
+" Function: lh#brackets#closing_chars()                                                                      {{{2
+function! lh#brackets#closing_chars() abort
+  " TODO: compute from the mappings registered
+  return ']})"'''
+endfunction
+
+"------------------------------------------------------------------------
+" Function: lh#brackets#close_all_and_jump_to_last_on_line(chars, ...)                                       {{{2
+" - {a:1} optional terminal mark to merge/append
+" - {a:2} to limit the number of matches -- valid values: "*", "+", "=", "?", "{42}"...
+function! lh#brackets#close_all_and_jump_to_last_on_line(chars, ...) abort
   let chars = escape(a:chars, ']')
   let del_mark = ''
   let p = col('.')
   let ll = getline('.')[p : ] " ignore char under cursor, look after
-  let m = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')+')
+  let m = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')'.get(a:, 2, '+'))
   let len_match = lh#encoding#strlen(m)
   let nb_bytes_match = strlen(m)
   call s:Verbose("In ##%1##  %3 characters/%4 bytes match: ##%2##", ll, m, len_match, nb_bytes_match)
@@ -564,7 +581,8 @@ function! s:JumpOverAllClose(chars, ...) abort
     let nb_bytes_match = strlen(m)
     let remaining = ll[nb_bytes_match : ]
     call s:Verbose("rem: ##%1## VS %2", remaining, a:1)
-    let match_rem = matchstr(remaining, '^\('.lh#marker#txt('.\{-}').'\)*'.a:1.'\('.lh#marker#txt('.\{-}').'\)*')
+    let placeholder = lh#marker#txt('.\{-}')
+    let match_rem = matchstr(remaining, '^\('.placeholder.'\)*'.a:1.'\('.placeholder.'\)*')
     let len_match_rem = lh#encoding#strlen(match_rem)
     if len_match_rem
       let del_mark = repeat("\<del>", len_match_rem).del_mark
@@ -577,20 +595,7 @@ function! s:JumpOverAllClose(chars, ...) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#closing_chars() {{{3
-function! lh#brackets#closing_chars() abort
-  " TODO: compute from the mappings registered
-  return ']})"'''
-endfunction
-
-"------------------------------------------------------------------------
-" Function: lh#brackets#close_all_and_jump_to_last_on_line(chars, ...) {{{2
-function! lh#brackets#close_all_and_jump_to_last_on_line(chars, ...) abort
-  return call('s:JumpOverAllClose', [a:chars]+a:000)
-endfunction
-
-"------------------------------------------------------------------------
-" Function: s:Jump() {{{2
+" Function: s:Jump()                                                                                         {{{2
 function! s:Jump() abort
   " todo: get rid of the marker as well
   let p = col('.')
@@ -604,7 +609,7 @@ function! s:Jump() abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:outer_blocks() {{{2
+" Function: s:outer_blocks()                                                                                 {{{2
 function! s:outer_blocks() abort
   let crt_pairs = copy(s:GetPairs(0))
   call extend(crt_pairs, s:GetPairs(1))
@@ -660,7 +665,7 @@ function! s:outer_blocks() abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#jump_outside(param) {{{2
+" Function: lh#brackets#jump_outside(param)                                                                  {{{2
 " In this flavour, we don't expect to be just before the current closing
 " character. Instead, search for the next character that closes the current
 " scope.
@@ -691,7 +696,7 @@ function! lh#brackets#jump_outside(param) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:ImapBrackets(obrkt, cbrkt, esc, nl)  {{{2
+" Function: s:ImapBrackets(obrkt, cbrkt, esc, nl)                                                            {{{2
 " Internal function.
 " {obrkt}:      open bracket
 " {cbrkt}:      close bracket
@@ -719,7 +724,7 @@ endfunction
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
 "------------------------------------------------------------------------
-" Function: lh#brackets#_switch(trigger, cases) {{{2
+" Function: lh#brackets#_switch(trigger, cases)                                                              {{{2
 function! lh#brackets#_switch_int(trigger, cases) abort
   call lh#notify#deprecated('lh#brackets#_switch_int', 'lh#mapping#_switch_int')
   return lh#mapping#_switch_int(a:trigger, a:cases)
@@ -730,19 +735,24 @@ function! lh#brackets#_switch(trigger, cases) abort
   return lh#mapping#_switch(a:trigger, a:cases)
 endfunction
 
-" Function: lh#brackets#define_imap(trigger, cases, isLocal [,default=trigger]) {{{2
-" TODO: see how it can be move in lh#mapping
+" Function: lh#brackets#define_imap(trigger, cases, isLocal [,default=trigger])                              {{{2
+" TODO: see how it can be moved to lh#mapping
 function! lh#brackets#define_imap(trigger, cases, isLocal, ...) abort
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
   " lh#mapping#reinterpret_escaped_char(eval()), which requires nested strings...
   let default = (a:0>0) ? (a:1) : (a:trigger)
-  let sCases='lh#mapping#_switch('.string(string(default)).', '.string(a:cases).')'
+  if type(a:cases) == type([])
+    let sCases='lh#mapping#_switch('.string(string(default)).', '.string(a:cases).')'
+  else
+    call lh#assert#type(a:cases).is('')
+    let sCases = a:cases
+  endif
   call s:DefineImap(a:trigger, sCases, a:isLocal)
 endfunction
 
-" Function: lh#brackets#enrich_imap(trigger, case, isLocal [,default=trigger]) {{{2
-" TODO: see how it can be move in lh#mapping
+" Function: lh#brackets#enrich_imap(trigger, case, isLocal [,default=trigger])                               {{{2
+" TODO: see how it can be moved to lh#mapping
 function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
@@ -763,8 +773,8 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   call s:DefineImap(a:trigger, sCase, a:isLocal)
 endfunction
 "------------------------------------------------------------------------
-" Function: s:DecodeDefineOptions(isLocal, a000)   {{{2
-function! s:DecodeDefineOptions(isLocal, a000)
+" Function: s:DecodeDefineOptions(isLocal, a000)                                                             {{{2
+function! s:DecodeDefineOptions(isLocal, a000) abort
   let nl         = ''
   let insert     = 1
   let visual     = 1
@@ -827,7 +837,7 @@ function! s:DecodeDefineOptions(isLocal, a000)
   return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context]
 endfunction
 
-" Function: lh#brackets#define(bang, ...) {{{2
+" Function: lh#brackets#define(bang, ...)                                                                    {{{2
 function! lh#brackets#define(bang, ...) abort
   " Parse Options {{{3
   let isLocal    = a:bang != "!"
@@ -889,7 +899,7 @@ function! lh#brackets#define(bang, ...) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#_match_any_bracket_pair() {{{2
+" Function: lh#brackets#_match_any_bracket_pair()                                                            {{{2
 function! lh#brackets#_match_any_bracket_pair() abort
   let crt_pairs = copy(s:GetPairs(0))
   call extend(crt_pairs, s:GetPairs(1))
@@ -899,7 +909,7 @@ function! lh#brackets#_match_any_bracket_pair() abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#_delete_empty_bracket_pair() {{{2
+" Function: lh#brackets#_delete_empty_bracket_pair()                                                         {{{2
 function! lh#brackets#_delete_empty_bracket_pair() abort
   let crt_pairs = copy(s:GetPairs(0))
   call extend(crt_pairs, s:GetPairs(1))
@@ -924,13 +934,13 @@ function! lh#brackets#_delete_empty_bracket_pair() abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#_add_newline_between_brackets() {{{2
+" Function: lh#brackets#_add_newline_between_brackets()                                                      {{{2
 " TODO: make this action redoable
 function! lh#brackets#_add_newline_between_brackets() abort
   return "\<cr>\<esc>O"
 endfunction
 
-" Function: lh#brackets#_jump_text(marker) {{{2
+" Function: lh#brackets#_jump_text(marker)                                                                   {{{2
 function! lh#brackets#_jump_text(marker) abort
   let m = matchstr(a:marker, '^'.lh#marker#txt('.\{-}'))
   let l = lh#encoding#strlen(m)
@@ -938,7 +948,7 @@ function! lh#brackets#_jump_text(marker) abort
 endfunction
 "
 "------------------------------------------------------------------------
-" Function: lh#brackets#_split_line(line, c, tw) {{{2
+" Function: lh#brackets#_split_line(line, c, tw)                                                             {{{2
 function! lh#brackets#_split_line(line, c, tw) abort
   let line = a:line
   let c    = a:c

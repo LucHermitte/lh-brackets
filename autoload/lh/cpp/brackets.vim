@@ -1,15 +1,16 @@
 "=============================================================================
-" File:		autoload/lh/cpp/brackets.vim                             {{{1
+" File:         autoload/lh/cpp/brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.4.0
-" Created:	17th Mar 2008
-" Last Update:	16th Dec 2015
+" Version:      3.5.0
+let s:k_version = 350
+" Created:      17th Mar 2008
+" Last Update:  16th May 2018
 "------------------------------------------------------------------------
 " Description:
-" 	Functions that tune how some bracket characters should expand in C&C++
+"       Functions that tune how some bracket characters should expand in C&C++
 " TODO:
 " }}}1
 "=============================================================================
@@ -17,18 +18,45 @@
 let s:cpo_save=&cpo
 set cpo&vim
 "------------------------------------------------------------------------
+" ## Misc Functions     {{{1
+" # Version {{{2
+function! lh#cpp#brackets#version()
+  return s:k_version
+endfunction
+
+" # Debug   {{{2
+let s:verbose = get(s:, 'verbose', 0)
+function! lh#cpp#brackets#verbose(...)
+  if a:0 > 0 | let s:verbose = a:1 | endif
+  return s:verbose
+endfunction
+
+function! s:Log(expr, ...)
+  call call('lh#log#this',[a:expr]+a:000)
+endfunction
+
+function! s:Verbose(expr, ...)
+  if s:verbose
+    call call('s:Log',[a:expr]+a:000)
+  endif
+endfunction
+
+function! lh#cpp#brackets#debug(expr) abort
+  return eval(a:expr)
+endfunction
+
 " ## Functions {{{1
 
 " - Callback function that specializes the behaviour of '<' {{{2
-function! lh#cpp#brackets#lt()
+function! lh#cpp#brackets#lt() abort
   let c = col('.') - 1
   let l = getline('.')
   let l = strpart(l, 0, c)
   if l =~ '^#\s*include\s*$'
-	\ . '\|\U\{-}_cast\s*$'
-	\ . '\|template\s*$'
-	\ . '\|typename[^<]*$'
-	" \ . '\|\%(lexical\|dynamic\|reinterpret\|const\|static\)_cast\s*$'
+        \ . '\|\U\{-}_cast\s*$'
+        \ . '\|template\s*$'
+        \ . '\|typename[^<]*$'
+        " \ . '\|\%(lexical\|dynamic\|reinterpret\|const\|static\)_cast\s*$'
     if lh#brackets#usemarks()
       return '<!cursorhere!>!mark!'
       " NB: InsertSeq with "\<left>" as parameter won't work in utf-8 => Prefer
@@ -45,7 +73,7 @@ function! lh#cpp#brackets#lt()
 endfunction
 
 " - Callback function that specializes the behaviour of '{' {{{2
-function! lh#cpp#brackets#close_curly()
+function! lh#cpp#brackets#close_curly() abort
   let c = col('.') - 1
   let l = getline('.')
   let l = strpart(l, 0, c)
@@ -85,11 +113,44 @@ function! lh#cpp#brackets#square_close() abort
   endif
 endfunction
 
-function! s:Mark() " {{{2
+function! s:Mark() abort " {{{2
   return lh#brackets#usemarks()
         \ ?  "!mark!"
         \ : ""
   endif
+endfunction
+
+" Function: lh#cpp#brackets#semicolon() {{{2
+function! lh#cpp#brackets#semicolon() abort
+  let line = getline('.')
+  let col  = col('.') - 1
+
+  " Cursor is within a "for"/"if" context?
+  if line[0:col] =~ '\v<(for|if)>\s*\('
+    " TODO: better detection of context with searchpair()
+    if line[col : -1] =~ '^;'
+      call s:Verbose("Within for/if && before a semicolon")
+      " Merge only with the next semicolon; ignore following ones!
+      " => 3rd param == empty string
+      return lh#brackets#close_all_and_jump_to_last_on_line(';', '', '')
+    else
+      call s:Verbose("Within for/if")
+      return ';'
+    endif
+  endif
+
+  let rem = line[col : -1]
+
+  if     rem =~ '^"\=\('.lh#marker#txt('.\{-}').'\)\=[)\]]\+'
+    call s:Verbose("Within brackets -> jump")
+    return lh#brackets#close_all_and_jump_to_last_on_line(')]', ';')
+  elseif rem =~ '^;'
+    call s:Verbose("Before a semicolon -> jump")
+    return lh#brackets#close_all_and_jump_to_last_on_line(';', '')
+  endif
+
+  " Otherwise
+  return ';'
 endfunction
 
 " }}}1

@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.2.0)
-*lh-brackets*           For Vim version 7.+     Last change: 10th Nov 2016
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.5.0)
+*lh-brackets*           For Vim version 7.+     Last change: 16th May 2018
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -847,9 +847,7 @@ pressing <F9>. In order to use another keybinding for this feature, add the
 following lines into your |.vimrc|: >
    nmap <leader>TB <Plug>ToggleBrackets
    imap <leader>TB <Plug>ToggleBrackets
-
-NB: Triggers.vim is not longer required to provide this feature.
-
+<
                                        *[bpg]:usemarks* *b:usemarks* *g:usemarks*
                                        *lh#brackets#usemarks()*
 In |insert-mode|, two operating modes are provided: one very classic, and one
@@ -944,14 +942,17 @@ program smart-mappings and abbreviations:
 lh#map#define_imap(trigger, cases, isLocal [, default=trigger])~
 @param {trigger} Key sequence to which the mapping is bound
 @param {cases}   |List| of cases describing when and how the mapping is
-                 expanded
+                 expanded, or |expr-string| for a single case.
 @param {isLocal} Tells whether the mapping is a |:map-<buffer>| mapping
 @param {default} Default sequence expanded when no case match -- its default
                  value is {trigger}
 @see all |lh#brackets#enrich_imap()|.
 
 Defines an INSERT mode mapping that'll get expanded differently depending on
-the current situation.
+the current situation -- when {cases} is a list of cases.
+
+The mappings defined this way will be registered to the list of mappings whose
+activation can be toggled on |<Plug>ToggleBrackets|.
 
 Examples:~
 
@@ -994,15 +995,20 @@ lh#map#enrich_imap(trigger, case, isLocal [, default=trigger])~
                  value is {trigger}
 @see also |lh#brackets#enrich_imap()|.
 
-Calling this function is actually equivalent to calling >
-    call lh#brackets#enrich_imap(trigger, [case], isLocal, default)
+When the situation described by {case} is detected, the associated action is
+executed.
 
+Otherwise, we fall back to the previous mapping on {trigger} found, or on the
+{default}.
+
+The mappings defined this way will be registered to the list of mappings whose
+activation can be toggled on |<Plug>ToggleBrackets|.
 
 ------------------------------------------------------------------------------
                                                         *mt-Download*
 Where to obtain these files ?~
 
-First don't forget to obtain |lh-vim-lib| v4.0.0+.
+First don't forget to obtain |lh-vim-lib| v4.4.0+.
       <http://github.com/LucHermitte/lh-vim-lib>
 
 These plugins can be obtained ...

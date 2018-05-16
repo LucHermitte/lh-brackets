@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:	3.3.0
-let s:k_version = 330
+" Version:	3.5.0
+let s:k_version = 350
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -101,14 +101,21 @@ if exists(':Brackets')
   " 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
   " 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
   if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
-    call lh#brackets#define_imap(';',
-          \ [{'condition': 'getline(".")[0:col(".")-1]=~"\\v<for<bar>if>\\s*\\("',
-          \   'action': '";"'},
-          \  {'condition': 'getline(".")[col(".")-1:-1]=~"^\"\\=\\(".lh#marker#txt(".\\{-}")."\\)\\=[)\\]]\\+"',
-          \   'action': 'lh#brackets#close_all_and_jump_to_last_on_line(")]", ";")'},
-          \  {'condition': 'getline(".")[col(".")-1:-1]=~"^;"',
-          \   'action': 'lh#brackets#close_all_and_jump_to_last_on_line(";", "")'}],
-          \1)
+    ""let def = {
+    ""      \   'lhs'    : ';'
+    ""      \ , 'rhs'    : 'lh#cpp#brackets#semicolon()'
+    ""      \ , 'expr'   : 1
+    ""      \ , 'buffer' : 1
+    ""      \ , 'mode'   : 'i'
+    ""      \ , 'nore'   : 1
+    ""      \ , 'silent' : 1
+    ""      \ }
+    """ TODO: use lh-bracket function that'll register the mapping so it can be
+    """ deactivated/reactivated...
+    ""call lh#mapping#define(def)
+
+    call lh#brackets#define_imap(';', 'lh#cpp#brackets#semicolon()', 1, ';')
+
     " Override default definition from lh-brackets to take care of semi-colon
     call lh#brackets#define_imap('<bs>',
           \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
@@ -141,7 +148,7 @@ function! Cpp_MoveSemicolBackToStringContext()
   let l=getline('.')[:col(".")-3]
   let end = matchstr(l, '"\s*)\+$')
   let lend= lh#encoding#strlen(end)
-  let move = repeat("\<left>", lend)
+  let move = lh#position#move_n("\<left>", lend)
   return "\<bs>".move.";"
 endfunction
 
