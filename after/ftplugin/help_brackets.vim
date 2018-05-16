@@ -2,10 +2,10 @@
 " File:         ftplugin/help.vim                                 {{{1
 " Author:       Luc Hermitte <EMAIL:luc {dot} hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte/lh-brackets>
-" Version:      3.2.0
-let s:k_version = 320
+" Version:      3.5.0
+let s:k_version = 350
 " Created:      14th Dec 2015
-" Last Update:  24th Nov 2016
+" Last Update:  16th May 2018
 "------------------------------------------------------------------------
 " Description:
 "       Mappings to insert help pairs
@@ -42,10 +42,10 @@ endif
 if exists(':Brackets')
   let b:cb_jump_on_close = 1
 
-  :Brackets * * -visual=0
-  :Brackets * * -insert=0 -trigger=<localleader>*
-  :Brackets ` `
-  :Brackets | |
+  :Brackets * * -default -visual=0
+  :Brackets * * -default -insert=0 -trigger=<localleader>*
+  :Brackets ` ` -default
+  :Brackets | | -default
 endif
 
 "=============================================================================

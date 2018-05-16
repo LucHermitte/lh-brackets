@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
+" Version:	3.5.0
 " Created:	26th May 2004
-" Last Update:	$Date$
+" Last Update:	16th May 2018
 "------------------------------------------------------------------------
 " Description:
 " 	js-ftplugin that defines the default preferences regarding the
@@ -36,7 +36,7 @@
 if exists('b:loaded_ftplug_javascript_brackets') && !exists('g:force_reload_ftplug_javascript_brackets')
   finish
 endif
-let b:loaded_ftplug_js_brackets = 222
+let b:loaded_ftplug_js_brackets = 350
 
 let s:cpo_save=&cpo
 set cpo&vim
@@ -52,10 +52,10 @@ if exists(':Brackets')
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
 
-  " :Brackets /* */ -visual=0
-  " :Brackets /** */ -visual=0 -trigger=/!
+  " :Brackets /* */ -default -visual=0
+  " :Brackets /** */ -default -visual=0 -trigger=/!
   "
-  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+  :Brackets { } -default -visual=1 -insert=0 -nl -trigger=<localleader>{
 endif
 
 "=============================================================================

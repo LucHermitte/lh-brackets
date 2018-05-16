@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.4.2
-let s:version = 342
+" Version:      3.5.0
+let s:version = 350
 " Purpose:      {{{1
 "               This file defines a command (:Brackets) that simplifies
 "               the definition of mappings that insert pairs of caracters when
@@ -21,6 +21,9 @@ let s:version = 342
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 3.5.0:
+"               * Default :Brackets definitions can be disabled with
+"                 g:cb_disable_default/g:cb_enable_default
 " Version 3.4.2:
 "               * Mapping on <CR> will enrich any previous mapping
 " Version 3.4.0:
@@ -229,23 +232,23 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   if !has('patch-7.2-061')
     call lh#ft#version()
   endif
-  :Brackets! ( )
-  :Brackets! [ ] -visual=0
-  :Brackets! [ ] -insert=0 -trigger=<leader>[
+  :Brackets! ( ) -default
+  :Brackets! [ ] -default -visual=0
+  :Brackets! [ ] -default -insert=0 -trigger=<leader>[
 
-  :Brackets! " " -visual=0 -insert=1
-  :Brackets! " " -visual=1 -insert=0 -trigger=""
-  " :Brackets! ' ' -visual=0 -insert=1 -but=^$\\\\|text\\\\|latex
-  :Brackets! ' ' -visual=0 -insert=1 -but=function('lh#ft#is_text')
-  :Brackets! ' ' -visual=1 -insert=0 -trigger=''
+  :Brackets! " " -default -visual=0 -insert=1
+  :Brackets! " " -default -visual=1 -insert=0 -trigger=""
+  " :Brackets! ' ' -default -visual=0 -insert=1 -but=^$\\\\|text\\\\|latex
+  :Brackets! ' ' -default -visual=0 -insert=1 -but=function('lh#ft#is_text')
+  :Brackets! ' ' -default -visual=1 -insert=0 -trigger=''
 
-  :Brackets! < > -visual=1 -insert=0 -trigger=<localleader><
+  :Brackets! < > -default -visual=1 -insert=0 -trigger=<localleader><
 
-  " :Brackets { } -visual=0 -nl
-  " :Brackets { } -visual=0 -trigger=#{
-  " :Brackets { } -visual=1 -insert=0
-  :Brackets! { }
-  :Brackets! { } -visual=1 -insert=0 -nl -trigger=<leader>{
+  " :Brackets { } -default -visual=0 -nl
+  " :Brackets { } -default -visual=0 -trigger=#{
+  " :Brackets { } -default -visual=1 -insert=0
+  :Brackets! { } -default
+  :Brackets! { } -default -visual=1 -insert=0 -nl -trigger=<leader>{
   "}
 endif
 

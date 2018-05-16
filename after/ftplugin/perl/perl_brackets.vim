@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
+" Version:	3.5.0
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -35,7 +35,7 @@
 if exists('b:loaded_ftplug_perl_brackets') && !exists('g:force_reload_ftplug_perl_brackets')
   finish
 endif
-let b:loaded_ftplug_perl_brackets = 222
+let b:loaded_ftplug_perl_brackets = 350
 
 let s:cpo_save=&cpo
 set cpo&vim
@@ -52,8 +52,8 @@ runtime ftplugin/perl_localleader.vim
 if exists(':Brackets')
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
-  :Brackets < > -visual=1 -insert=0 -trigger=<localleader><
-  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+  :Brackets < > -default -visual=1 -insert=0 -trigger=<localleader><
+  :Brackets { } -default -visual=1 -insert=0 -nl -trigger=<localleader>{
 endif
 
 "=============================================================================

@@ -31,6 +31,8 @@
 "               * Add parameter in
 "                 lh#brackets#close_all_and_jump_to_last_on_line() to merge
 "                 only with the first next lexeme
+"               * Default :Brackets definitions can be disabled with
+"                 g:cb_disable_default/g:cb_enable_default
 "
 " Version 3.4.2:  28th Mar 2018
 "               * Require lh-vim-lib 4.3.0
@@ -773,6 +775,19 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   call s:DefineImap(a:trigger, sCase, a:isLocal)
 endfunction
 "------------------------------------------------------------------------
+function! s:ShallKeepDefaultMapping(trigger, mode) abort
+  if exists('g:cb_enable_default') && exists('g:cb_disable_default')
+    call lh#notify#once('lh_brackets_no_defaults', 'Warning: Both g:cb_enable_default and g:cb_disable_default are defined, g:cb_disable_default will be ignored')
+  endif
+  if exists('g:cb_enable_default')
+    return stridx(get(g:cb_enable_default, a:trigger, ''), a:mode) >= 0
+  elseif exists('g:cb_disable_default')
+    return stridx(get(g:cb_disable_default, a:trigger, 'inv'), a:mode) == -1
+  else
+    return 1
+  endif
+endfunction
+"------------------------------------------------------------------------
 " Function: s:DecodeDefineOptions(isLocal, a000)                                                             {{{2
 function! s:DecodeDefineOptions(isLocal, a000) abort
   let nl         = ''
@@ -782,6 +797,7 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
   let escapable  = 0
   let context    = {}
   let options    = []
+  let default    = 0
   for p in a:a000
     if     p =~ '-l\%[list]'        | call s:ListMappings(a:isLocal)  | return []
     elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(a:isLocal) | return []
@@ -793,6 +809,7 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
     elseif p =~ '-no\%[rmal]'       | let normal    = matchstr(p, '-n\%[ormal]=\zs.*')
     elseif p =~ '-co\%[ntext]='     | let context   = {'is'   : matchstr(p, '-co\%[ntext]=\zs.*')}
     elseif p =~ '-co\%[ntext]!='    | let context   = {"isn't": matchstr(p, '-co\%[ntext]!=\zs.*')}
+    elseif p =~ '-default'          | let default   = 1
     elseif p =~ '-b\%[ut]'
       let exceptions= matchstr(p, '-b\%[ut]=\zs.*')
       if exceptions =~ "^function"
@@ -829,10 +846,16 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
     throw ":Brackets: incorrect number of arguments"
   endif
 
-  if !exists('trigger')      | let trigger    = options[0] | endif
+  if !exists('trigger')      | let trigger      = options[0] | endif
   if !exists('l:Open')       | let l:Open       = options[0] | endif
   if !exists('l:Close')      | let l:Close      = options[1] | endif
   if !exists('l:Exceptions') | let l:Exceptions = ''         | endif
+
+  if default
+    let insert = insert && s:ShallKeepDefaultMapping(trigger, 'i')
+    let visual = visual && s:ShallKeepDefaultMapping(trigger, 'v')
+    let normal = normal && s:ShallKeepDefaultMapping(trigger, 'n')
+  endif
 
   return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context]
 endfunction

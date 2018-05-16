@@ -21,6 +21,9 @@ let s:k_version = 350
 " 	Then, replace the calls to :Brackets
 "
 " History:
+"       v3.5.0  16th May 2018
+"               Default :Brackets definitions can be disabled with
+"               g:cb_disable_default/g:cb_enable_default
 "	v3.3.0  02nd Oct 2017
 "	        `;` jumps over `]`
 "	v2.1.0  29th Jan 2014
@@ -72,26 +75,26 @@ if exists(':Brackets')
   let b:cb_jump_on_close = 1
   " Re-run brackets() in order to update the mappings regarding the different
   " options.
-  :Brackets < > -open=function('lh#cpp#brackets#lt') -visual=0
-  :Brackets { } -visual=1 -insert=0 -nl -trigger=<localleader>{
+  :Brackets < > -default -open=function('lh#cpp#brackets#lt') -visual=0
+  :Brackets { } -default -visual=1 -insert=0 -nl -trigger=<localleader>{
   "}
-  :Brackets { } -visual=0 -insert=1 -open=function('lh#cpp#brackets#close_curly')
+  :Brackets { } -default -visual=0 -insert=1 -open=function('lh#cpp#brackets#close_curly')
 
   " Support for C++11 [[atributes]]
-  :Brackets [ ] -visual=0 -insert=1
+  :Brackets [ ] -default -visual=0 -insert=1
         \ -open=function('lh#cpp#brackets#square_open')
         \ -clos=function('lh#cpp#brackets#square_close')
 
   " Doxygen surround action
-  :Brackets <tt> </tt> -visual=1 -insert=0 -trigger=<localleader>tt
+  :Brackets <tt> </tt> -default -visual=1 -insert=0 -trigger=<localleader>tt
   " In insert mode, this needs to be expanded only in comment context
   "  - first \\ becomes \
   "  - last \ required before | to avoid confusion with :h :bar
   "  -> \\\|
-  :Brackets ` ` -insert=1 -visual=0 -normal=0 -context=comment\\\|doxygen
-  :Brackets ` ` -insert=0 -visual=1 -normal=0
-  " :Brackets /* */ -visual=0
-  " :Brackets /** */ -visual=0 -trigger=/!
+  :Brackets ` ` -default -insert=1 -visual=0 -normal=0 -context=comment\\\|doxygen
+  :Brackets ` ` -default -insert=0 -visual=1 -normal=0
+  " :Brackets /* */ -default -visual=0
+  " :Brackets /** */ -default -visual=0 -trigger=/!
   "
   " eclipse (?) behaviour (placeholders are facultatives)
   " '(foo|«»)«»' + ';'     --> '("foo");|'
@@ -101,19 +104,6 @@ if exists(':Brackets')
   " 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
   " 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
   if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
-    ""let def = {
-    ""      \   'lhs'    : ';'
-    ""      \ , 'rhs'    : 'lh#cpp#brackets#semicolon()'
-    ""      \ , 'expr'   : 1
-    ""      \ , 'buffer' : 1
-    ""      \ , 'mode'   : 'i'
-    ""      \ , 'nore'   : 1
-    ""      \ , 'silent' : 1
-    ""      \ }
-    """ TODO: use lh-bracket function that'll register the mapping so it can be
-    """ deactivated/reactivated...
-    ""call lh#mapping#define(def)
-
     call lh#brackets#define_imap(';', 'lh#cpp#brackets#semicolon()', 1, ';')
 
     " Override default definition from lh-brackets to take care of semi-colon
