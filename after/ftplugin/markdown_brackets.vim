@@ -34,11 +34,9 @@ set cpo&vim
 "------------------------------------------------------------------------
 " Brackets & all {{{1
 " ------------------------------------------------------------------------
-if !exists(':Brackets')
-  runtime plugin/common_brackets.vim
-endif
+if ! lh#option#get('cb_no_default_brackets', 0)
+  runtime ftplugin/markdown_localleader.vim ftplugin/markdown/markdown_localleader.vim
 
-if exists(':Brackets')
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
 
@@ -66,6 +64,8 @@ if exists(':Brackets')
         \ '\<bs\>'
         \ )
 endif
+
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

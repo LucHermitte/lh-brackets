@@ -13,12 +13,11 @@ let s:k_version = 350
 " 	bracketing mappings we want to use.
 "
 "------------------------------------------------------------------------
-" Installation:
-" 	This particular file is meant to be into {rtp}/after/ftplugin/c/
+" Note:
 " 	In order to override these default definitions, copy this file into a
 " 	directory that comes before the {rtp}/after/ftplugin/c/ you choosed --
 " 	typically $HOME/.vim/ftplugin/c/ (:h 'rtp').
-" 	Then, replace the calls to :Brackets
+" 	Then, replace the calls to :Brackets, without the `-default` flag
 "
 " History:
 "       v3.5.0  16th May 2018
@@ -68,8 +67,11 @@ if !exists('lh#cpp#brackets#lt')
   runtime autoload/lh/cpp/brackets.vim
 endif
 
-if exists(':Brackets')
+if ! lh#option#get('cb_no_default_brackets', 0)
+  runtime ftplugin/c_localleader.vim ftplugin/c/c_localleader.vim
+
   let b:cb_jump_on_close = 1
+
   " Re-run brackets() in order to update the mappings regarding the different
   " options.
   :Brackets < > -default -open=function('lh#cpp#brackets#lt') -visual=0
@@ -77,7 +79,7 @@ if exists(':Brackets')
   "}
   :Brackets { } -default -visual=0 -insert=1 -open=function('lh#cpp#brackets#close_curly')
 
-  " Support for C++11 [[atributes]]
+  " Support for C++11 [[attributes]]
   :Brackets [ ] -default -visual=0 -insert=1
         \ -open=function('lh#cpp#brackets#square_open')
         \ -clos=function('lh#cpp#brackets#square_close')
@@ -92,27 +94,27 @@ if exists(':Brackets')
   :Brackets ` ` -default -insert=0 -visual=1 -normal=0
   " :Brackets /* */ -default -visual=0
   " :Brackets /** */ -default -visual=0 -trigger=/!
-  "
-  " eclipse (?) behaviour (placeholders are facultatives)
-  " '(foo|«»)«»' + ';'     --> '("foo");|'
-  " '("foo|"«»)«»' + ';'   --> '("foo");|'
-  " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
-  " '[foo|«»]«»' + ';'     --> '["foo"];|'
-  " 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
-  " 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
-  if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
-    call lh#brackets#define_imap(';', 'lh#cpp#brackets#semicolon()', 1, ';')
+endif
 
-    " Override default definition from lh-brackets to take care of semi-colon
-    call lh#brackets#define_imap('<bs>',
-          \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
-          \   'action': 'lh#cpp#brackets#move_semicolon_back_to_string_context()'},
-          \  { 'condition': 'lh#brackets#_match_any_bracket_pair()',
-          \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
-          \ 1,
-          \ '\<bs\>'
-          \ )
-  endif
+" eclipse (?) behaviour (placeholders are facultatives)
+" '(foo|«»)«»' + ';'     --> '("foo");|'
+" '("foo|"«»)«»' + ';'   --> '("foo");|'
+" '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
+" '[foo|«»]«»' + ';'     --> '["foo"];|'
+" 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
+" 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
+if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
+  call lh#brackets#define_imap(';', 'lh#cpp#brackets#semicolon()', 1, ';')
+
+  " Override default definition from lh-brackets to take care of semi-colon
+  call lh#brackets#define_imap('<bs>',
+        \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
+        \   'action': 'lh#cpp#brackets#move_semicolon_back_to_string_context()'},
+        \  { 'condition': 'lh#brackets#_match_any_bracket_pair()',
+        \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
+        \ 1,
+        \ '\<bs\>'
+        \ )
 endif
 " }}}1
 "=============================================================================

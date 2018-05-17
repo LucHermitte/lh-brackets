@@ -5,7 +5,7 @@
 " Version:      3.5.0
 let s:k_version = 350
 " Created:      14th Dec 2015
-" Last Update:  16th May 2018
+" Last Update:  17th May 2018
 "------------------------------------------------------------------------
 " Description:
 "       Mappings to insert help pairs
@@ -35,11 +35,9 @@ set cpo&vim
 "------------------------------------------------------------------------
 " Brackets & all {{{2
 " ------------------------------------------------------------------------
-if !exists(':Brackets')
-  runtime plugin/common_brackets.vim
-endif
+if ! lh#option#get('cb_no_default_brackets', 0)
+  runtime ftplugin/help_localleader.vim ftplugin/help/help_localleader.vim
 
-if exists(':Brackets')
   let b:cb_jump_on_close = 1
 
   :Brackets * * -default -visual=0
@@ -48,25 +46,6 @@ if exists(':Brackets')
   :Brackets | | -default
 endif
 
-"=============================================================================
-" Global Definitions {{{1
-" Avoid global reinclusion {{{2
-if &cp || (exists("g:loaded_ftplug_help_brackets")
-      \ && (g:loaded_ftplug_help_brackets >= s:k_version)
-      \ && !exists('g:force_reload_ftplug_help_brackets'))
-  let &cpo=s:cpo_save
-  finish
-endif
-let g:loaded_ftplug_help_brackets = s:k_version
-" Avoid global reinclusion }}}2
-"------------------------------------------------------------------------
-" Functions {{{2
-" Note: most filetype-global functions are best placed into
-" autoload/«your-initials»/help/«help».vim
-" Keep here only the functions are are required when the ftplugin is
-" loaded, like functions that help building a vim-menu for this
-" ftplugin.
-" Functions }}}2
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save

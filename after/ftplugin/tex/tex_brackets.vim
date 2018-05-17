@@ -12,14 +12,12 @@
 " 	bracketing mappings we want to use.
 "
 "------------------------------------------------------------------------
-" Installation:
-" 	This particular file is meant to be into {rtp}/ftplugin/tex/
-" 	In order to overidde these default definitions, copy this file into a
-" 	directory that comes after the {rtp}/ftplugin/tex/ you choosed --
-" 	typically $HOME/.vim/after/ftplugin/tex/ (:h 'rtp').
-" 	Then, replace the calls to :Brackets
+" Note:
+" 	In order to override these default definitions, copy this file into a
+" 	directory that comes before the {rtp}/after/ftplugin/tex/ you choosed --
+" 	typically $HOME/.vim/ftplugin/tex/ (:h 'rtp').
+" 	Then, replace the calls to :Brackets, without the `-default` flag
 "
-" 	Requires Vim7+, and lh-map-tools
 " History:
 " TODO:
 " }}}1
@@ -34,25 +32,24 @@ set cpo&vim
 let b:loaded_ftplug_tex_brackets = 350
 " Avoid local reinclusion }}}2
 
-
 "------------------------------------------------------------------------
 " Brackets & all {{{2
-
-if !exists(':Brackets')
-  runtime plugin/common_brackets.vim
-endif
-
-let b:cb_jump_on_close = 1
 let b:marker_open      = '<+'
 let b:marker_close     = '+>'
 
-Brackets ( ) -default -esc
-Brackets { } -default -esc
-Brackets [ ] -default -visual=0 -esc
-Brackets [ ] -default -insert=0 -trigger=<localleader>[
-Brackets $ $ -default -visual=0
-Brackets $ $ -default -insert=0 -trigger=<localleader>$
+if ! lh#option#get('cb_no_default_brackets', 0)
+  runtime ftplugin/tex_localleader.vim ftplugin/tex/tex_localleader.vim
 
+  let b:cb_jump_on_close = 1
+  Brackets ( ) -default -esc
+  Brackets { } -default -esc
+  Brackets [ ] -default -visual=0 -esc
+  Brackets [ ] -default -insert=0 -trigger=<localleader>[
+  Brackets $ $ -default -visual=0
+  Brackets $ $ -default -insert=0 -trigger=<localleader>$
+endif
+
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

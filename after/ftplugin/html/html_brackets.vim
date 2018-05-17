@@ -12,15 +12,12 @@
 " 	bracketing mappings we want to use.
 "
 "------------------------------------------------------------------------
-" Installation:
-" 	This particular file is meant to be into {rtp}/after/ftplugin/html/
-" 	In order to overidde these default definitions, copy this file into a
-" 	directory that comes before the {rtp}/after/ftplugin/html/ you choosed
-" 	-- typically $HOME/.vim/ftplugin/html/ (:h 'rtp').
-" 	Then, replace the calls to :Brackets
-
-" 	Requires Vim7+, lh-map-tools, and {rtp}/autoload/lh/html/brackets.vim
-" History:
+" Note:
+" 	In order to override these default definitions, copy this file into a
+" 	directory that comes before the {rtp}/after/ftplugin/html/ you choosed --
+" 	typically $HOME/.vim/ftplugin/html/ (:h 'rtp').
+" 	Then, replace the calls to :Brackets, without the `-default` flag
+"
 " TODO:
 " }}}1
 "=============================================================================
@@ -42,22 +39,24 @@ let b:loaded_ftplug_html_brackets = 350
 
 "------------------------------------------------------------------------
 " Brackets & all {{{2
-if !exists(':Brackets')
-  runtime plugin/common_brackets.vim
-endif
-" It seems that function() does not load anything ...
+" It seems that function() does not load anything with some versions of vim
 if !exists('lh#html#brackets#lt')
   runtime autoload/lh/html/brackets.vim
 endif
 
 let b:cb_jump_on_close = 1
 
-Brackets < > -default
-      \      -visual=0
-      \      -open=function('lh#html#brackets#lt')
-      \      -clos=function('lh#html#brackets#gt')
-Brackets < > -default -visual=1 -insert=0 -trigger=<localleader><
+if ! lh#option#get('cb_no_default_brackets', 0)
+  runtime ftplugin/html_localleader.vim ftplugin/html/html_localleader.vim
 
+  Brackets < > -default
+        \      -visual=0
+        \      -open=function('lh#html#brackets#lt')
+        \      -clos=function('lh#html#brackets#gt')
+  Brackets < > -default -visual=1 -insert=0 -trigger=<localleader><
+endif
+
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

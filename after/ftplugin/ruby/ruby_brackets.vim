@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
-let s:k_version = 222
+" Version:	3.5.0
+let s:k_version = 350
 " Created:      17th Jun 2010
 "------------------------------------------------------------------------
 " Description:
@@ -79,6 +79,7 @@ function! s:ToggleBeginOrBracket()
 endfunction
 
 " Functions }}}2
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
