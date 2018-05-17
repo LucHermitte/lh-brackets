@@ -12,6 +12,9 @@ By default, lh-brackets comes with a few ready-to-use mappings:
    * [(La)TeX](#latex-mappings)
    * [VimL](#viml-mappings)
 
+The default mappings can be inhibited with the options
+`(bpg):cb_no_default_brackets`, `g:cb_enable_default` and
+`g:cb_disable_default`. See `:h :Brackets-default`.
 
 ### Global mappings
 
