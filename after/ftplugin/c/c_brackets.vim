@@ -63,10 +63,7 @@ set cpo&vim
 "------------------------------------------------------------------------
 " Brackets & all {{{2
 " ------------------------------------------------------------------------
-if !exists(':Brackets')
-  runtime plugin/common_brackets.vim
-endif
-" It seems that function() does not load anything ...
+" It seems that function() does not load anything with some versions of vim
 if !exists('lh#cpp#brackets#lt')
   runtime autoload/lh/cpp/brackets.vim
 endif
@@ -109,7 +106,7 @@ if exists(':Brackets')
     " Override default definition from lh-brackets to take care of semi-colon
     call lh#brackets#define_imap('<bs>',
           \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
-          \   'action': 'Cpp_MoveSemicolBackToStringContext()'},
+          \   'action': 'lh#cpp#brackets#move_semicolon_back_to_string_context()'},
           \  { 'condition': 'lh#brackets#_match_any_bracket_pair()',
           \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
           \ 1,
@@ -117,33 +114,6 @@ if exists(':Brackets')
           \ )
   endif
 endif
-" }}}1
-"=============================================================================
-" Global Definitions {{{1
-" Avoid global reinclusion {{{2
-if exists('g:loaded_ftplug_c_brackets')
-      \ && !exists('g:force_reload_ftplug_c_brackets')
-  let s:cpo_save=&cpo
-  set cpo&vim
-  finish
-endif
-let g:loaded_ftplug_c_brackets = s:k_version
-"------------------------------------------------------------------------
-" Global functions {{{2
-" TODO: use <SNR> function
-function! Cpp_MoveSemicolBackToStringContext()
-  " It seem c-o leaves the insert mode for good. Thats odd.
-  " BUG? -> return "\<bs>\<c-o>F\";"
-  " Let's do n-<left> instead
-  let l=getline('.')[:col(".")-3]
-  let end = matchstr(l, '"\s*)\+$')
-  let lend= lh#encoding#strlen(end)
-  let move = lh#position#move_n("\<left>", lend)
-  return "\<bs>".move.";"
-endfunction
-
-"=============================================================================
-
 " }}}1
 "=============================================================================
 let &cpo=s:cpo_save

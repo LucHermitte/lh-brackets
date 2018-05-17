@@ -7,7 +7,7 @@
 " Version:      3.5.0
 let s:k_version = 350
 " Created:      17th Mar 2008
-" Last Update:  16th May 2018
+" Last Update:  17th May 2018
 "------------------------------------------------------------------------
 " Description:
 "       Functions that tune how some bracket characters should expand in C&C++
@@ -151,6 +151,18 @@ function! lh#cpp#brackets#semicolon() abort
 
   " Otherwise
   return ';'
+endfunction
+
+" Function: lh#cpp#brackets#move_semicolon_back_to_string_context() {{{3
+function! lh#cpp#brackets#move_semicolon_back_to_string_context() abort
+  " It seem c-o leaves the insert mode for good. Thats odd.
+  " BUG? -> return "\<bs>\<c-o>F\";"
+  " Let's do n-<left> instead
+  let l=getline('.')[:col(".")-3]
+  let end = matchstr(l, '"\s*)\+$')
+  let lend= lh#encoding#strlen(end)
+  let move = lh#position#move_n("\<left>", lend)
+  return "\<bs>".move.";"
 endfunction
 
 " }}}1
