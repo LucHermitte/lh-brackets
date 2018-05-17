@@ -792,6 +792,19 @@ endfunction
 
 "------------------------------------------------------------------------
 " Function: s:DecodeDefineOptions(isLocal, a000)                                                             {{{2
+function! s:IsFalse(value) abort
+  if type(a:value) == type(0)
+    return ! a:value
+  else
+    call lh#assert#type(a:value).is('string')
+    if a:value =~ '^\d\+$'
+      return ! eval(a:value)
+    else " case like "default=X"
+      return 0
+    endif
+  endif
+endfunction
+
 function! s:DecodeDefineOptions(isLocal, a000) abort
   let nl         = ''
   let insert     = 1
@@ -857,7 +870,7 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
   if default
     let insert = insert && s:ShallKeepDefaultMapping(trigger, 'i')
     let visual = visual && s:ShallKeepDefaultMapping(trigger, 'v')
-    let normal = !empty(normal) && s:ShallKeepDefaultMapping(trigger, 'n') ? normal : 0
+    let normal = !s:IsFalse(normal) && s:ShallKeepDefaultMapping(trigger, 'n') ? normal : 0
   endif
 
   return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context]
@@ -898,7 +911,7 @@ function! lh#brackets#define(bang, ...) abort
 
   " VISUAL-mode surrounding {{{3
   if visual
-    if strlen(nl) > 0
+    if !empty(nl)
       let action = ' <c-\><c-n>@=lh#map#surround('.
             \ lh#brackets#_string(options[0].'!cursorhere!').', '.
             \ lh#brackets#_string(options[1].'!mark!').", 1, 1, '', 1, ".lh#brackets#_string(trigger).")\<cr>"
@@ -916,10 +929,15 @@ function! lh#brackets#define(bang, ...) abort
   endif
 
   " NORMAL-mode surrounding {{{3
-  if type(normal)==type(1) && normal == 1
-    let normal = strlen(nl)>0 ? 'V' : 'viw'
+  " NB: it looks like "'1' == 1" and "'0' == 1" behave correctly, but I'm not
+  " sure it does with every version of vim...
+  if type(normal)==type('string') && normal =~ '\v^\d+$'
+    let normal = eval(normal)
   endif
-  if type(normal)!=type(0) || normal != 0
+  if lh#type#is_number(normal) && normal
+    let normal = empty(nl) ? 'viw' : 'V'
+  endif
+  if lh#type#is_string(normal)
     call s:DefineMap('n', trigger, normal.escape(trigger, '|'), isLocal, 0)
   endif
 endfunction
