@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.5.0
 " Created:      28th Feb 2008
-" Last Update:  16th May 2018
+" Last Update:  17th May 2018
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -774,7 +774,9 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   let sCase='lh#mapping#_switch('.string(default).', '.string([a:case]).')'
   call s:DefineImap(a:trigger, sCase, a:isLocal)
 endfunction
+
 "------------------------------------------------------------------------
+" Function: s:ShallKeepDefaultMapping(trigger, mode) abort {{{2
 function! s:ShallKeepDefaultMapping(trigger, mode) abort
   if exists('g:cb_enable_default') && exists('g:cb_disable_default')
     call lh#notify#once('lh_brackets_no_defaults', 'Warning: Both g:cb_enable_default and g:cb_disable_default are defined, g:cb_disable_default will be ignored')
@@ -787,6 +789,7 @@ function! s:ShallKeepDefaultMapping(trigger, mode) abort
     return 1
   endif
 endfunction
+
 "------------------------------------------------------------------------
 " Function: s:DecodeDefineOptions(isLocal, a000)                                                             {{{2
 function! s:DecodeDefineOptions(isLocal, a000) abort
@@ -854,7 +857,7 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
   if default
     let insert = insert && s:ShallKeepDefaultMapping(trigger, 'i')
     let visual = visual && s:ShallKeepDefaultMapping(trigger, 'v')
-    let normal = normal && s:ShallKeepDefaultMapping(trigger, 'n')
+    let normal = !empty(normal) && s:ShallKeepDefaultMapping(trigger, 'n') ? normal : 0
   endif
 
   return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context]
