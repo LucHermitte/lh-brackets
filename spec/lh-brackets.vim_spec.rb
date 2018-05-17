@@ -135,7 +135,7 @@ RSpec.describe "autoload/lh/map.vim" do
           EOF
       end
 
-      specify "Surround with backets", :surround => true do
+      specify "Surround with brackets", :surround => true do
           vim.insert('foo bar foo<esc>')
           assert_buffer_contents <<-EOF
             foo bar foo
@@ -263,7 +263,7 @@ RSpec.describe "autoload/lh/map.vim" do
           # EOF
       end
 
-      specify "Surround with backets", :surround => true do
+      specify "Surround with brackets", :surround => true do
           vim.insert('foo bar foo<esc>')
           assert_buffer_contents <<-EOF
             foo bar foo
