@@ -693,9 +693,9 @@ The options are:
    {rtp}/ftplugin/tex.vim: >
        :Bracket ( ) -esc
 <
-   Warning: avoid using |<LocalLeader>| in global brackets definitions. When
-   the localleaders will be set, the mapping will already exist and it won't
-   be updated when |maplocalleader| will be modified. If you want to use local
+   Warning: don't use |<LocalLeader>| in global brackets definitions. When the
+   localleaders will be set, the mapping will already exist and it won't be
+   updated when |maplocalleader| will be modified. If you want to use local
    leaders in your mappings, your will have to execute |:Brackets| from
    |ftplugin|s placed in the |after-directory|.
 
@@ -798,13 +798,49 @@ Examples from {rtp}/after/ftplugin/tex/tex_brackets.vim: >
     :Brackets $ $ -visual=0 -insert=1 -escapable
     :Brackets $ $ -visual=1 -insert=0 -trigger=$$
 <
-                                                        *:Brackets-notes*
-Notes~
-These examples are in the |after-directory| for several reasons:
+                                                        *:Brackets-default*
+Notes about default definitions~
+lh-brackets comes with default brackets definitions you may not desire.
+  Note: They are defined with a `-default` flags that you are not expected to
+        use in your definitions.
+
+If you want to disable:
+- every single one of them, set *g:cb_no_default_brackets* to 0 in your
+  |.vimrc|, and then define what you wish in a plugin in an |after-directory|.
+
+- only the specialized ones defined for a given {ft} |filetype|, you can set
+  *b:cb_no_default_brackets* to 0 in an |ftplugin| stored in a
+  non-|after-directory|, for instance in `~/.vim/ftplugin/{ft}_brackets.vim`.
+
+- only the specialized ones defined for a given |lhvl#project|, you can set
+  *p:cb_no_default_brackets* to 0 in an |localvimrc| stored at the root of the
+  project -- while I permit this, I'm not sure this is a good idea. See
+  the related documentation about |p:|variables.
+
+- only some bracket pairs in selected |vim-modes|, you can fill either of the
+  following |dictionary| in your |.vimrc|: *g:cb_enable_default* OR
+  *g:cb_disable_default*
+  Using both doesn't make any sense. The first acts as a kind of withelist
+  that lists the only mappings that'll can be defined, the second acts as a
+  kind of blacklist that lists all the mappings that should not be defined.
+  The dictionaries format is: >
+      { trigger1: modes, trigger2:othermodes }
+<  e.g. >
+      " No normal mode mapping for `[`, no normal nor visual mode mappings for `{`
+      let g:cb_disable_default = { '[': 'n', '{': 'nv' }
+
+      " OR
+
+      " Only the mappings on `(`
+      let g:cb_enable_default = { '(': 'inv' }
+<
+
+                                                        *:Brackets-override*
+Default definitions are in the |after-directory| for several reasons:
 - this enables to set custom |localleader| before |:Bracket| is called.
 - my |ftplugins| can be seen as "official" ftplugins, particularly the
-  c_brackets.vim. By being stored into atfer/ftplugin/c/, this enables you,
-  end-user of my C&C++ ftplugin suite, to override my definitions with yours
+  `c_brackets.vim`. By being stored into `after/ftplugin/c/`, this enables
+  you, end-user of my lh-bracket plugin, to override my definitions with yours
   with a: >
     " .vim/ftplugin/c/c_your_brackets.vim
     " 0- anti-reinclusion
@@ -1024,6 +1060,6 @@ These plugins can be obtained ...
   flavor 'LucHermitte/lh-brackets'
 
 ------------------------------------------------------------------------------
- © Luc Hermitte, 2001-2017 <http://github.com/LucHermitte/lh-brackets, CC by SA 3.0 {{{1
+ © Luc Hermitte, 2001-2018 <http://github.com/LucHermitte/lh-brackets, CC by SA 3.0 {{{1
  VIM: let b:VS_language = 'american'
  vim:ts=8:sw=4:tw=78:fo=tcq2:isk=!-~,^*,^\|,^\":ft=help:
