@@ -4,10 +4,10 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      3.5.0
-let s:k_version = 350
+" Version:      3.5.1
+let s:k_version = 351
 " Created:      17th Mar 2008
-" Last Update:  17th May 2018
+" Last Update:  24th May 2018
 "------------------------------------------------------------------------
 " Description:
 "       Functions that tune how some bracket characters should expand in C&C++
@@ -121,6 +121,7 @@ function! s:Mark() abort " {{{2
 endfunction
 
 " Function: lh#cpp#brackets#semicolon() {{{2
+" expected to be called from insert mode
 function! lh#cpp#brackets#semicolon() abort
   let line = getline('.')
   let col  = col('.') - 1
@@ -132,7 +133,7 @@ function! lh#cpp#brackets#semicolon() abort
       call s:Verbose("Within for/if && before a semicolon")
       " Merge only with the next semicolon; ignore following ones!
       " => 3rd param == empty string
-      return lh#brackets#close_all_and_jump_to_last_on_line(';', '', '')
+      return lh#brackets#close_all_and_jump_to_last_on_line(';', {'to_merge': '', 'repeat': ''})
     else
       call s:Verbose("Within for/if")
       return ';'
@@ -143,10 +144,10 @@ function! lh#cpp#brackets#semicolon() abort
 
   if     rem =~ '^"\=\('.lh#marker#txt('.\{-}').'\)\=[)\]]\+'
     call s:Verbose("Within brackets -> jump")
-    return lh#brackets#close_all_and_jump_to_last_on_line(')]', ';')
+    return lh#brackets#close_all_and_jump_to_last_on_line(')]', {'to_merge': ';'})
   elseif rem =~ '^;'
     call s:Verbose("Before a semicolon -> jump")
-    return lh#brackets#close_all_and_jump_to_last_on_line(';', '')
+    return lh#brackets#close_all_and_jump_to_last_on_line(';', {'to_merge': ''})
   endif
 
   " Otherwise

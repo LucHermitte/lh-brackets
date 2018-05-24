@@ -27,6 +27,7 @@
 " Version 3.5.1:  24th May 2018
 "               * lh#brackets#close_all_and_jump_to_last_on_line() uses the
 "                 complete and dynamic list of closing characters
+"               * Fix `v_<Plug>MarkersCloseAllAndJumpToLast`
 " Version 3.5.0:  16th May 2018
 "               * Require lh-vim-lib 4.4.0
 "               * Merge s:JumpOverAllClose into
@@ -567,34 +568,48 @@ function! lh#brackets#closing_chars() abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#close_all_and_jump_to_last_on_line(chars, ...)                                       {{{2
+" Function: lh#brackets#close_all_and_jump_to_last_on_line(chars, opts)                                       {{{2
 " - {a:1} optional terminal mark to merge/append
 " - {a:2} to limit the number of matches -- valid values: "*", "+", "=", "?", "{42}"...
-function! lh#brackets#close_all_and_jump_to_last_on_line(chars, ...) abort
+function! lh#brackets#close_all_and_jump_to_last_on_line(chars, opts) abort
+  let mode = get(a:opts, 'mode', '')
   let chars = escape(a:chars, ']')
   let del_mark = ''
+  let ll = ''
+  if mode == 'v'
+    let selection = lh#visual#selection()
+    if lh#marker#is_a_marker(selection)
+      let del_mark = s:k_move_prefix."\<left>"
+      let ll = lh#encoding#strpart(selection, 0, 1)
+    elseif col('.') != col("'>")
+      " In visual mode, we can move around violently, redoing actions isn't
+      " possible anyway... => we don't care!
+      normal! `>
+    endif
+  endif
   let p = col('.')
-  let ll = getline('.')[p : ] " ignore char under cursor, look after
-  let m = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')'.get(a:, 2, '+'))
+  let ll .= matchstr(getline('.'), '\%>'.p.'c.*') " ignore char under cursor, look after (MB: compatible)
+  let m   = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')'.get(a:opts, 'repeat', '+'))
   let len_match = lh#encoding#strlen(m)
   let nb_bytes_match = strlen(m)
   call s:Verbose("In ##%1##  %3 characters/%4 bytes match: ##%2##", ll, m, len_match, nb_bytes_match)
   if len_match
-    let del_mark = repeat("\<del>", len_match)
+    let del_mark .= repeat("\<del>", len_match)
     let del_mark .= substitute(m, '[^'.chars.']', '', 'g')
   endif
   " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
-  if a:0 > 0
+  let to_merge = get(a:opts, 'to_merge', lh#option#unset())
+  if lh#option#is_set(to_merge)
     let nb_bytes_match = strlen(m)
     let remaining = ll[nb_bytes_match : ]
-    call s:Verbose("rem: ##%1## VS %2", remaining, a:1)
+    call s:Verbose("rem: ##%1## VS %2", remaining, to_merge)
     let placeholder = lh#marker#txt('.\{-}')
-    let match_rem = matchstr(remaining, '^\('.placeholder.'\)*'.a:1.'\('.placeholder.'\)*')
+    let match_rem = matchstr(remaining, '^\('.placeholder.'\)*'.to_merge.'\('.placeholder.'\)*')
     let len_match_rem = lh#encoding#strlen(match_rem)
     if len_match_rem
       let del_mark = repeat("\<del>", len_match_rem).del_mark
     endif
-    let del_mark .= a:1
+    let del_mark .= to_merge
   endif
   call s:Verbose("-> %1", strtrans(del_mark))
 
