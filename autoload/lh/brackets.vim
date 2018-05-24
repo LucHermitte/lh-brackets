@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.0
+" Version:      3.5.1
 " Created:      28th Feb 2008
-" Last Update:  17th May 2018
+" Last Update:  24th May 2018
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,9 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.5.1:  24th May 2018
+"               * lh#brackets#close_all_and_jump_to_last_on_line() uses the
+"                 complete and dynamic list of closing characters
 " Version 3.5.0:  16th May 2018
 "               * Require lh-vim-lib 4.4.0
 "               * Merge s:JumpOverAllClose into
@@ -557,8 +560,10 @@ endfunction
 "------------------------------------------------------------------------
 " Function: lh#brackets#closing_chars()                                                                      {{{2
 function! lh#brackets#closing_chars() abort
-  " TODO: compute from the mappings registered
-  return ']})"'''
+  let closings = map(s:GetPairs(0) + s:GetPairs(1), 'v:val[1]')
+  call lh#list#unique_sort(closings)
+  let res = join(filter(closings, 'lh#encoding#strlen(v:val)==1'), '')
+  return res
 endfunction
 
 "------------------------------------------------------------------------
