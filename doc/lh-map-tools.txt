@@ -1,4 +1,4 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.5.0)
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.5.2)
 *lh-brackets*           For Vim version 7.+     Last change: 16th May 2018
 
                         lh-brackets MANUAL     by Luc Hermitte
@@ -560,10 +560,21 @@ I have also added some other features:
 
                                             *M-INSERT* *M-DELETE* *M-S-DELETE*
                                             *<M-Ins>* *<M-Del>* *<M-S-Del>*
+                                            *CTRL-L_INS* *CTRL-J* *CTRL-L_DEL*
+                                            *<C-L><Ins>* *<C-J>* *<C-L><S-Del>*
                                 *<Plug>MarkersInsertMark* *<Plug>MarkersMark*
                                 *<Plug>MarkersJumpF* *<Plug>MarkersJumpB*
 BTW, I map `<Plug>MarkersInsertMark` to <M-Insert>, `<Plug>MarkersJumpF` to
-<M-Delete>, and `<Plug>MarkersJumpB` to <M-S-Del>.
+<M-Delete>, and `<Plug>MarkersJumpB` to <M-S-Del> in gvim GUI sessions.
+In terminal sessions, they are mapped to <C-L><Ins>, <C-J>, and <C-L><S-Del>
+respectivelly.
+
+They respectivelly
+- Insert an empty marker (aka placeholder), or replace a placeholder with its
+  content (i.e. `«foo»` becomes `foo`).
+- Jump to the next marker
+- Jump to the previous marker
+
 If you'd rather use other keybindings, then add into your |.vimrc| something
 like: >
         imap <C-J>      <Plug>MarkersJumpF
@@ -576,7 +587,9 @@ like: >
 <
 
                             *M-END* *<M-End>* *<Plug>MarkersCloseAllAndJumpToLast*
-I map also `<Plug>MarkersCloseAllAndJumpToLast` to <M-End>.
+                            *CTRL-L_$* *<C-L>$*
+I map also `<Plug>MarkersCloseAllAndJumpToLast` to <M-End> in gvim GUI sessions.
+The action is mapped to `<C-L>$` in terminal session.
 This mapping closes all placeholders after the cursor which following closing
 bracket-like characters, and jumps to the last placeholder.
 If you'd rather use other keybindings, then add into your |.vimrc| something
@@ -587,8 +600,10 @@ like: >
 <
 
                             *C-PAGEDOWN* *<C-PageDown>* *<Plug>MarkersJumpOutside*
-I map also `<Plug>MarkersJumpOutside`` to <C-PageDown>.
-This mapping move the cursor ouside current block according to the pairs
+                            *CTRL-L_END* *<C-L><End>*
+I map also `<Plug>MarkersJumpOutside`` to <C-PageDown> in gvim GUI sessions.
+The action is mapped to <C-L><End> in terminal session.
+This mapping moves the cursor ouside current block according to the pairs
 currently defined in the current buffer.
 If you'd rather use other keybindings, then add into your |.vimrc| something
 like: >

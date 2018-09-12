@@ -18,7 +18,7 @@ This subsystem provides functions and mappings to:
     See the help about `!jump!`, and `<Plug>MarkersJumpF`
   * close all placeholders on the same line that are after closing bracket-like
     characters and jump to the last one -- see
-    `<Plug>MarkersCloseAllAndJumpToLast` which is binded by default to `<M-End>`.
+    `<Plug>MarkersCloseAllAndJumpToLast` which is binded by default to `<M-End>` (or `<C-L>$` in terminal instancef of Vim).
 
 The marker/placeholder characters:
   * default to the French quote characters («»),
@@ -27,7 +27,7 @@ The marker/placeholder characters:
   * can be shared with the ones from imaps.vim (`:h g:use_place_holders`).
 
 Jumping to the next/previous placeholder:
-  * is binded to `<M-ins>` or `<C-J>` by default (see `:h <Plug>MarkersJumpF`),
+  * is binded to `<M-Del>` (GUI) or `<C-J>` (terminal) by default (see `:h <Plug>MarkersJumpF`), or `<M-S-Del>`/`<C-L><S-Del>` to jump backward
   * can be tuned to delete or select the placeholder the cursor is jumping to (`:h g:marker_prefers_select`, `:h g:marker_select_empty_marks`),
   * can select or ignore the placeholder where the cursor is currently within (if any) (`:h g:marker_select_current`, `:h g:marker_select_current_fwd`),
   * may move the line of the placeholder (we jump to) to the middle of the window (`:h g:marker_center`),

@@ -4,12 +4,14 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.1
+" Version:      3.5.2
 "
 "       Stephen Riehm's braketing macros for vim
 "       Customizations by Luc Hermitte.
 " ======================================================================
 " History:      {{{1
+"       12th Sep 2018:  by LH
+"               * Provide default mappings for terminal mode
 "       24th May 2018:  by LH
 "               * Avoid remapping in v_<Plug>MarkersCloseAllAndJumpToLast
 "               * Fix `v_<Plug>MarkersCloseAllAndJumpToLast`
@@ -181,11 +183,19 @@ set cpo&vim
 " Mappings that can be redefined {{{1
 " ==============================
 " (LH) As I use <del> a lot, I use different keys than those proposed by SR.
-call lh#mapping#plug('<M-Insert>',   '<Plug>MarkersMark',                  'inv')
-call lh#mapping#plug('<M-Del>',      '<Plug>MarkersJumpF',                 'inv')
-call lh#mapping#plug('<M-S-Del>',    '<Plug>MarkersJumpB',                 'inv')
-call lh#mapping#plug('<M-End>',      '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
-call lh#mapping#plug('<C-PageDown>', '<Plug>MarkersJumpOutside',           'insx')
+if has('gui_running')
+  call lh#mapping#plug('<M-Insert>',   '<Plug>MarkersMark',                  'inv')
+  call lh#mapping#plug('<M-Del>',      '<Plug>MarkersJumpF',                 'inv')
+  call lh#mapping#plug('<M-S-Del>',    '<Plug>MarkersJumpB',                 'inv')
+  call lh#mapping#plug('<M-End>',      '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
+  call lh#mapping#plug('<C-PageDown>', '<Plug>MarkersJumpOutside',           'insx')
+else
+  call lh#mapping#plug('<C-L><Ins>',   '<Plug>MarkersMark',                  'inv')
+  call lh#mapping#plug('<C-J>',        '<Plug>MarkersJumpF',                 'inv')
+  call lh#mapping#plug('<C-L><S-Del>', '<Plug>MarkersJumpB',                 'inv')
+  call lh#mapping#plug('<C-L>$',       '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
+  call lh#mapping#plug('<C-L><End>',   '<Plug>MarkersJumpOutside',           'insx')
+endif
 
 inoremap <silent> <Plug>MarkersInsertMark <c-r>=lh#marker#txt()<cr>
 imap     <silent> <Plug>MarkersMark       <Plug>MarkersInsertMark<C-R>=LHMoveWithinMarker()<cr>
