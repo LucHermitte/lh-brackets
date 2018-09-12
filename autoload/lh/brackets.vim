@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.1
+" Version:      3.5.2
 " Created:      28th Feb 2008
-" Last Update:  24th May 2018
+" Last Update:  12th Sep 2018
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,9 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.5.2:  12th Sep 2018
+"               * lh#brackets#close_all_and_jump_to_last_on_line() was
+"                 keeping closing chars instead of markers...
 " Version 3.5.1:  24th May 2018
 "               * lh#brackets#close_all_and_jump_to_last_on_line() uses the
 "                 complete and dynamic list of closing characters
@@ -589,13 +592,14 @@ function! lh#brackets#close_all_and_jump_to_last_on_line(chars, opts) abort
   endif
   let p = col('.')
   let ll .= matchstr(getline('.'), '\%>'.p.'c.*') " ignore char under cursor, look after (MB: compatible)
-  let m   = matchstr(ll, '\v^(['.chars.']|'.lh#marker#very_magic('.{-}').')'.get(a:opts, 'repeat', '+'))
+  let re_v_marker = lh#marker#very_magic('.{-}')
+  let m   = matchstr(ll, '\v^(['.chars.']|'.re_v_marker.')'.get(a:opts, 'repeat', '+'))
   let len_match = lh#encoding#strlen(m)
   let nb_bytes_match = strlen(m)
   call s:Verbose("In ##%1##  %3 characters/%4 bytes match: ##%2##", ll, m, len_match, nb_bytes_match)
   if len_match
     let del_mark .= repeat("\<del>", len_match)
-    let del_mark .= substitute(m, '[^'.chars.']', '', 'g')
+    let del_mark .= substitute(m, '\v'.re_v_marker, '', 'g')
   endif
   " Is there an optional terminal mark to check and merge/add (like: «»;«») ?
   let to_merge = get(a:opts, 'to_merge', lh#option#unset())
