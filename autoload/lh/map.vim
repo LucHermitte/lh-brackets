@@ -4,16 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.2.1
-let s:k_version = '321'
+" Version:      3.5.1
+let s:k_version = '351'
 " Created:      03rd Nov 2015
-" Last Update:  13th Sep 2017
+" Last Update:  11th Oct 2018
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.5.2 Improve logs
 "       v3.2.1 Fix regression with `set et`
 "       v3.2.0 Add `lh#map#4_this_context()`
 "              Fix tw issue, again
@@ -529,14 +530,15 @@ endfunction
 function! lh#map#_cursor_here(...) abort
   let s:old_indent = indent(line('.'))
   let mark = s:find_unused_mark()
-  call setpos(mark[0], getpos('.'))
+  let pos = getpos('.')
+  call setpos(mark[0], pos)
   call s:Verbose('Using mark %1', mark)
   if a:0 > 0
     let s:goto_mark_{a:1} = mark
   else
     let s:goto_mark = mark
   endif
-  call s:Verbose("Record cursor %1 with mark %2: |   indent=%3", get(a:, 1, ''), mark[0], s:old_indent)
+  call s:Verbose("Record cursor %1 with mark %2: @ %3 |   indent=%4", get(a:, 1, ''), mark[0], pos, s:old_indent)
   return ''
 endfunction
 
@@ -549,7 +551,7 @@ function! lh#map#_goto_mark(...) abort
   let markpos = getpos(s:goto_mark[0]) + [virtcol(s:goto_mark[0])]
   let goto_lin = markpos[1]
   let goto_vcol = markpos[4]
-  call s:Verbose('Returning to mark %1 @ %2', markpos[0][0], markpos[0][1])
+  call s:Verbose('Returning to mark %1 @ %2', s:goto_mark[0], markpos)
   " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
   let crt_indent = indent(goto_lin)
   let s:fix_indent = s:old_indent - crt_indent
