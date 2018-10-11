@@ -570,13 +570,17 @@ function! lh#map#_goto_mark(...) abort
       let move = lh#map#_move_cursor_on_the_current_line(delta)
       return move
     else
-      let goto_col = markpos[2]
-      let goto_col -= s:fix_indent
-      " " uses {lig}'normal! {col}|' because of the possible reindent
-      call s:Verbose("Restore cursor to %1normal! %2|", goto_lin, goto_col)
-      execute goto_lin . 'normal! ' . (goto_col) . '|'
-      " call cursor(goto_lin, goto_col)
+      let pos = getpos(s:goto_mark[0])
+      call s:Verbose("Restore cursor to mark %1: %2", s:goto_mark[0], pos)
+      call setpos('.', pos)
       return ''
+      ""let goto_col = markpos[2]
+      ""let goto_col -= s:fix_indent
+      """ " uses {lig}'normal! {col}|' because of the possible reindent
+      ""call s:Verbose("Restore cursor to %1normal! %2|", goto_lin, goto_col)
+      ""execute goto_lin . 'normal! ' . (goto_col) . '|'
+      """ call cursor(goto_lin, goto_col)
+      ""return ''
     endif
   finally
     " Restore the mark to [0,0,0,0] or to what it was
