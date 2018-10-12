@@ -7,7 +7,7 @@
 " Version:      3.5.1
 let s:k_version = '351'
 " Created:      03rd Nov 2015
-" Last Update:  11th Oct 2018
+" Last Update:  12th Oct 2018
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
@@ -536,7 +536,7 @@ function! lh#map#_cursor_here(...) abort
   if a:0 > 0
     let s:goto_mark_{a:1} = mark
   else
-    let s:goto_mark = mark
+    let s:goto_mark = mark + [virtcol(mark[0])]
   endif
   call s:Verbose("Record cursor %1 with mark %2: @ %3 |   indent=%4", get(a:, 1, ''), mark[0], pos, s:old_indent)
   return ''
@@ -548,10 +548,11 @@ function! lh#map#_goto_mark(...) abort
   " line breaking occurs (i.e. when cursor column exceeds 'tw'). Indeed, in
   " that case, the mark is automatically moved, and we need to use it's last
   " know position.
-  let markpos = getpos(s:goto_mark[0]) + [virtcol(s:goto_mark[0])]
+  let markpos = getpos(s:goto_mark[0])
   let goto_lin = markpos[1]
-  let goto_vcol = markpos[4]
-  call s:Verbose('Returning to mark %1 @ %2', s:goto_mark[0], markpos)
+  let old_vcol = s:goto_mark[2]
+  let goto_vcol = virtcol(s:goto_mark[0])
+  call s:Verbose('Returning to mark %1 @ %2', s:goto_mark[0], markpos+[goto_vcol])
   " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
   let crt_indent = indent(goto_lin)
   let s:fix_indent = s:old_indent - crt_indent
@@ -570,17 +571,45 @@ function! lh#map#_goto_mark(...) abort
       let move = lh#map#_move_cursor_on_the_current_line(delta)
       return move
     else
-      let pos = getpos(s:goto_mark[0])
-      call s:Verbose("Restore cursor to mark %1: %2", s:goto_mark[0], pos)
-      call setpos('.', pos)
-      return ''
+      " * insert-mode "^Fif(!cursor!)..." does not trigger fix_indent
+      " * visual-mode surrounding "`<iif (!cursor!)....gv``=" triggers
+      "   fix_indent
+      " * getpos() doesn't follow indent changes
+      "   try "rm", ">>", "`r"
+      "   -> the mark has not followed the indent change
+      " * However, with virtcol() if &expandtab is false, and we're within
+      "   curly brackets, things change...
+      " * virtual columns are important because
+      "   - "\t" occupies 1 byte, but several columns
+      "   - "«" occupies 2 bytes, but only one column
+      " * "|" takes a virtual column number
+      """ No!
+      ""let pos = getpos(s:goto_mark[0])
+      ""call s:Verbose("Restore cursor to mark %1: %2", s:goto_mark[0], pos)
+      ""call setpos('.', pos)
+
+      """ No!
       ""let goto_col = markpos[2]
       ""let goto_col -= s:fix_indent
       """ " uses {lig}'normal! {col}|' because of the possible reindent
       ""call s:Verbose("Restore cursor to %1normal! %2|", goto_lin, goto_col)
       ""execute goto_lin . 'normal! ' . (goto_col) . '|'
-      """ call cursor(goto_lin, goto_col)
-      ""return ''
+
+      if s:fix_indent == 0
+        call s:Verbose("No indent fixed ; restore cursor to mark %1: %2", s:goto_mark[0], markpos)
+        call setpos('.', markpos)
+      else
+        let goto_vcol = old_vcol - s:fix_indent
+        call s:Verbose("new virtcol = old (%1) - fix_indent(%2) => %3", old_vcol, s:fix_indent, goto_vcol)
+        " goto_lin has already been fixed!
+        call s:Verbose("Indent needs to be fixed ; restore cursor to %1normal! %2|", goto_lin, goto_vcol)
+        execute goto_lin . 'normal! ' . (goto_vcol) . '|'
+
+      endif
+
+      """ No!
+      "" call cursor(goto_lin, goto_col)
+      return ''
     endif
   finally
     " Restore the mark to [0,0,0,0] or to what it was

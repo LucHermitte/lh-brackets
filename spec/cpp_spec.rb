@@ -21,65 +21,102 @@ RSpec.describe "C snippets", :c => true do
     expect(/ftplugin.c.c_brackets\.vim/).to be_sourced
   end
 
-  specify "surround on V", :surround => true do
-    expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
-    expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
-    vim.runtime('spec/support/c-snippets.vim') # Inoreab
-    expect(vim.echo('&ft')).to eq "c"
-    expect(vim.echo('&sw')).to eq "2"
-    # Check indenting and surrounding
-    set_buffer_contents <<-EOF
-    void f() {
-      instr1;
-      instr2;
-      instr3;
-    }
-    EOF
-    vim.normal("ggj")
-    vim.feedkeys('Vjµfoo\<esc>')
-    vim.feedkeys('a\<esc>')
-    # expect(vim.echo('input("pause")')).to eq ""
-    assert_buffer_contents <<-EOF
-    void f() {
-      if (foo) {
+  describe "surround on V", :surround => true do
+    specify "tabs are expanded", :expandtab => true do
+      vim.set('expandtab')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab
+      expect(vim.echo('&ft')).to eq "c"
+      expect(vim.echo('&sw')).to eq "2"
+      # Check indenting and surrounding
+      set_buffer_contents <<-EOF
+      void f() {
         instr1;
         instr2;
-      }<++>
-      instr3;
-    }
-    EOF
+        instr3;
+      }
+      EOF
+      vim.normal("ggj")
+      vim.feedkeys('Vjµfoo\<esc>')
+      vim.feedkeys('a\<esc>')
+      # expect(vim.echo('input("pause")')).to eq ""
+      assert_buffer_contents <<-EOF
+      void f() {
+        if (foo) {
+          instr1;
+          instr2;
+        }<++>
+        instr3;
+      }
+      EOF
+    end
+    specify "tabs are not expanded", :noexpandtab => true do
+      vim.set('noexpandtab')
+      vim.set('sw=8')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab
+      expect(vim.echo('&ft')).to eq "c"
+      expect(vim.echo('&sw')).to eq "8"
+      # Check indenting and surrounding
+      set_buffer_contents <<-EOF
+      void f() {
+	instr1;
+	instr2;
+	instr3;
+      }
+      EOF
+      vim.normal("ggj")
+      vim.feedkeys('Vjµfoo\<esc>')
+      vim.feedkeys('a\<esc>')
+      # expect(vim.echo('input("pause")')).to eq ""
+	assert_buffer_contents <<-EOF
+	void f() {
+		if (foo) {
+			instr1;
+			instr2;
+		}<++>
+		instr3;
+	}
+	EOF
+    end
+
   end
 
-  specify "surround on v$ a badly indented code", :surround => true do
-    expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
-    expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
-    vim.runtime('spec/support/c-snippets.vim') # Inoreab
-    expect(vim.echo('&ft')).to eq "c"
-    expect(vim.echo('&sw')).to eq "2"
-    # Check indenting and surrounding
-    set_buffer_contents <<-EOF
-    void f() {
-      if (foo) {
-                instr1;
-      }<++>
-      instr2;
-      instr3;
-    }
-    EOF
-    vim.normal("ggjj")
-    vim.feedkeys('$v^µbar\<esc>')
-    vim.feedkeys('a\<esc>')
-    assert_buffer_contents <<-EOF
-    void f() {
-      if (foo) {
-        if (bar) {
-          instr1;
+  describe "surround on v$ a badly indented code", :surround => true do
+    specify "tabs are expanded", :expandtab => true do
+      vim.set('expandtab')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab
+      expect(vim.echo('&ft')).to eq "c"
+      expect(vim.echo('&sw')).to eq "2"
+      # Check indenting and surrounding
+      set_buffer_contents <<-EOF
+      void f() {
+        if (foo) {
+                  instr1;
         }<++>
-      }<++>
-      instr2;
-      instr3;
-    }
-    EOF
+        instr2;
+        instr3;
+      }
+      EOF
+      vim.normal("ggjj")
+      vim.feedkeys('$v^µbar\<esc>')
+      vim.feedkeys('a\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        if (foo) {
+          if (bar) {
+            instr1;
+          }<++>
+        }<++>
+        instr2;
+        instr3;
+      }
+      EOF
+    end
   end
 
 end
