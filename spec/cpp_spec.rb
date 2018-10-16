@@ -17,7 +17,7 @@ RSpec.describe "C snippets", :c => true do
     vim.command('call lh#style#clear()')
   end
 
-  it "has loaded vim ftplugin", :deps => true do
+  it "has loaded C ftplugin", :deps => true do
     expect(/ftplugin.c.c_brackets\.vim/).to be_sourced
   end
 
