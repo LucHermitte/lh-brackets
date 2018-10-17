@@ -110,6 +110,98 @@ EOF
     end
   end
 
+  describe "insert a multi-lines 'if' snippet after MB characters", :i_snippet => true, :MB => true do
+    specify "tabs are expanded", :expandtab => true do
+      vim.set('expandtab')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab if
+      expect(vim.echo('&ft')).to eq "c"
+      expect(vim.echo('&sw')).to eq "2"
+      # Check indenting and surrounding
+      set_buffer_contents <<-EOF
+      void f() {
+        instr1;
+        /*«»*/
+        instr2;
+        instr3;
+      }
+      EOF
+      vim.normal("ggjj")
+      vim.feedkeys('A if foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        instr1;
+        /*«»*/ if (foo) {
+          <++>
+        }<++>
+        instr2;
+        instr3;
+      }
+      EOF
+    end
+    specify "tabs are not expanded (sw=8)", :noexpandtab => true do
+      vim.set('noexpandtab')
+      vim.set('sw=8')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab if
+      expect(vim.echo('&ft')).to eq "c"
+      expect(vim.echo('&sw')).to eq "8"
+      # Check indenting and surrounding
+      set_buffer_contents <<-EOF
+      void f() {
+	instr1;
+        /*«»*/
+	instr2;
+	instr3;
+      }
+      EOF
+      vim.normal("ggjj")
+      vim.feedkeys('A if foo\<esc>')
+	assert_buffer_contents <<-EOF
+	void f() {
+		instr1;
+		/*«»*/ if (foo) {
+			<++>
+		}<++>
+		instr2;
+		instr3;
+	}
+	EOF
+    end
+    specify "tabs are not expanded (sw=4)", :noexpandtab => true do
+      vim.set('noexpandtab')
+      vim.set('sw=4')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab if
+      expect(vim.echo('&ft')).to eq "c"
+      expect(vim.echo('&sw')).to eq "4"
+      # Check indenting and surrounding
+      set_buffer_contents <<-EOF
+      void f() {
+          instr1;
+          /*«»*/
+          instr2;
+          instr3;
+      }
+      EOF
+      vim.normal("ggjj")
+      vim.feedkeys('A if foo\<esc>')
+assert_buffer_contents <<-EOF
+void f() {
+    instr1;
+    /*«»*/ if (foo) {
+	<++>
+    }<++>
+    instr2;
+    instr3;
+}
+EOF
+    end
+  end
+
   describe "surround on V", :surround => true do
     specify "tabs are expanded", :expandtab => true do
       vim.set('expandtab')
