@@ -285,6 +285,123 @@ RSpec.describe "autoload/lh/map.vim" do
           # vim.echo('input("pause")')
       end
   end
+  # ======================================================================
+  describe "Test context-sensitive expansion", :context => true do
+    let (:filename) { "test.cpp" }
+    before :each do
+      vim.command('let g:load_doxygen_syntax = 1')
+      vim.set('ft=cpp')
+      vim.runtime('after/ftplugin/c/c_brackets.vim') # default bracket mappings
+      vim.set('expandtab')
+      vim.set('sw=2')
+      vim.command('SetMarker <+ +>')
+      clear_buffer
+      vim.command('call lh#style#clear()')
+      expect(vim.echo('lh#style#use({"indent_brace_style": "K&R"}, {"buffer": 1})')).to eq "1"
+      expect(vim.echo('lh#style#use({"spacesbeforeparens": "control-statements"}, {"buffer": 1})')).to eq "1"
+      vim.runtime('spec/support/c-snippets.vim') # Inoreab if
+    end
+
+    specify "Expands from normal context" do
+      set_buffer_contents <<-EOF
+      void f() {
+      }
+      EOF
+      vim.normal("ggj")
+      expect(vim.echo('lh#syntax#name_at(line("."), col("$")-2,1)')).not_to match(/Comment|doxygen/)
+      vim.feedkeys('Oif foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        if (foo) {
+          <++>
+        }<++>
+      }
+      EOF
+    end
+
+    specify "Doesn't expand from C++ // context" do
+      set_buffer_contents <<-EOF
+      void f() {
+        //
+      }
+      EOF
+      vim.normal("ggj")
+      expect(vim.echo('lh#syntax#name_at(line("."), col("$")-2,1)')).to match(/Comment/)
+      vim.feedkeys('Aif foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        //if foo
+      }
+      EOF
+    end
+    specify "Doesn't expand from C /* context" do
+      set_buffer_contents <<-EOF
+      void f() {
+        /*
+      }
+      EOF
+      vim.normal("ggj")
+      expect(vim.echo('lh#syntax#name_at(line("."), col("$")-2,1)')).to match(/Comment/)
+      vim.feedkeys('Aif foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        /*if foo
+      }
+      EOF
+    end
+    specify "Doesn't expand from C /** context" do
+      set_buffer_contents <<-EOF
+      void f() {
+        /**
+      }
+      EOF
+      vim.normal("ggj")
+      expect(vim.echo('lh#syntax#name_at(line("."), col("$")-2,1)')).to match(/doxygen/)
+      vim.feedkeys('Aif foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        /**if foo
+      }
+      EOF
+    end
+    specify "Expands after C /**/ context (known bug)" do
+      skip "Known bug..."
+      set_buffer_contents <<-EOF
+      void f() {
+        /**/
+      }
+      EOF
+      vim.normal("ggj")
+      # expect(vim.echo('lh#syntax#name_at(line("."), col("$")-1,1)')).not_to match(/Comment/)
+      # Expected bug. See autoload/lh/syntax.vim comments
+      vim.feedkeys('Aif foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        /**/if (foo) {
+          <++>
+        }<++>
+      }
+      EOF
+    end
+    specify "Expands after C /**/ context (workaround)" do
+      set_buffer_contents <<-EOF
+      void f() {
+        /**/
+      }
+      EOF
+      vim.normal("ggj")
+      # expect(vim.echo('lh#syntax#name_at(line("."), col("$")-1,1)')).not_to match(/Comment/)
+      # Expected bug. See autoload/lh/syntax.vim comments
+      vim.feedkeys('A if foo\<esc>')
+      assert_buffer_contents <<-EOF
+      void f() {
+        /**/ if (foo) {
+          <++>
+        }<++>
+      }
+      EOF
+    end
+  end
 end
 
 # vim:set sw=2:
