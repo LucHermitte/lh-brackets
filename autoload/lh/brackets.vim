@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.2
+" Version:      3.5.3
 " Created:      28th Feb 2008
-" Last Update:  12th Sep 2018
+" Last Update:  21st Jan 2019
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -24,6 +24,8 @@
 "
 "------------------------------------------------------------------------
 " History:
+" Version 3.5.3:  21st Jan 2019
+"               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
 "               * lh#brackets#close_all_and_jump_to_last_on_line() was
 "                 keeping closing chars instead of markers...
@@ -971,6 +973,9 @@ endfunction
 function! lh#brackets#_match_any_bracket_pair() abort
   let crt_pairs = copy(s:GetPairs(0))
   call extend(crt_pairs, s:GetPairs(1))
+  if empty(crt_pairs)
+    return 0
+  endif
   " let regex = '\V\('.join(map(copy(crt_pairs), 'escape(join(v:val,"\\%'.col('.').'c"), "\\")'), '\|').'\)'
   let regex = '\V\('.join(map(crt_pairs, 'join(v:val,"\\%'.col('.').'c")'), '\|').'\)'
   return getline(".")=~ regex
