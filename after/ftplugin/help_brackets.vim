@@ -2,8 +2,8 @@
 " File:         ftplugin/help.vim                                 {{{1
 " Author:       Luc Hermitte <EMAIL:luc {dot} hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte/lh-brackets>
-" Version:      3.5.3
-let s:k_version = 353
+" Version:      3.5.4
+let s:k_version = 354
 " Created:      14th Dec 2015
 " Last Update:  30th Apr 2019
 "------------------------------------------------------------------------

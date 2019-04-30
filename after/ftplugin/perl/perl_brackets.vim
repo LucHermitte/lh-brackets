@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	3.5.3
+" Version:	3.5.4
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -32,7 +32,7 @@
 if exists('b:loaded_ftplug_perl_brackets') && !exists('g:force_reload_ftplug_perl_brackets')
   finish
 endif
-let b:loaded_ftplug_perl_brackets = 350
+let b:loaded_ftplug_perl_brackets = 353
 
 let s:cpo_save=&cpo
 set cpo&vim
