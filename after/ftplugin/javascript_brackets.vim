@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	3.5.0
+" Version:	3.5.3
 " Created:	26th May 2004
-" Last Update:	17th May 2018
+" Last Update:	30th Apr 2019
 "------------------------------------------------------------------------
 " Description:
 " 	js-ftplugin that defines the default preferences regarding the
@@ -42,8 +42,6 @@ set cpo&vim
 " Brackets & all {{{1
 " ------------------------------------------------------------------------
 if ! lh#option#get('cb_no_default_brackets', 0)
-  runtime ftplugin/javascript_localleader.vim ftplugin/javascript/javascript_localleader.vim
-
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
 

@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:	3.5.0
-let s:k_version = 350
+" Version:	3.5.3
+let s:k_version = 353
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -68,8 +68,6 @@ if !exists('lh#cpp#brackets#lt')
 endif
 
 if ! lh#option#get('cb_no_default_brackets', 0)
-  runtime ftplugin/c_localleader.vim ftplugin/c/c_localleader.vim
-
   let b:cb_jump_on_close = 1
 
   " Re-run brackets() in order to update the mappings regarding the different

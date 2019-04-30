@@ -2,10 +2,10 @@
 " File:         ftplugin/help.vim                                 {{{1
 " Author:       Luc Hermitte <EMAIL:luc {dot} hermitte {at} gmail {dot} com>
 "		<URL:http://github.com/LucHermitte/lh-brackets>
-" Version:      3.5.0
-let s:k_version = 350
+" Version:      3.5.3
+let s:k_version = 353
 " Created:      14th Dec 2015
-" Last Update:  17th May 2018
+" Last Update:  30th Apr 2019
 "------------------------------------------------------------------------
 " Description:
 "       Mappings to insert help pairs
@@ -36,8 +36,6 @@ set cpo&vim
 " Brackets & all {{{2
 " ------------------------------------------------------------------------
 if ! lh#option#get('cb_no_default_brackets', 0)
-  runtime ftplugin/help_localleader.vim ftplugin/help/help_localleader.vim
-
   let b:cb_jump_on_close = 1
 
   :Brackets * * -default -visual=0

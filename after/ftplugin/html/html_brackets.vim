@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	3.5.0
+" Version:	3.5.3
 " Created:	24th Mar 2008
 "------------------------------------------------------------------------
 " Description:
@@ -47,8 +47,6 @@ endif
 let b:cb_jump_on_close = 1
 
 if ! lh#option#get('cb_no_default_brackets', 0)
-  runtime ftplugin/html_localleader.vim ftplugin/html/html_localleader.vim
-
   Brackets < > -default
         \      -visual=0
         \      -open=function('lh#html#brackets#lt')

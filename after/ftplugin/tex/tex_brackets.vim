@@ -4,7 +4,7 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	3.5.0
+" Version:	3.5.3
 " Created:	24th Mar 2008
 "------------------------------------------------------------------------
 " Description:
@@ -29,7 +29,7 @@ if exists("b:loaded_ftplug_tex_brackets") && !exists('g:force_reload_ftplug_tex_
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_tex_brackets = 350
+let b:loaded_ftplug_tex_brackets = 353
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------
@@ -38,8 +38,6 @@ let b:marker_open      = '<+'
 let b:marker_close     = '+>'
 
 if ! lh#option#get('cb_no_default_brackets', 0)
-  runtime ftplugin/tex_localleader.vim ftplugin/tex/tex_localleader.vim
-
   let b:cb_jump_on_close = 1
   Brackets ( ) -default -esc
   Brackets { } -default -esc

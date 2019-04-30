@@ -7,7 +7,7 @@
 " Version:	3.5.2
 let s:version = '3.5.2'
 " Created:	06th Nov 2007
-" Last Update:  12th Sep 2018
+" Last Update:  30th Apr 2019
 "------------------------------------------------------------------------
 cd <sfile>:p:h
 try
@@ -39,7 +39,6 @@ autoload/lh/marker.vim
 autoload/lh/vim/brackets.vim
 doc/default_brackets.md
 doc/lh-map-tools.txt
-ftplugin/python/python_localleader.vim
 ftplugin/python/python_snippets.vim
 mkVba/mk-lh-map-tools.vim
 plugin/bracketing.base.vim

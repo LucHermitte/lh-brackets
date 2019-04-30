@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	3.5.0
-let s:k_version = 350
+" Version:	3.5.3
+let s:k_version = 353
 " Created:      13th Mar 2014
 "------------------------------------------------------------------------
 " Description:
@@ -35,8 +35,6 @@ set cpo&vim
 " Brackets & all {{{1
 " ------------------------------------------------------------------------
 if ! lh#option#get('cb_no_default_brackets', 0)
-  runtime ftplugin/markdown_localleader.vim ftplugin/markdown/markdown_localleader.vim
-
   let b:cb_jump_on_close = 1
   " Use the default definitions from plugin/common_brackets.vim
 

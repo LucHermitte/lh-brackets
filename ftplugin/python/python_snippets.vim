@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.4
-let s:k_version = '2.3.4'
+" Version:	3.5.3
+let s:k_version = '3.5.3'
 " Created:      21st Jan 2015
 "------------------------------------------------------------------------
 " Description:
@@ -29,9 +29,6 @@ let b:loaded_ftplug_python_snippets = s:k_version
 let s:cpo_save=&cpo
 set cpo&vim
 " Avoid local reinclusion }}}2
-
-" This must be loaded before continuing
-runtime! ftplugin/python/python_localleader.vim
 
 "------------------------------------------------------------------------
 " Local mappings {{{2
@@ -141,7 +138,7 @@ function! PyMapOnSingleLine(key, what) abort
   endif
 endfunction
 
-" Functions }}}2
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================
