@@ -92,27 +92,27 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   :Brackets ` ` -default -insert=0 -visual=1 -normal=0
   " :Brackets /* */ -default -visual=0
   " :Brackets /** */ -default -visual=0 -trigger=/!
-endif
 
-" eclipse (?) behaviour (placeholders are facultatives)
-" '(foo|«»)«»' + ';'     --> '("foo");|'
-" '("foo|"«»)«»' + ';'   --> '("foo");|'
-" '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
-" '[foo|«»]«»' + ';'     --> '["foo"];|'
-" 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
-" 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
-if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
-  call lh#brackets#define_imap(';', 'lh#cpp#brackets#semicolon()', 1, ';')
+  " eclipse (?) behaviour (placeholders are facultatives)
+  " '(foo|«»)«»' + ';'     --> '("foo");|'
+  " '("foo|"«»)«»' + ';'   --> '("foo");|'
+  " '(((foo|)«»)«»)' + ';' --> '(((foo)));|'
+  " '[foo|«»]«»' + ';'     --> '["foo"];|'
+  " 'for(yoyo|;)'          --> 'for(yoyo|;)' # case ignored
+  " 'if(yoyo|;)'           --> 'if(yoyo|;)'  # case ignored (C++17)
+  if lh#ft#option#get('semicolon_closes_bracket', &ft, 1)
+    call lh#brackets#define_imap(';', 'lh#cpp#brackets#semicolon()', 1, ';')
 
-  " Override default definition from lh-brackets to take care of semi-colon
-  call lh#brackets#define_imap('<bs>',
-        \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
-        \   'action': 'lh#cpp#brackets#move_semicolon_back_to_string_context()'},
-        \  { 'condition': 'lh#brackets#_match_any_bracket_pair()',
-        \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
-        \ 1,
-        \ '\<bs\>'
-        \ )
+    " Override default definition from lh-brackets to take care of semi-colon
+    call lh#brackets#define_imap('<bs>',
+          \ [{ 'condition': 'getline(".")[:col(".")-2]=~".*\"\\s*)\\+;$"',
+          \   'action': 'lh#cpp#brackets#move_semicolon_back_to_string_context()'},
+          \  { 'condition': 'lh#brackets#_match_any_bracket_pair()',
+          \   'action': 'lh#brackets#_delete_empty_bracket_pair()'}],
+          \ 1,
+          \ '\<bs\>'
+          \ )
+  endif
 endif
 " }}}1
 "=============================================================================
