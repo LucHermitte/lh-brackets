@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:	3.5.4
-let s:k_version = 354
+" Version:	3.6.0
+let s:k_version = 360
 " Created:	26th May 2004
 "------------------------------------------------------------------------
 " Description:
@@ -20,6 +20,9 @@ let s:k_version = 354
 " 	Then, replace the calls to :Brackets, without the `-default` flag
 "
 " History:
+"       v3.6.0  16th Nov 2019
+"               '}' will jump after the next non whitespace/newline that
+"               is a curly-bracket or insert it.
 "       v3.5.0  16th May 2018
 "               Default :Brackets definitions can be disabled with
 "               g:cb_disable_default/g:cb_enable_default
@@ -75,7 +78,9 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   :Brackets < > -default -open=function('lh#cpp#brackets#lt') -visual=0
   :Brackets { } -default -visual=1 -insert=0 -nl -trigger=<localleader>{
   "}
-  :Brackets { } -default -visual=0 -insert=1 -open=function('lh#cpp#brackets#close_curly')
+  :Brackets { } -default -visual=0 -insert=1
+        \ -open=function('lh#cpp#brackets#curly_open')
+        \ -clos=function('lh#cpp#brackets#curly_close')
 
   " Support for C++11 [[attributes]]
   :Brackets [ ] -default -visual=0 -insert=1
