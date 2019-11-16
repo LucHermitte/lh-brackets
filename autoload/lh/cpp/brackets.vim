@@ -4,10 +4,10 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      3.5.1
-let s:k_version = 351
+" Version:      3.6.0
+let s:k_version = 360
 " Created:      17th Mar 2008
-" Last Update:  24th May 2018
+" Last Update:  16th Nov 2019
 "------------------------------------------------------------------------
 " Description:
 "       Functions that tune how some bracket characters should expand in C&C++
@@ -18,6 +18,10 @@ let s:k_version = 351
 let s:cpo_save=&cpo
 set cpo&vim
 "------------------------------------------------------------------------
+" Does vim supports the new way to support redo/undo?
+let s:k_vim_supports_redo = has('patch-7.4.849')
+let s:k_move_prefix = s:k_vim_supports_redo ? "\<C-G>U" : ""
+
 " ## Misc Functions     {{{1
 " # Version {{{2
 function! lh#cpp#brackets#version()
@@ -73,7 +77,7 @@ function! lh#cpp#brackets#lt() abort
 endfunction
 
 " - Callback function that specializes the behaviour of '{' {{{2
-function! lh#cpp#brackets#close_curly() abort
+function! lh#cpp#brackets#curly_open() abort
   let c = col('.') - 1
   let l = getline('.')
   let l = strpart(l, 0, c)
@@ -83,6 +87,32 @@ function! lh#cpp#brackets#close_curly() abort
   else
     " return '<>' . "\<Left>"
     return '{!cursorhere!'.close
+  endif
+endfunction
+
+" Function: lh#cpp#brackets#curly_close() {{{2
+function! lh#cpp#brackets#curly_close() abort
+  let lin = line(".")
+  let col = col(".")
+  let lig = getline(lin)
+
+  if lig[col-1] == '}'
+    let nb = matchend(lig[(col-1) :], '};\=')
+    return lh#map#_move_cursor_on_the_current_line(nb).lh#brackets#_jump_text(lig[(col+nb-1) :])
+  else
+    " if the non white character is a curly bracket several lines later,
+    " jump to it. Ignore any following semi-colon
+    let pos = searchpos('\%#\_s*};\=', 'ce')
+
+    if pos != [0,0]
+      let delta_line = pos[0] - lin
+      " We need to go to another line, this means, redo will be broken
+      return s:k_move_prefix."\<home>".repeat("\<down>", delta_line)
+            \ . lh#map#_move_cursor_on_the_current_line(pos[1])
+            \ . lh#brackets#_jump_text(getline(pos[0])[pos[1]:])
+    else
+      return '}'
+    endif
   endif
 endfunction
 
