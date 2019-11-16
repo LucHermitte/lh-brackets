@@ -81,7 +81,7 @@ function! lh#cpp#brackets#curly_open() abort
   let c = col('.') - 1
   let l = getline('.')
   let l = strpart(l, 0, c)
-  let close =  l =~ 'struct\|class' ? '};' : '}'
+  let close =  l =~ 'struct\|class\|enum\|union' ? '};' : '}'
   if lh#brackets#usemarks()
     return '{!cursorhere!'.close.'!mark!'
   else
