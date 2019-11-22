@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.5.3
 " Created:      28th Feb 2008
-" Last Update:  21st Jan 2019
+" Last Update:  22nd Nov 2019
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -476,17 +476,17 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
   elseif a:escapable
     let e = (escaped ? '\' : "")
     " todo: support \%(\) with vim
-    " let open = '\<c-v\>'.a:Open
-    " let close = e.'\<c-v\>'.a:Close
-    let open = a:Open
-    let close = e.a:Close
+    " let l:Open = '\<c-v\>'.a:Open
+    " let l:Close = e.'\<c-v\>'.a:Close
+    let l:Open = a:Open
+    let l:Close = e.a:Close
   elseif escaped
     return a:trigger
   elseif a:areSameTriggers && lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
     return s:Jump()
   else
-    let open = a:Open
-    let close = a:Close
+    let l:Open = a:Open
+    let l:Close = a:Close
   endif
 
   if ! empty(a:nl)
@@ -494,13 +494,13 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
     " work and !cursorhere! does not provokes a reindentation
     "  :return lh#map#insert_seq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
     " hence the following solution
-    return call('lh#map#insert_seq', [a:trigger, open.a:nl.close.'!mark!\<esc\>O']+a:000)
+    return call('lh#map#insert_seq', [a:trigger, l:Open.a:nl.l:Close.'!mark!\<esc\>O']+a:000)
   else
     let c = virtcol('.')
     let c = col('.')
     " call s:Verbose(c)
     let current = matchstr(line, '.*\%'.(c).'c\S*')
-    if 0 && &tw > 0 && lh#encoding#strlen(current.open.close.lh#marker#txt()) > &tw
+    if 0 && &tw > 0 && lh#encoding#strlen(current.l:Open.l:Close.lh#marker#txt()) > &tw
       " v2.3.0 update:
       " This situation (that should take &fo and &wrapmargin into account as
       " well) could only occur when the cursor is moved on the same line (from
@@ -522,7 +522,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
         call setline(line('.'), head)
         " An undo break is added here. I'll have to investigate that someday
         let before = "\<cr>".substitute(before, '^\s\+', '', '')
-        return call('lh#map#insert_seq', [a:trigger, before.open.'!cursorhere!'.close.'!mark!'.after]+a:000)
+        return call('lh#map#insert_seq', [a:trigger, before.l:Open.'!cursorhere!'.l:Close.'!mark!'.after]+a:000)
       endif
       let delta_to_line_cut = lh#encoding#strlen(before)
       let delta_to_insertion = lh#encoding#strlen(substitute(before, '^\s\+', '', ''))
@@ -532,9 +532,9 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, Close, areSameTrigger
 
       " echomsg "--> ".strtrans(prepare)
 
-      return call('lh#map#insert_seq',[a:trigger, prepare.open.'!cursorhere!'.close.'!mark!']+a:000)
+      return call('lh#map#insert_seq',[a:trigger, prepare.l:Open.'!cursorhere!'.l:Close.'!mark!']+a:000)
     endif
-    return call('lh#map#insert_seq',[a:trigger, open.'!cursorhere!'.close.'!mark!']+a:000)
+    return call('lh#map#insert_seq',[a:trigger, l:Open.'!cursorhere!'.l:Close.'!mark!']+a:000)
 endfunction
 
 "------------------------------------------------------------------------
