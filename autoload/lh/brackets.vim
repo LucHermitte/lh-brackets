@@ -485,7 +485,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTrigger
     " let open = '\<c-v\>'.a:Open
     " let close = e.'\<c-v\>'.a:close
     let open = a:Open
-    let close = e.a:Close
+    let close = e.a:close
   elseif escaped
     return a:trigger
   elseif a:areSameTriggers && lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
@@ -498,7 +498,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTrigger
   if ! empty(a:nl)
     " Cannot use the following generic line because &inckey does not always
     " work and !cursorhere! does not provokes a reindentation
-    "  :return lh#map#insert_seq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:Close.'!mark!')
+    "  :return lh#map#insert_seq(a:trigger, a:Open.a:nl.'!cursorhere!'.a:nl.a:close.'!mark!')
     " hence the following solution
     return call('lh#map#insert_seq', [a:trigger, open.a:nl.close.'!mark!\<esc\>O']+a:000)
   else
