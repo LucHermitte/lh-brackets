@@ -183,18 +183,20 @@ set cpo&vim
 " Mappings that can be redefined {{{1
 " ==============================
 " (LH) As I use <del> a lot, I use different keys than those proposed by SR.
-if has('gui_running')
-  call lh#mapping#plug('<M-Insert>',   '<Plug>MarkersMark',                  'inv')
-  call lh#mapping#plug('<M-Del>',      '<Plug>MarkersJumpF',                 'inv')
-  call lh#mapping#plug('<M-S-Del>',    '<Plug>MarkersJumpB',                 'inv')
-  call lh#mapping#plug('<M-End>',      '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
-  call lh#mapping#plug('<C-PageDown>', '<Plug>MarkersJumpOutside',           'insx')
-else
-  call lh#mapping#plug('<C-L><Ins>',   '<Plug>MarkersMark',                  'inv')
-  call lh#mapping#plug('<C-J>',        '<Plug>MarkersJumpF',                 'inv')
-  call lh#mapping#plug('<C-L><S-Del>', '<Plug>MarkersJumpB',                 'inv')
-  call lh#mapping#plug('<C-L>$',       '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
-  call lh#mapping#plug('<C-L><End>',   '<Plug>MarkersJumpOutside',           'insx')
+if get(g:, 'marker_define_jump_mappings', 1)
+  if has('gui_running')
+    call lh#mapping#plug('<M-Insert>',   '<Plug>MarkersMark',                  'inv')
+    call lh#mapping#plug('<M-Del>',      '<Plug>MarkersJumpF',                 'inv')
+    call lh#mapping#plug('<M-S-Del>',    '<Plug>MarkersJumpB',                 'inv')
+    call lh#mapping#plug('<M-End>',      '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
+    call lh#mapping#plug('<C-PageDown>', '<Plug>MarkersJumpOutside',           'insx')
+  else
+    call lh#mapping#plug('<C-L><Ins>',   '<Plug>MarkersMark',                  'inv')
+    call lh#mapping#plug('<C-J>',        '<Plug>MarkersJumpF',                 'inv')
+    call lh#mapping#plug('<C-L><S-Del>', '<Plug>MarkersJumpB',                 'inv')
+    call lh#mapping#plug('<C-L>$',       '<Plug>MarkersCloseAllAndJumpToLast', 'inv')
+    call lh#mapping#plug('<C-L><End>',   '<Plug>MarkersJumpOutside',           'insx')
+  endif
 endif
 
 inoremap <silent> <Plug>MarkersInsertMark <c-r>=lh#marker#txt()<cr>

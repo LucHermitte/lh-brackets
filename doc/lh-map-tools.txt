@@ -1,5 +1,5 @@
-*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.5.2)
-*lh-brackets*           For Vim version 7.+     Last change: 16th May 2018
+*lh-map-tools.txt*      Tools for helping mappings-definitions (v3.6.0)
+*lh-brackets*           For Vim version 7.+     Last change: 02nd Feb 2020
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -473,8 +473,14 @@ and, to jump to them.
 In visual-mode (and select-mode), |!mark!| will toggle the presence of the
 pair of marker-string around the visual selection.
 
+                                                *g:marker_define_jump_mappings*
+Since version 3.6.0, default mappings can be disabled by settting this
+variable to 0. I still highly recommend you to bind |<Plug>MarkersJumpF| to
+something in case you activate marker signs.
+And |<Plug>MarkersJumpOutside| in all cases.
+
                                                 *g:use_old_bracketting_macros*
-Since version 3.0.0, !mark! and co have bben deprecated has mapping. In
+Since version 3.0.0, !mark! and co have been deprecated has mapping. In
 interactive mode, they won't be available. However, they are still the only
 way to write placeholders and jump between them in lh-brackets functions.
 
@@ -584,7 +590,8 @@ like: >
         imap <C-<>      <Plug>MarkersMark
         nmap <C-<>      <Plug>MarkersMark
         xmap <C-<>      <Plug>MarkersMark
-<
+Note: all default mappings can be disabled by setting
+|g:marker_define_jump_mappings| to 0.
 
                             *M-END* *<M-End>* *<Plug>MarkersCloseAllAndJumpToLast*
                             *CTRL-L_$* *<C-L>$*
@@ -597,7 +604,9 @@ like: >
         imap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
         nmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
         vmap <C-$>      <Plug>MarkersCloseAllAndJumpToLast
-<
+
+Note: all default mappings can be disabled by setting
+|g:marker_define_jump_mappings| to 0.
 
                             *C-PAGEDOWN* *<C-PageDown>* *<Plug>MarkersJumpOutside*
                             *CTRL-L_END* *<C-L><End>*
@@ -612,6 +621,8 @@ like: >
         vmap <C-)>      <Plug>MarkersJumpOutside
 
 This feature requires Vim 7.3+.
+Note: all default mappings can be disabled by setting
+|g:marker_define_jump_mappings| to 0.
 
 
 Plugins developpers~

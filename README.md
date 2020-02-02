@@ -27,7 +27,7 @@ The marker/placeholder characters:
   * can be shared with the ones from imaps.vim (`:h g:use_place_holders`).
 
 Jumping to the next/previous placeholder:
-  * is binded to `<M-Del>` (GUI) or `<C-J>` (terminal) by default (see `:h <Plug>MarkersJumpF`), or `<M-S-Del>`/`<C-L><S-Del>` to jump backward
+  * is binded to `<M-Del>` (GUI) or `<C-J>` (terminal) by default (see `:h <Plug>MarkersJumpF`), or `<M-S-Del>`/`<C-L><S-Del>` to jump backward. Can be disabled by setting `g:marker_define_jump_mappings` to 0.
   * can be tuned to delete or select the placeholder the cursor is jumping to (`:h g:marker_prefers_select`, `:h g:marker_select_empty_marks`),
   * can select or ignore the placeholder where the cursor is currently within (if any) (`:h g:marker_select_current`, `:h g:marker_select_current_fwd`),
   * may move the line of the placeholder (we jump to) to the middle of the window (`:h g:marker_center`),
