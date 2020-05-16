@@ -1,53 +1,56 @@
 "=============================================================================
-" File:		autoload/lh/html/brackets.vim                             {{{1
+" File:         autoload/lh/html/brackets.vim                             {{{1
 " Author:       Luc Hermitte <EMAIL:hermitte {at} free {dot} fr>
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.2.2
-" Created:	24th Mar 2008
+" Version:      3.6.0
+let s:k_version = '360'
+" Created:      24th Mar 2008
 "------------------------------------------------------------------------
 " Description:
-" 	Functions that tune how some bracket characters should expand in C&C++
-"
-"------------------------------------------------------------------------
-" Installation:
-" 	Requires Vim7+ and lh-map-tools
-" 	Used by {ftp}/ftplugin/html/html_brackets.vim
-" 	Drop this file into {rtp}/autoload/lh/html
-"
-" History:
-" 	v1.0.0: First version
-"       v2.0.0: GPLv3
+"       Functions that tune how some bracket characters should expand in C&C++
 " }}}1
 "=============================================================================
 
 let s:cpo_save=&cpo
 set cpo&vim
 
-" ## Debug {{{1
-function! lh#html#brackets#verbose(level)
-  let s:verbose = a:level
+" ## Misc Functions     {{{1
+" # Version {{{2
+function! lh#html#brackets#version()
+  return s:k_version
 endfunction
 
-function! s:Verbose(expr)
-  if exists('s:verbose') && s:verbose
-    echomsg a:expr
+" # Debug   {{{2
+let s:verbose = get(s:, 'verbose', 0)
+function! lh#html#brackets#verbose(...)
+  if a:0 > 0 | let s:verbose = a:1 | endif
+  return s:verbose
+endfunction
+
+function! s:Log(expr, ...) abort
+  call call('lh#log#this',[a:expr]+a:000)
+endfunction
+
+function! s:Verbose(expr, ...) abort
+  if s:verbose
+    call call('s:Log',[a:expr]+a:000)
   endif
 endfunction
 
-function! lh#html#brackets#debug(expr)
+function! lh#html#brackets#debug(expr) abort
   return eval(a:expr)
 endfunction
 
 "------------------------------------------------------------------------
 " ## Hooks {{{1
-function! lh#html#brackets#lt()
-  return s:Insert(0)
+function! lh#html#brackets#lt() abort
+  return s:Insert('<')
 endfunction
 
-function! lh#html#brackets#gt()
-  return s:Insert(1)
+function! lh#html#brackets#gt() abort
+  return s:Insert('>')
 endfunction
 
 " '<' automatically inserts its counter part
@@ -58,35 +61,29 @@ endfunction
 " not already closed.
 
 " Which==0 <=> '<';
-function! s:Insert(which)
+function! s:Insert(which) abort
   let column = col(".")
-  let lig = getline(line("."))
+  let lig = getline(".")
   if lig[column-2] == '<'
-    let ret = "\<BS>&". ((a:which == 0) ? 'lt;' : 'gt;')
+    let ret = "\<BS>&". ((a:which == '<') ? 'lt;' : 'gt;')
     if lig[column-1] == '>'
-      let ret = "\<Right>\<BS>" . ret
+      let ret = "\<del>" . ret
     endif
-    " if lig[column].lig[column+1] == Marker_Txt()
-    if strpart(lig, column) =~ '\V'.escape(Marker_Txt(), '\')
-      let ret .= substitute(Marker_Txt(), '.', "\<del>", 'g')
+    let marker = lh#marker#txt()
+    if strpart(lig, column) =~ '\V'.escape(marker, '\')
+      let ret .= substitute(marker, '.', "\<del>", 'g')
     endif
     return ret
   else
-    if a:which == 0
-      if lh#brackets#usemarks()
-	" return "<>\<c-r>=Marker_Txt()\<cr>\<esc>F>i"
-	return "<>!mark!\<esc>F>i"
-	"TODO: tester sans imaps.vim
-      else
-	return "<>\<left>"
-      endif
-    else            | return "\<esc>/>\<CR>a"
+    if     a:which == '<'       | return '<!cursorhere!>!mark!'
+    elseif lig[column-1] == '>' | return lh#brackets#_jump()
+    else                        | return '>'
     endif
   endif
 endfunction
 
 "
-function! s:CloseTag()
+function! s:CloseTag() abort
   let ret = '/'
   let column = col(".")
   let lig = getline(line("."))

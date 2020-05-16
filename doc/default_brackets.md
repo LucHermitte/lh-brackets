@@ -67,7 +67,7 @@ The main differences from the global table are:
 
 The main differences from the global table are:
  * Typing `<` twice results in `&lt;`, and `<>` results in `&gt;`.
- *  In visual mode, `<localleader><` surrounds the selection with a pair of
+ * In visual mode, `<localleader><` surrounds the selection with a pair of
     angle brackets.
 
 ### Javascript mappings
