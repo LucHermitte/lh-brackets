@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.5
+" Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  26th Nov 2019
+" Last Update:  16th May 2020
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -26,6 +26,7 @@
 " History:
 " Version 3.6.0:  26th Nov 2019
 "               * Fix When -close is provided but not -open
+"               * Export s:Jump() as lh#brackets#_jump()
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -489,7 +490,7 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTrigger
   elseif escaped
     return a:trigger
   elseif a:areSameTriggers && lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
-    return s:Jump()
+    return lh#brackets#_jump()
   else
     let open = a:Open
     let close = a:close
@@ -563,7 +564,7 @@ endfunction
 function! s:JumpOrClose(trigger) abort
   if lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
     " todo: detect even if there is a newline in between
-    return s:Jump()
+    return lh#brackets#_jump()
   else
     return a:trigger
   endif
@@ -629,8 +630,8 @@ function! lh#brackets#close_all_and_jump_to_last_on_line(chars, opts) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:Jump()                                                                                         {{{2
-function! s:Jump() abort
+" Function: lh#brackets#_jump()                                                                              {{{2
+function! lh#brackets#_jump() abort
   " todo: get rid of the marker as well
   let p = col('.')
 
