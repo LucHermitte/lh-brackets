@@ -4,9 +4,9 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	3.5.4
+" Version:	3.6.0
 " Created:	24th Mar 2008
-" Last Update:	30th Apr 2019
+" Last Update:	17th May 2020
 "------------------------------------------------------------------------
 " Description:
 " 	vim-ftplugin that defines the default preferences regarding the
@@ -31,7 +31,7 @@ if exists("b:loaded_ftplug_vim_brackets") && !exists('g:force_reload_ftplug_vim_
 endif
 let s:cpo_save=&cpo
 set cpo&vim
-let b:loaded_ftplug_vim_brackets = 354
+let b:loaded_ftplug_vim_brackets = 360
 " Avoid local reinclusion }}}2
 
 "------------------------------------------------------------------------
@@ -47,7 +47,7 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   let b:cb_jump_on_close = 1
 
   Brackets ( ) -default -esc
-  Brackets " " -default -visual=0 -open=function('lh#vim#brackets#dquotes')
+  Brackets " " -default -visual=0 -open=function('lh#vim#brackets#dquotes') -context!=comment
   Brackets < > -default -visual=0 -open=function('lh#vim#brackets#lt')
   Brackets < > -default -visual=1 -insert=0 -trigger=<localleader><
 endif

@@ -150,4 +150,5 @@ New and specialized mappings are avaible.
     this rule knowns an exception: within a string, or after a `\`, `<` is
     always converted to `<>`.  Does not handle special characters like `'<` and
     `'>`
-  * <sup>6</sup> except for comments
+  * <sup>6</sup> except for comments, and special attention is given when the
+    cursor is within strings
