@@ -55,7 +55,7 @@ function! lh#vim#brackets#lt() abort
   let c = col('.') - 1
   let syn = synIDattr(synID(line('.'),c,1),'name')
   if (l[c-1] != '\') && (syn !~? '\(string\)\|\(character\)')
-    if (syn =~? 'comment') || (l =~ '\m.*\<\(if\|while\)\s*.*')
+    if (syn =~? 'comment') || (l =~ '\v.*<(if|elseif|while|let\s+\S+|AssertBuf|SetBuf)\s*.*')
       return '<'
     endif
   endif
