@@ -7,7 +7,7 @@
 " Version:      3.6.0.
 let s:k_version = '360'
 " Created:      17th May 2020
-" Last Update:  17th May 2020
+" Last Update:  18th May 2020
 "------------------------------------------------------------------------
 " Description:
 "       Tests of vim specific bracket mappings
@@ -16,6 +16,9 @@ let s:k_version = '360'
 
 UTSuite [lh#brackets] Testing html mappings
 
+runtime plugin/bracketing.base.vim
+runtime plugin/common_brackets.vim
+runtime plugin/misc_map.vim
 runtime autoload/lh/brackets.vim
 runtime autoload/lh/html/brackets.vim
 
@@ -28,7 +31,7 @@ function! s:BeforeAll() abort
 endfunction
 
 function! s:AfterAll() abort
-  bw! vim-test-buffer.html
+  silent bw! vim-test-buffer.html
 endfunction
 
 function! s:Setup() abort
@@ -45,11 +48,20 @@ function! s:Test_lt_gt_with_usemark()
   %d_
 
   let b:usemarks = 1
-  normal a<
-  normal o<<
-  normal o<>
-  normal o<toto
-  normal o<toto>ti
+  Comment "imap < ---> ".strtrans(maparg('<', 'i'))
+  AssertMatches! (maparg('<', 'i'), "lh#brackets#opener")
+  call feedkeys('a<', 'x')
+  redraw
+  call feedkeys('o<<', 'x')
+  call feedkeys('o<>', 'x')
+  call feedkeys('o<toto', 'x')
+  call feedkeys('o<toto>ti', 'x')
+  redraw
+  " normal a<
+  " normal o<<
+  " normal o<>
+  " normal o<toto
+  " normal o<toto>ti
 
   AssertBufferMatches trim << EOF
   <>«»

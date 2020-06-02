@@ -7,7 +7,7 @@
 " Version:      3.6.0.
 let s:k_version = '360'
 " Created:      16th May 2020
-" Last Update:  16th May 2020
+" Last Update:  02nd Jun 2020
 "------------------------------------------------------------------------
 " Description:
 "       Tests of vim specific bracket mappings
@@ -16,6 +16,9 @@ let s:k_version = '360'
 
 UTSuite [lh#brackets] Testing vim mappings
 
+runtime plugin/bracketing.base.vim
+runtime plugin/common_brackets.vim
+runtime plugin/misc_map.vim
 runtime autoload/lh/brackets.vim
 runtime autoload/lh/vim/brackets.vim
 
@@ -28,7 +31,7 @@ function! s:BeforeAll() abort
 endfunction
 
 function! s:AfterAll() abort
-  bw! vim-test-buffer.vim
+  silent bw! vim-test-buffer.vim
 endfunction
 
 "------------------------------------------------------------------------
