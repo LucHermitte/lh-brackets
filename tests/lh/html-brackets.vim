@@ -50,18 +50,18 @@ function! s:Test_lt_gt_with_usemark()
   let b:usemarks = 1
   Comment "imap < ---> ".strtrans(maparg('<', 'i'))
   AssertMatches! (maparg('<', 'i'), "lh#brackets#opener")
-  call feedkeys('a<', 'x')
+  " call feedkeys('a<', 'x')
   " redraw
-  call feedkeys('o<<', 'x')
-  call feedkeys('o<>', 'x')
-  call feedkeys('o<toto', 'x')
-  call feedkeys("o<toto\<esc>a>ti", 'x')
+  " call feedkeys('o<<', 'x')
+  " call feedkeys('o<>', 'x')
+  " call feedkeys('o<toto', 'x')
+  " call feedkeys("o<toto\<esc>a>ti", 'x')
   " redraw
-  " normal a<
-  " normal o<<
-  " normal o<>
-  " normal o<toto
-  " normal o<toto>ti
+  normal a<
+  normal o<<
+  normal o<>
+  normal o<toto
+  exe "normal o<toto\<esc>a>ti"
 
   AssertBufferMatches trim << EOF
   <>«»
@@ -81,7 +81,8 @@ function! s:Test_lt_gt_without_usemark()
   normal o<>
   normal o<toto
   " normal o<toto>ti
-  call feedkeys("o<toto\<esc>a>ti", 'x')
+  exe "normal o<toto\<esc>a>ti"
+  " call feedkeys("o<toto\<esc>a>ti", 'x')
 
   AssertBufferMatches trim << EOF
   <>

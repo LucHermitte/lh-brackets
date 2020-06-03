@@ -21,7 +21,11 @@ set cpo&vim
 
 "------------------------------------------------------------------------
 function! s:Test_bracket_string()
-  AssertMatches(execute('scriptnames'), 'autoload.lh.brackets.vim')
+  if has('*execute')
+    AssertMatches(execute('scriptnames'), 'autoload.lh.brackets.vim')
+  else
+    Comment &rtp
+  endif
   Assert! exists('*lh#brackets#_string')
 
   AssertEqual( lh#brackets#_string('foo\nbar'), '"foo\nbar"')
