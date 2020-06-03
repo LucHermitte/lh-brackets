@@ -5,7 +5,7 @@
 " Version:      3.0.6.
 let s:k_version = '306'
 " Created:      13th May 2016
-" Last Update:  13th May 2016
+" Last Update:  03rd Jun 2020
 "------------------------------------------------------------------------
 " Description:
 "       Test lh-brackets functions
@@ -21,6 +21,9 @@ set cpo&vim
 
 "------------------------------------------------------------------------
 function! s:Test_bracket_string()
+  AssertMatches(execute('scriptnames'), 'autoload.lh.brackets.vim')
+  Assert! exists('*lh#brackets#_string')
+
   AssertEqual( lh#brackets#_string('foo\nbar'), '"foo\nbar"')
   AssertEqual( lh#brackets#_string('foo\\bar'), '"foo\\bar"')
   AssertEqual( lh#brackets#_string('\\Q{'), '"\\Q{"')
