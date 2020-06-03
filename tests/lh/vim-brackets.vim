@@ -7,7 +7,7 @@
 " Version:      3.6.0.
 let s:k_version = '360'
 " Created:      16th May 2020
-" Last Update:  02nd Jun 2020
+" Last Update:  03rd Jun 2020
 "------------------------------------------------------------------------
 " Description:
 "       Tests of vim specific bracket mappings
@@ -68,7 +68,7 @@ function! s:Test_dquote_new_string() abort
   EOF
 
   " Just the insertion of the pair
-  normal alet toto = "titi
+  exe "normal alet toto = \<esc>a\"titi"
   " Check closing of empty string
   normal olet toto = ""bli
   " Check closing
@@ -118,6 +118,7 @@ function! s:Test_dquote_within_string() abort
   EOF
 endfunction
 
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

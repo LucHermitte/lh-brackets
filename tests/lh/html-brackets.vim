@@ -7,7 +7,7 @@
 " Version:      3.6.0.
 let s:k_version = '360'
 " Created:      17th May 2020
-" Last Update:  18th May 2020
+" Last Update:  03rd Jun 2020
 "------------------------------------------------------------------------
 " Description:
 "       Tests of vim specific bracket mappings
@@ -51,12 +51,12 @@ function! s:Test_lt_gt_with_usemark()
   Comment "imap < ---> ".strtrans(maparg('<', 'i'))
   AssertMatches! (maparg('<', 'i'), "lh#brackets#opener")
   call feedkeys('a<', 'x')
-  redraw
+  " redraw
   call feedkeys('o<<', 'x')
   call feedkeys('o<>', 'x')
   call feedkeys('o<toto', 'x')
-  call feedkeys('o<toto>ti', 'x')
-  redraw
+  call feedkeys("o<toto\<esc>a>ti", 'x')
+  " redraw
   " normal a<
   " normal o<<
   " normal o<>
@@ -80,7 +80,8 @@ function! s:Test_lt_gt_without_usemark()
   normal o<<
   normal o<>
   normal o<toto
-  normal o<toto>ti
+  " normal o<toto>ti
+  call feedkeys("o<toto\<esc>a>ti", 'x')
 
   AssertBufferMatches trim << EOF
   <>
