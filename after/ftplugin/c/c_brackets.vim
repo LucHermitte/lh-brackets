@@ -78,9 +78,22 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   :Brackets < > -default -open=function('lh#cpp#brackets#lt') -visual=0
   :Brackets { } -default -visual=1 -insert=0 -nl -trigger=<localleader>{
   "}
-  :Brackets { } -default -visual=0 -insert=1
-        \ -open=function('lh#cpp#brackets#curly_open')
-        \ -clos=function('lh#cpp#brackets#curly_close')
+  if get(g:, 'cb_jump_over_newlines', 1)
+    " In this (defaut) case, if the cursor is before a spaces,
+    " newline(s) and a '}', then it'll jump over the closing brackets
+    " when it's hit on the keyboard.
+    " To force the insertion of the brackets
+    " - either set g:cb_jump_over_newlines to 0,
+    " - or momentarilly type CTRL-V before }
+    :Brackets { } -default -visual=0 -insert=1
+          \ -open=function('lh#cpp#brackets#curly_open')
+          \ -clos=function('lh#cpp#brackets#curly_close')
+  else
+    " In this case, the cursor jump over the next '}' on '}' if and only
+    " if it (the cursor) is right before the '}' character.
+    :Brackets { } -default -visual=0 -insert=1
+          \ -open=function('lh#cpp#brackets#curly_open')
+  endif
 
   " Support for C++11 [[attributes]]
   :Brackets [ ] -default -visual=0 -insert=1

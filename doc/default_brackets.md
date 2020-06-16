@@ -47,7 +47,12 @@ The following mappings apply to all filetypes (unless specified otherwise, or sp
 See [lh-cpp documentation](https://github.com/LucHermitte/lh-cpp#brackets) for the complete mappings table.
 
 The main differences from the global table are:
- * `}` jumps to the next non whitespace/newline that is a `}`
+ * `}` jumps to the next non whitespace/newline character that is a `}` if
+   `g:cb_jump_over_newlines` equals to 1 (default case). If you want to jump
+   after the `}` only if it's exactly right after the cursor, then set
+   `g:cb_jump_over_newlines` to 0 in your `.vimrc`. See #26.
+   When not jumping, `}` is simply inserted.
+
  *  In visual mode, `<localleader>{` surrounds the selection with a pair of
     curly brackets (and newlines are introduced).
  * `<tt>` is recognized as an opening bracket (I use it a lot to write Doxygen
