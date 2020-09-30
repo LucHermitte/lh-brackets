@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  16th May 2020
+" Last Update:  30th Sep 2020
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -27,6 +27,7 @@
 " Version 3.6.0:  26th Nov 2019
 "               * Fix When -close is provided but not -open
 "               * Export s:Jump() as lh#brackets#_jump()
+"               * Fix g:cb_disable_default/g:cb_enable_default
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -815,9 +816,9 @@ function! s:ShallKeepDefaultMapping(trigger, mode) abort
     call lh#notify#once('lh_brackets_no_defaults', 'Warning: Both g:cb_enable_default and g:cb_disable_default are defined, g:cb_disable_default will be ignored')
   endif
   if exists('g:cb_enable_default')
-    return stridx(get(g:cb_enable_default, a:trigger, ''), a:mode) >= 0
+    return stridx(get(g:cb_enable_default, a:trigger, 'inv'), a:mode) >= 0
   elseif exists('g:cb_disable_default')
-    return stridx(get(g:cb_disable_default, a:trigger, 'inv'), a:mode) == -1
+    return stridx(get(g:cb_disable_default, a:trigger, ''), a:mode) == -1
   else
     return 1
   endif
