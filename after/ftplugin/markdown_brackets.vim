@@ -41,13 +41,13 @@ if ! lh#option#get('cb_no_default_brackets', 0)
   " :Brackets /* */ -default -visual=0
   " :Brackets /** */ -default -visual=0 -trigger=/!
   "
-  :Brackets _ _ -default -open=function('lh#markdown#brackets#underscore')
-  :Brackets * * -default -open=function('lh#markdown#brackets#star') -visual=0
-  :Brackets * * -default -insert=0 -trigger=<localleader>*
-  " :Brackets * * -default -open=function('lh#markdown#brackets#star') -close=function('lh#markdown#brackets#star')
-  :Brackets ` `
+  :Brackets _ _           -default -open=function('lh#markdown#brackets#underscore')
+  :Brackets * *           -default -open=function('lh#markdown#brackets#star') -visual=0
+  :Brackets * *           -default -insert=0 -trigger=<localleader>*
+  " :Brackets * *         -default -open=function('lh#markdown#brackets#star') -close=function('lh#markdown#brackets#star')
+  :Brackets ` `           -default
   :Brackets <\del> </del> -default -trigger=<localleader>~ -insert=0
-  :Brackets ~ ~ -default -open=function('lh#markdown#brackets#strike') -visual=0
+  :Brackets ~ ~           -default -open=function('lh#markdown#brackets#strike') -visual=0
   "
   " Todo: add
   " *<space> remove the second '*'
