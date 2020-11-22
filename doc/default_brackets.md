@@ -60,13 +60,17 @@ The main differences from the global table are:
  * `;` will try to close parenthesis -- set `(bpg):[{ft}_]semicolon_closes_bracket` to 0 to inhibit this setting.
  * `<bs>` take care of semi-colons after the closing curly-bracket -- set `(bpg):[{ft}_]semicolon_closes_bracket` to 0 to inhibit this setting.
 
-| in mode                                                 | insert            |
-| :---------------------------------------------          | :---------------- |
-| **keys**                                                | expands into ..   |
-| `<` after `#include`, `template`, `typename` or `_cast` | `<<cursor>>;`     |
-| `{` after `struct`, `class`, `enum` or `union`          | `{<cursor>};`     |
-| `[` after a `[`                                         | `[[<cursor>]]«»`  |
-| `]` before `]]`                                         | close all `]]`    |
+| in mode                                                                 | insert            |
+| :---------------------------------------------------------------------  | :---------------- |
+| **keys**                                                                | expands into ..   |
+| `<` after `#include`, `template`, `typename`, `_cast` or standard types | `<<cursor>>;`     |
+| `{` after `struct`, `class`, `enum` or `union`                          | `{<cursor>};`     |
+| `[` after a `[`                                                         | `[[<cursor>]]«»`  |
+| `]` before `]]`                                                         | close all `]]`    |
+
+#### Notes
+ * For `<` to expand into `<|>` after standard types like `std::vector`, [lh-cpp](https://github.com/LucHermitte/lh-cpp)
+   v2.2.1+ is required
 
 ### HTML mappings
 
