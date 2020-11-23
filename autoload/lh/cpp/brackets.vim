@@ -7,7 +7,7 @@
 " Version:      3.6.0
 let s:k_version = 360
 " Created:      17th Mar 2008
-" Last Update:  22nd Nov 2020
+" Last Update:  23rd Nov 2020
 "------------------------------------------------------------------------
 " Description:
 "       Functions that tune how some bracket characters should expand in C&C++
@@ -52,7 +52,6 @@ endfunction
 " ## Functions {{{1
 
 " - Callback function that specializes the behaviour of '<' {{{2
-unlet s:has_lh_cpp
 function! s:is_template(type) abort
   let type = matchstr(a:type, '\k\+\ze\s*$')
   call s:Verbose('check if template: "%1" -> "%2"', a:type, type)
