@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  30th Sep 2020
+" Last Update:  30th Dec 2020
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -793,6 +793,8 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   " - Some keys, like '<bs>', cannot be used to code the default.
   " - Double "string(" because those chars are correctly interpreted with
   " lh#mapping#reinterpret_escaped_char(eval()), which requires nested strings...
+  call s:Verbose('Enriching imaping on %1', strtrans(a:trigger))
+  call s:Verbose('...previously %1', strtrans(execute('verbose imap <cr>')))
   if a:0 == 0
     let previous = maparg(a:trigger, 'i', 0, 1)
     if !empty(previous) && previous.expr
@@ -807,6 +809,7 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   endif
   let sCase='lh#mapping#_switch('.string(default).', '.string([a:case]).')'
   call s:DefineImap(a:trigger, sCase, a:isLocal)
+  call s:Verbose('New i-mapping on %1 is %2', strtrans(a:trigger), strtrans(execute('verbose imap <cr>')))
 endfunction
 
 "------------------------------------------------------------------------
