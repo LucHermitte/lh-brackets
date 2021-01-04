@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  30th Dec 2020
+" Last Update:  04th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -28,6 +28,7 @@
 "               * Fix When -close is provided but not -open
 "               * Export s:Jump() as lh#brackets#_jump()
 "               * Fix g:cb_disable_default/g:cb_enable_default
+"               * Support enriching non-<expr> imaps
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -416,8 +417,8 @@ function! s:DefineMap(mode, trigger, action, isLocal, isExpr) abort
   endif
 endfunction
 
-" Function: s:DefineImap(trigger, inserter, isLocal)                                                         {{{2
-function! s:DefineImap(trigger, inserter, isLocal) abort
+" Function: s:DefineImap(trigger, inserter, isLocal [, nore])                                                {{{2
+function! s:DefineImap(trigger, inserter, isLocal, ...) abort
   if exists('*IMAP') && a:trigger !~? '<bs>\|<cr>\|<up>\|<down>\|<left>\|<right>'
     if a:isLocal
       call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
@@ -425,8 +426,9 @@ function! s:DefineImap(trigger, inserter, isLocal) abort
       call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", '')
     endif
   else
+    let nore = get(a:, '1', 1) ? 'nore' : ''
     " call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>", a:isLocal)
-    call s:DefineMap('inore', a:trigger, (a:inserter), a:isLocal, 1)
+    call s:DefineMap('i' . nore, a:trigger, (a:inserter), a:isLocal, 1)
   endif
 endfunction
 
@@ -795,20 +797,24 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   " lh#mapping#reinterpret_escaped_char(eval()), which requires nested strings...
   call s:Verbose('Enriching imaping on %1', strtrans(a:trigger))
   call s:Verbose('...previously %1', strtrans(execute('verbose imap <cr>')))
+  let nore = 1
   if a:0 == 0
     let previous = maparg(a:trigger, 'i', 0, 1)
-    if !empty(previous) && previous.expr
-      " If not an expression, I do know yet how to forward a non expr mapping
-      " from an expr mapping definition
-      let default = lh#mapping#_build_rhs(previous)
-    else
+    if empty(previous)
       let default = string(a:trigger)
+    elseif previous.expr
+      let default = lh#mapping#_build_rhs(previous)
+      let nore    = previous.noremap
+    else
+      let default = string(previous.rhs)
+      let nore    = previous.noremap
+      " call s:Verbose('%1 ==> %2', previous.rhs, default)
     endif
   else
     let default = string(a:1)
   endif
   let sCase='lh#mapping#_switch('.string(default).', '.string([a:case]).')'
-  call s:DefineImap(a:trigger, sCase, a:isLocal)
+  call s:DefineImap(a:trigger, sCase, a:isLocal, nore)
   call s:Verbose('New i-mapping on %1 is %2', strtrans(a:trigger), strtrans(execute('verbose imap <cr>')))
 endfunction
 
