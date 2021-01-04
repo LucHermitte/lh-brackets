@@ -66,7 +66,7 @@ set cpo&vim
 " Brackets & all {{{2
 " ------------------------------------------------------------------------
 " It seems that function() does not load anything with some versions of vim
-if !exists('lh#cpp#brackets#lt')
+if !exists('*lh#cpp#brackets#lt')
   runtime autoload/lh/cpp/brackets.vim
 endif
 
