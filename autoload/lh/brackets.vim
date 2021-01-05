@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  04th Jan 2021
+" Last Update:  05th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -29,6 +29,7 @@
 "               * Export s:Jump() as lh#brackets#_jump()
 "               * Fix g:cb_disable_default/g:cb_enable_default
 "               * Support enriching non-<expr> imaps
+"               * Moving `s:DefineMap()` function to lh-vim-lib
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -202,66 +203,15 @@ endfunction
 "
 "# Globals                                                                                                   {{{2
 "# Definitions {{{3
-if !exists('s:definitions') || exists('brackets_clear_definitions')
-  let s:definitions = {}
+if !exists('s:pairs') || exists('brackets_clear_definitions')
+  "" let s:definitions = {}
   let s:pairs       = {}
 endif
-
-"# Activation State {{{3
-" let s:active = 1
-let s:state = {
-      \ 'isActive': 1,
-      \ 'isActiveInBuffer': {},
-      \}
-
-function! s:state.toggle() dict abort
-  let self.isActive = 1 - self.isActive
-  let bid = bufnr('%')
-  let self.isActiveInBuffer[bid] = self.isActive
-endfunction
-
-function! s:state.mustActivate() dict abort
-  let bid = bufnr('%')
-  if has_key(self.isActiveInBuffer, bid)
-    let must = !self.isActiveInBuffer[bid]
-    let why = must." <= has key, global=". (self.isActive) . ", local=".self.isActiveInBuffer[bid]
-  else " first time in the buffer
-    " throw "lh#Brackets#mustActivate() assertion failed: unknown local activation state"
-    let must = 0
-    let why = must." <= has not key, global=". (self.isActive)
-  endif
-  let self.isActiveInBuffer[bid] = self.isActive
-  " echomsg "mustActivate[".bid."]: ".why
-  return must
-endfunction
-
-function! s:state.mustDeactivate() dict abort
-  let bid = bufnr('%')
-  if has_key(self.isActiveInBuffer, bid)
-    let must = self.isActiveInBuffer[bid]
-    let why = must." <= has key, global=". (self.isActive) . ", local=".self.isActiveInBuffer[bid]
-  else " first time in the buffer
-    " throw "lh#Brackets#mustDeactivate() assertion failed: unknown local activation state"
-    let must = 0
-    let why = must." <= has not key, global=". (self.isActive)
-  endif
-  let self.isActiveInBuffer[bid] = self.isActive
-  " echomsg "mustDeactivate[".bid."]: ".why
-  return must
-endfunction
+if !exists('s:toggable_mappings')
+  let s:toggable_mappings = lh#mapping#create_toggable_group('Brackets ')
+endif
 
 "# Functions                                                                                                 {{{2
-
-" Function: s:GetDefinitions(isLocal) {{{3
-" Fetch the brackets defined for the current buffer.
-function! s:GetDefinitions(isLocal) abort
-  let bid = a:isLocal ? bufnr('%') : -1
-  if !has_key(s:definitions, bid)
-    let s:definitions[bid] = []
-  endif
-  let crt_definitions = s:definitions[bid]
-  return crt_definitions
-endfunction
 
 " Function: s:GetPairs(isLocal) {{{3
 " Fetch the brackets defined for the current buffer.
@@ -284,51 +234,7 @@ endfunction
 
 " Function: Main function called to toggle bracket mappings. {{{3
 function! lh#brackets#toggle() abort
-  " TODO: when entering a buffer, update the mappings depending on whether it
-  " has been toggled
-  if exists('*IMAP')
-    let g:Imap_FreezeImap = 1 - s:state.isActive
-  else
-    let crt_definitions = s:GetDefinitions(0) + s:GetDefinitions(1)
-    if s:state.isActive " active -> inactive
-      for m in crt_definitions
-        call s:UnMap(m)
-      endfor
-      call lh#common#warning_msg("Brackets mappings deactivated")
-    else " inactive -> active
-      for m in crt_definitions
-        call s:Map(m)
-      endfor
-      call lh#common#warning_msg("Brackets mappings (re)activated")
-    endif
-  endif " No imaps.vim
-  call s:state.toggle()
-endfunction
-
-" Function: Activate or deactivate the mappings in the current buffer. {{{3
-function! s:UpdateMappingsActivationE() abort
-  if s:state.isActive
-    if s:state.mustActivate()
-      let crt_definitions = s:GetDefinitions(1)
-      for m in crt_definitions
-        call s:Map(m)
-      endfor
-    endif " active && must activate
-  else " not active
-    let crt_definitions = s:GetDefinitions(1)
-    if s:state.mustDeactivate()
-    for m in crt_definitions
-        call s:UnMap(m)
-      endfor
-    endif
-  endif
-endfunction
-
-function! s:UpdateMappingsActivationL() abort
-  let bid = bufnr('%')
-  let s:state.isActiveInBuffer[bid] = s:state.isActive
-  " echomsg "updateL[".bid."]: <- ". s:state.isActive
-  " call confirm( "updateL[".bid."]: <- ". s:state.isActive, '&Ok', 1)
+  call s:toggable_mappings.toggle_mappings()
 endfunction
 
 " Function: lh#brackets#toggle_usemarks() {{{3
@@ -344,13 +250,6 @@ function! lh#brackets#toggle_usemarks() abort
     call lh#common#warning_msg('g:usemarks <-'.g:usemarks)
   endif
 endfunction
-
-"# Autocommands                                                                                              {{{2
-augroup LHBrackets
-  au!
-  au BufEnter * call s:UpdateMappingsActivationE()
-  au BufLeave * call s:UpdateMappingsActivationL()
-augroup END
 
 "------------------------------------------------------------------------
 
@@ -368,88 +267,6 @@ function! lh#brackets#_string(s) abort
   return '"'.escape(a:s, '|"').'"'  " version that works with double quote and \n
   " return '"'.a:s.'"'                " version that works with \n
   " return string(a:s) " version that doesn't work: need to return something enclosed in double quotes
-endfunction
-
-" Function: s:UnMap(m)                                                                                       {{{2
-" TODO: move to lh#mapping
-function! s:UnMap(m) abort
-  try
-    let cmd = a:m.mode[0].'unmap '. a:m.buffer . a:m.lhs
-    call s:Verbose(cmd)
-    exe cmd
-  catch /E31/
-    call s:Verbose("%1: %2", v:exception, cmd)
-  endtry
-endfunction
-
-" Function: s:Map(m)                                                                                         {{{2
-" TODO: move to lh#mapping
-function! s:Map(m) abort
-  let cmd = a:m.mode.'map <silent> ' . a:m.expr . a:m.buffer . a:m.lhs .' '.a:m.rhs
-  call s:Verbose(cmd)
-  exe cmd
-endfunction
-
-" Function: s:DefineMap(mode, trigger, action, isLocal, isExpr)                                              {{{2
-function! s:DefineMap(mode, trigger, action, isLocal, isExpr) abort
-  let crt_definitions = s:GetDefinitions(a:isLocal)
-  let crt_mapping = {}
-  let crt_mapping.lhs = escape(a:trigger, '|') " need to escape bar
-  let crt_mapping.mode    = a:mode
-  let crt_mapping.rhs  = a:action
-  let crt_mapping.buffer  = a:isLocal ? '<buffer> ' : ''
-  let crt_mapping.expr    = a:isExpr  ? '<expr> '   : ''
-  if s:state.isActive
-    call s:Map(crt_mapping)
-  endif
-  let p = lh#list#Find_if(crt_definitions,
-        \ 'v:val.mode==v:1_.mode && v:val.lhs==v:1_.lhs',
-        \ [crt_mapping])
-  if p == -1
-    call add(crt_definitions, crt_mapping)
-  else
-    if crt_mapping.rhs != a:action
-      call lh#common#warning_msg( "Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].rhs."  with ".a:action)
-    elseif &verbose >= 2
-      call s:Log("(almost) Overrriding ".a:mode."map ".a:trigger." ".crt_definitions[p].rhs." with ".a:action)
-    endif
-    let crt_definitions[p] = crt_mapping
-  endif
-endfunction
-
-" Function: s:DefineImap(trigger, inserter, isLocal [, nore])                                                {{{2
-function! s:DefineImap(trigger, inserter, isLocal, ...) abort
-  if exists('*IMAP') && a:trigger !~? '<bs>\|<cr>\|<up>\|<down>\|<left>\|<right>'
-    if a:isLocal
-      call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", &ft)
-    else
-      call IMAP(a:trigger,  "\<c-r>=".a:inserter."\<cr>", '')
-    endif
-  else
-    let nore = get(a:, '1', 1) ? 'nore' : ''
-    " call s:DefineMap('inore', a:trigger, " \<c-r>=".(a:inserter)."\<cr>", a:isLocal)
-    call s:DefineMap('i' . nore, a:trigger, (a:inserter), a:isLocal, 1)
-  endif
-endfunction
-
-" Function: s:ListMappings(isLocal)                                                                          {{{2
-function! s:ListMappings(isLocal) abort
-  let crt_definitions = s:GetDefinitions(a:isLocal)
-  for m in crt_definitions
-    let cmd = m.mode.'map <silent> ' . m.buffer . m.lhs .' '.m.rhs
-    echomsg cmd
-  endfor
-endfunction
-
-" Function: s:ClearMappings(isLocal)                                                                         {{{2
-function! s:ClearMappings(isLocal) abort
-  let crt_definitions = s:GetDefinitions(a:isLocal)
-  if s:state.isActive
-    for m in crt_definitions
-      call s:UnMap(m)
-    endfor
-  endif
-  unlet crt_definitions[:]
 endfunction
 
 "------------------------------------------------------------------------
@@ -786,7 +603,7 @@ function! lh#brackets#define_imap(trigger, cases, isLocal, ...) abort
     call lh#assert#type(a:cases).is('')
     let sCases = a:cases
   endif
-  call s:DefineImap(a:trigger, sCases, a:isLocal)
+  call s:toggable_mappings.define_imap(a:trigger, sCases, a:isLocal)
 endfunction
 
 " Function: lh#brackets#enrich_imap(trigger, case, isLocal [,default=trigger])                               {{{2
@@ -814,7 +631,7 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
     let default = string(a:1)
   endif
   let sCase='lh#mapping#_switch('.string(default).', '.string([a:case]).')'
-  call s:DefineImap(a:trigger, sCase, a:isLocal, nore)
+  call s:toggable_mappings.define_imap(a:trigger, sCase, a:isLocal, nore)
   call s:Verbose('New i-mapping on %1 is %2', strtrans(a:trigger), strtrans(execute('verbose imap <cr>')))
 endfunction
 
@@ -858,8 +675,8 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
   let options    = []
   let default    = 0
   for p in a:a000
-    if     p =~ '-l\%[list]'        | call s:ListMappings(a:isLocal)  | return []
-    elseif p =~ '-cle\%[ar]'        | call s:ClearMappings(a:isLocal) | return []
+    if     p =~ '-l\%[list]'        | call s:toggable_mappings.list_mappings(a:isLocal)  | return []
+    elseif p =~ '-cle\%[ar]'        | call s:toggable_mappings.clear_mappings(a:isLocal) | return []
     elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
@@ -942,10 +759,10 @@ function! lh#brackets#define(bang, ...) abort
     let map_ctx = empty(context) ? '' : ','.string(context)
     let inserter = 'lh#brackets#opener('.lh#brackets#_string(trigger).','. escapable.',"'.(nl).
           \'",'. lh#brackets#_string(l:Open).','.lh#brackets#_string(options[1]).','.string(areSameTriggers).','.string(l:Exceptions).map_ctx.')'
-    call s:DefineImap(trigger, inserter, isLocal)
+    call s:toggable_mappings.define_imap(trigger, inserter, isLocal)
     if ! areSameTriggers
       let inserter = 'lh#brackets#closer('.lh#brackets#_string(options[1]).','.lh#brackets#_string (l:Close).','.lh#brackets#_string(l:Exceptions).map_ctx.')'
-      call s:DefineImap(options[1], inserter, isLocal)
+      call s:toggable_mappings.define_imap(options[1], inserter, isLocal)
       if len(options[1])
         " TODO: enrich <bs> & <del> imaps for the close triggers
       endif
@@ -962,7 +779,7 @@ function! lh#brackets#define(bang, ...) abort
       let action = ' <c-\><c-n>@=lh#map#surround('.
             \ lh#brackets#_string(options[0]).', '.lh#brackets#_string(options[1]).", 0, 0, '`>ll', 1)\<cr>"
     endif
-    call s:DefineMap(s:k_vmap_type.'nore', trigger, action, isLocal, 0)
+    call s:toggable_mappings.define_map(s:k_vmap_type.'nore', trigger, action, isLocal, 0)
 
     if type(normal)==type('string') && normal=="default=1"
       let normal = 1
@@ -981,7 +798,7 @@ function! lh#brackets#define(bang, ...) abort
     let normal = empty(nl) ? 'viw' : 'V'
   endif
   if lh#type#is_string(normal)
-    call s:DefineMap('n', trigger, normal.escape(trigger, '|'), isLocal, 0)
+    call s:toggable_mappings.define_map('n', trigger, normal.escape(trigger, '|'), isLocal, 0)
   endif
 endfunction
 
