@@ -4,16 +4,17 @@
 "		<URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.2
-let s:k_version = '352'
+" Version:      3.6.0
+let s:k_version = '360'
 " Created:      03rd Nov 2015
-" Last Update:  17th Oct 2018
+" Last Update:  05th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
 "
 "------------------------------------------------------------------------
 " History:
+"       v3.6.0 Move functions into autoload plugin
 "       v3.5.2 Improve logs
 "       v3.2.1 Fix regression with `set et`
 "       v3.2.0 Add `lh#map#4_this_context()`
@@ -293,8 +294,8 @@ function! lh#map#smart_insert_seq2(key, expr, ...) abort
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "!cursorhere!&", '')
     let rhs = substitute(rhs, '<+\(.\{-}\)+>', "\<c-r>=lh#marker#txt(".string('\1').")\<cr>", 'g')
     let rhs .= "!movecursor!"
-    " let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>"
-    let rhs = lh#map#build_map_seq(rhs."\<c-\>\<c-n>@=Marker_Jump({'direction':1, 'mode':'n'})\<cr>")
+    " let rhs = lh#map#build_map_seq(escape(rhs, '\'))."\<c-\>\<c-n>@=lh#marker#_jump({'direction':1, 'mode':'n'})\<cr>"
+    let rhs = lh#map#build_map_seq(rhs."\<c-\>\<c-n>@=lh#marker#_jump({'direction':1, 'mode':'n'})\<cr>")
   endif
   " Build & return the context dependent sequence to insert
   if a:0 > 0

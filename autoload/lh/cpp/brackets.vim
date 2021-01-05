@@ -7,7 +7,7 @@
 " Version:      3.6.0
 let s:k_version = 360
 " Created:      17th Mar 2008
-" Last Update:  23rd Nov 2020
+" Last Update:  05th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "       Functions that tune how some bracket characters should expand in C&C++
@@ -91,8 +91,8 @@ function! lh#cpp#brackets#lt() abort
       return '<!cursorhere!>!mark!'
       " NB: InsertSeq with "\<left>" as parameter won't work in utf-8 => Prefer
       " "h" when motion is needed.
-      " return '<>' . "!mark!\<esc>".lh#encoding#strlen(Marker_Txt())."hi"
-      " return '<>' . "!mark!\<esc>".lh#encoding#strlen(Marker_Txt())."\<left>i"
+      " return '<>' . "!mark!\<esc>".lh#encoding#strlen(lh#marker#txt())."hi"
+      " return '<>' . "!mark!\<esc>".lh#encoding#strlen(lh#marker#txt())."\<left>i"
     else
       " return '<>' . "\<Left>"
       return '<!cursorhere!>'

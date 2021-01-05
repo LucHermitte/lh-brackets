@@ -443,7 +443,7 @@ let &cpo = s:cpo_save
 "     keyboard layout -> <M-{>, <M-[>, <M-`>, etc
 " (*) nmap <buffer> " ... is a very bad idea, hence nmap ""
 " (*) !mark! and !jump! can't be called yet from MapNoContext().
-"     but <c-r>=Marker_Txt()<cr> can.
+"     but <c-r>=lh#marker#txt()<cr> can.
 " }}}
 " ===========================================================================
 " vim600: set fdm=marker:

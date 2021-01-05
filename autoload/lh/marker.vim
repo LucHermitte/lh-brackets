@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:      3.1.1
-let s:k_version = 311
+" Version:      3.6.0
+let s:k_version = 360
 " Created:      27th Nov 2013
 "------------------------------------------------------------------------
 " Description:
@@ -145,11 +145,20 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
-function! s:Option(name, default) " {{{2
+" # Options {{{2
+function! s:Option(name, default) " {{{3
   if     exists('b:'.a:name) | return b:{a:name}
   elseif exists('g:'.a:name) | return g:{a:name}
   else                       | return a:default
   endif
+endfunction
+
+function! s:Select_or_Echo()    "                  {{{3
+  return get(g:, 'marker_prefers_select', 1)
+endfunction
+
+function! s:Select_Empty_Mark() " or delete them ? {{{3
+  return get(g:, 'marker_select_empty_marks', 1)
 endfunction
 
 function! lh#marker#_set(open, close, ...) abort " {{{2
@@ -177,6 +186,179 @@ function! lh#marker#_set(open, close, ...) abort " {{{2
     " Seems to be required to update g:stakeholders#def.Replace(text)
     runtime autoload/stakeholders.vim
   endif
+endfunction
+
+function! lh#marker#_insert(text) range abort " {{{2
+  " This test function is incapable of detecting the current mode.
+  " There is no way to know when we are in insert mode.
+  " There is no way to know if we are in visual mode or if we are in normal
+  " mode and the cursor is on the start of the previous visual region.
+  let mode =  confirm("'< = (".line("'<").','.virtcol("'<").
+        \ ")\n'> =(".line("'>").','.virtcol("'>").
+        \ ")\n.  =(".line(".").','.virtcol("."). ")\n\n Mode ?",
+        \ "&Visual\n&Normal\n&Insert", 1)
+  if mode == 1
+    exe "normal gv\<Plug>MarkersMark"
+  elseif mode == 2
+    exe "normal viw\<Plug>MarkersMark"
+  elseif mode == 3
+    "<c-o>:MI titi toto<cr>
+    let text = lh#marker#txt(a:text)
+    exe "normal! i".text."\<esc>l"
+  endif
+endfunction
+
+function! lh#marker#_jump(param) abort " {{{2
+  " ¿ forward([1]) or backward(0) ?
+  let direction = get(a:param, 'direction') ? '' : 'b'
+  let delete    = get(a:param, 'delete', 0)
+  let mode      = get(a:param, 'mode')
+
+  " little optimization
+  let mo = lh#marker#open()        | let emo = escape(mo, '\')
+  let mc = lh#marker#close()       | let emc = escape(mc, '\')
+
+  " Save cursor and current view
+  let position = winsaveview()
+
+  " if within a marker, and going backward, {{{3
+  if (direction == 'b') && !s:Option('marker_select_current', 0)
+    " echomsg 'B, !C'
+    " then: go to the start of the marker.
+    " Principle: {{{
+    " 1- search backward the pair {open, close}
+    "    In order to find the current pair correctly, we must consider the
+    "    beginning of the match (\zs) to be just before the last character of
+    "    the second pair.
+    " 2- Then, in order to be sure we did jump to a match of the open marker,
+    "    we search forward for its closing counter-part.
+    "    Test: with open='«', close = 'ééé', and the text:{{{
+    "       blah «»
+    "       «1ééé  «2ééé
+    "       «3ééé foo
+    "       «4ééé
+    "    with the cursor on any character. }}}
+    "    Without this second test, the cursor would have been moved to the end
+    "    of "blah «" which is not the beginning of a marker.
+    " }}}
+    if searchpair('\V'.emo, '', '\V'.substitute(emc, '.$', '\\zs\0', ''), 'b')
+      echo '1-'.string(getpos('.'))
+      if ! searchpair('\V'.emo, '', '\V'.emc, 'n')
+        echo '2-'.string(getpos('.'))
+        " restore cursor position as we are not within a marker.
+        call winrestview(position)
+      endif
+    endif
+  endif
+  " if within a marker, and going forward, {{{3
+  if (direction == '') && s:Option('marker_select_current_fwd', 1)
+    " This option must be reserved to
+    " echomsg 'F, C'
+    " then: go to the start of the marker.
+    if searchpair('\V'.emo, '', '\V'.emc, 'w')
+      " echomsg '1-'.string(getpos('.'))
+      if ! searchpair('\V'.emo, '', '\V'.emc, 'b')
+        " echomsg '2-'.string(getpos('.'))
+        " restore cursor position as we are not within a marker.
+        call winrestview(position)
+        " echomsg position
+      else
+        " echomsg "premature found"
+        return s:DoSelect(emo, emc, delete, position, mode)
+      endif
+    endif
+  endif
+  " }}}3
+  " "&ws?'w':'W'" is implicit with search()
+  if !search('\V'.emo.'\.\{-}'.emc, direction) " {{{3
+    " Case:             No more marker
+    " Treatment:        None
+    return ""
+  else " found! {{{3
+    return s:DoSelect(emo, emc, delete, position, mode)
+  endif
+endfunction
+
+function! s:DoSelect(emo, emc, delete, position, mode) abort " {{{2
+  " In insert mode, now the mapping is using <c-r>=, we need to move the cursor
+  " one character right
+  let mode_prefix = a:mode == 'i' ? "\<c-\>\<c-n>l" : ''
+
+  silent! foldopen!
+  if s:Option('marker_center', 1)
+    exe "normal! zz"
+  endif
+  let mark_start = virtcol('.')
+  let select = 'v'.mark_start.'|o'
+  if &selection == 'exclusive' | let select .= 'l' | endif
+  let c = col('.')
+  " search for the last character of the closing string.
+  call search('\V'.substitute(a:emc, '.$', '\\zs\0', ''))
+  " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
+  if s:Select_or_Echo() " select! {{{4
+    if !a:delete &&
+          \ (s:Select_Empty_Mark() ||
+          \ (matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''))
+      " Case:           Marker containing a tag, e.g.: «tag»
+      " Treatment:      The marker is selected, going into SELECT-mode
+      return mode_prefix.select."\<c-g>"
+    else
+      " Case:           Empty marker, i.e. not containing a tag, e.g.: «»
+      " Treatment:      The marker is deleted, going into INSERT-mode.
+      if a:position.lnum == line('.') && a:mode == 'i'
+        " Then we can move the cursor instead
+        let mark_end   = virtcol('.')
+        let offset = mark_start - a:position.curswant - 1
+        let action
+              \ = lh#map#_move_cursor_on_the_current_line(offset)
+              \ . repeat("\<del>", mark_end-mark_start+1)
+
+        " let g:debug = {'act':action, 'pos':a:position, 'mark_end':mark_end, 'mark_start':mark_start, 'offset':offset}
+        call winrestview(a:position)
+        return action
+      endif
+      return mode_prefix.select.'"_c'
+    endif
+  else " Echo! {{{4
+    " Case:             g:marker_prefers_select == 0
+    " Treatment:        Echo the tag within the marker
+    return mode_prefix.select."v:echo lh#visual#selection()\<cr>gv\"_c"
+  endif
+endfunction
+
+function! lh#marker#_move_within_marker()     abort " {{{2
+  " Purpose: move the cursor within the marker just inserted.
+  " Here, b:marker_close exists
+  return "\<esc>" . strlen(lh#encoding#iconv(lh#marker#close(),&enc, 'latin1')) . 'ha'
+endfunction
+
+function! lh#marker#_toggle_marker_in_visual()     abort " {{{2
+  " Purpose: Toggle the marker characters around a visual zone.
+  " 1- Check wheither we areselecting a marker
+  if line("'<") == line("'>") " I suppose markers don't spread over several lines
+    " Extract the selected text
+    let a_save = @a
+    normal! gv"ay
+    let a = @a
+    let @a = a_save
+
+    " Check whether the selected text is strictly a marker (and only one)
+    if (a =~ '^'.lh#marker#txt('.\{-}').'$')
+          \ && (a !~ '\%(.*'.lh#marker#close().'\)\{2}')
+      " 2- If so, strip the marker characters
+      let a = substitute(a, lh#marker#txt('\(.\{-}\)'), '\1', '')
+      let unnamed_save=@"
+      exe "normal! gvs".a."\<esc>"
+      " escape(a, '\') must not be used.
+      " exe "normal! gvs".a."\<esc>v".(strlen(a)-1)."ho\<c-g>"
+      let @"=unnamed_save
+      return 'a'
+    endif
+  endif
+
+  " 3- Else insert the pair of marker characters around the visual selection
+  call lh#map#insert_around_visual(lh#marker#open(),lh#marker#close(),0,0)
+  return '`>'.lh#encoding#strlen(lh#marker#txt()).'l'
 endfunction
 
 " }}}1

@@ -4,12 +4,14 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.2
+" Version:      3.6.0
 "
 "       Stephen Riehm's braketing macros for vim
 "       Customizations by Luc Hermitte.
 " ======================================================================
 " History:      {{{1
+"       05th Jan 2021: by LH
+"               * Move functions into autoload plugin
 "       12th Sep 2018:  by LH
 "               * Provide default mappings for terminal mode
 "       24th May 2018:  by LH
@@ -175,7 +177,7 @@ set cpoptions-=c
 if exists("g:loaded_bracketing_base") && !exists('g:force_reload_bracketing_base')
   finish
 endif
-let g:loaded_bracketing_base = 351
+let g:loaded_bracketing_base = 360
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -200,24 +202,24 @@ if get(g:, 'marker_define_jump_mappings', 1)
 endif
 
 inoremap <silent> <Plug>MarkersInsertMark <c-r>=lh#marker#txt()<cr>
-imap     <silent> <Plug>MarkersMark       <Plug>MarkersInsertMark<C-R>=LHMoveWithinMarker()<cr>
-vnoremap <silent> <Plug>MarkersMark       <C-\><C-N>@=LHToggleMarkerInVisual()<cr>
+imap     <silent> <Plug>MarkersMark       <Plug>MarkersInsertMark<C-R>=lh#marker#_move_within_marker()<cr>
+vnoremap <silent> <Plug>MarkersMark       <C-\><C-N>@=lh#marker#_toggle_marker_in_visual()<cr>
 nmap     <silent> <Plug>MarkersMark       viw<Plug>MarkersMark
 
 " <C-\><C-N> is like '<ESC>', but without any screen flash. Here, we unselect
 " the current selection and go into normal mode.
-vnoremap <silent> <Plug>MarkersJumpF <C-\><C-N>@=Marker_Jump({'direction':1, 'mode':'v'})<cr>
-inoremap <silent> <Plug>MarkersJumpF <C-R>=Marker_Jump({'direction':1, 'mode':'i'})<cr>
-nnoremap <silent> <Plug>MarkersJumpF @=Marker_Jump({'direction':1, 'mode':'n'})<cr>
-vnoremap <silent> <Plug>MarkersJumpB <C-\><C-N>`<@=Marker_Jump({'direction':0, 'mode':'v'})<cr>
-nnoremap <silent> <Plug>MarkersJumpB @=Marker_Jump({'direction':0, 'mode':'n'})<cr>
-inoremap <silent> <Plug>MarkersJumpB <C-R>=Marker_Jump({'direction':0, 'mode':'i'})<cr>
+vnoremap <silent> <Plug>MarkersJumpF <C-\><C-N>@=lh#marker#_jump({'direction':1, 'mode':'v'})<cr>
+inoremap <silent> <Plug>MarkersJumpF <C-R>=lh#marker#_jump({'direction':1, 'mode':'i'})<cr>
+nnoremap <silent> <Plug>MarkersJumpF @=lh#marker#_jump({'direction':1, 'mode':'n'})<cr>
+vnoremap <silent> <Plug>MarkersJumpB <C-\><C-N>`<@=lh#marker#_jump({'direction':0, 'mode':'v'})<cr>
+nnoremap <silent> <Plug>MarkersJumpB @=lh#marker#_jump({'direction':0, 'mode':'n'})<cr>
+inoremap <silent> <Plug>MarkersJumpB <C-R>=lh#marker#_jump({'direction':0, 'mode':'i'})<cr>
 
-vnoremap <silent> <Plug>MarkersJumpAndDelF <C-\><C-N>@=Marker_Jump({'direction':1, 'mode':'v', 'delete':1})<cr>
-nnoremap <silent> <Plug>MarkersJumpAndDelF @=Marker_Jump({'direction':1, 'mode':'n', 'delete':1})<cr>
+vnoremap <silent> <Plug>MarkersJumpAndDelF <C-\><C-N>@=lh#marker#_jump({'direction':1, 'mode':'v', 'delete':1})<cr>
+nnoremap <silent> <Plug>MarkersJumpAndDelF @=lh#marker#_jump({'direction':1, 'mode':'n', 'delete':1})<cr>
 imap     <silent> <Plug>MarkersJumpAndDelF <ESC><Plug>MarkersJumpFAndDel
-vnoremap <silent> <Plug>MarkersJumpAndDelB <C-\><C-N>@=Marker_Jump({'direction':0, 'mode':'v', 'delete':1})<cr>
-nnoremap <silent> <Plug>MarkersJumpAndDelB @=Marker_Jump({'direction':0, 'mode':'n', 'delete':1})<cr>
+vnoremap <silent> <Plug>MarkersJumpAndDelB <C-\><C-N>@=lh#marker#_jump({'direction':0, 'mode':'v', 'delete':1})<cr>
+nnoremap <silent> <Plug>MarkersJumpAndDelB @=lh#marker#_jump({'direction':0, 'mode':'n', 'delete':1})<cr>
 imap     <silent> <Plug>MarkersJumpAndDelB <ESC><Plug>MarkersJumpFAndDel
 
 nnoremap <silent> <Plug>MarkersCloseAllAndJumpToLast a<c-r>=lh#brackets#close_all_and_jump_to_last_on_line(lh#brackets#closing_chars(), {})<cr>
@@ -239,29 +241,9 @@ command! -nargs=+ SetMarker :call lh#marker#_set(<f-args>, &enc)<bar>:call <sid>
 
 :command! -nargs=0 -range MP exe ":normal <Plug>MarkersJumpB"
 :command! -nargs=0 -range MN exe ":normal <Plug>MarkersJumpF"
-:command! -nargs=* -range MI :call s:MarkerInsert(<q-args>)
+:command! -nargs=* -range MI call lh#marker#_insert(<q-args>)
 " :command! -nargs=0 MN <Plug>MarkersJumpF
 " :command! -nargs=0 MI <Plug>MarkersMark
-
-" This test function is incapable of detecting the current mode.
-" There is no way to know when we are in insert mode.
-" There is no way to know if we are in visual mode or if we are in normal mode
-" and the cursor is on the start of the previous visual region.
-function! s:MarkerInsert(text) range
-  let mode =  confirm("'< = (".line("'<").','.virtcol("'<").
-        \ ")\n'> =(".line("'>").','.virtcol("'>").
-        \ ")\n.  =(".line(".").','.virtcol("."). ")\n\n Mode ?",
-        \ "&Visual\n&Normal\n&Insert", 1)
-  if mode == 1
-    exe "normal gv\<Plug>MarkersMark"
-  elseif mode == 2
-    exe "normal viw\<Plug>MarkersMark"
-  elseif mode == 3
-    "<c-o>:MI titi toto<cr>
-    let text = lh#marker#txt(a:text)
-    exe "normal! i".text."\<esc>l"
-  endif
-endfunction
 
 " }}}1
 
@@ -276,123 +258,9 @@ endfunction
 " * @" isn't messed thanks to Srinath Avadhanula (/Benji Fisher ?)
 "
 function! Marker_Jump(param) " {{{2
-  " ¿ forward([1]) or backward(0) ?
-  let direction = get(a:param, 'direction') ? '' : 'b'
-  let delete    = get(a:param, 'delete', 0)
-  let mode      = get(a:param, 'mode')
-
-  " little optimization
-  let mo = lh#marker#open()        | let emo = escape(mo, '\')
-  let mc = lh#marker#close()       | let emc = escape(mc, '\')
-
-  " Save cursor and current view
-  let position = winsaveview()
-
-  " if within a marker, and going backward, {{{3
-  if (direction == 'b') && !s:Option('marker_select_current', 0)
-    " echomsg 'B, !C'
-    " then: go to the start of the marker.
-    " Principle: {{{
-    " 1- search backward the pair {open, close}
-    "    In order to find the current pair correctly, we must consider the
-    "    beginning of the match (\zs) to be just before the last character of
-    "    the second pair.
-    " 2- Then, in order to be sure we did jump to a match of the open marker,
-    "    we search forward for its closing counter-part.
-    "    Test: with open='«', close = 'ééé', and the text:{{{
-    "       blah «»
-    "       «1ééé  «2ééé
-    "       «3ééé foo
-    "       «4ééé
-    "    with the cursor on any character. }}}
-    "    Without this second test, the cursor would have been moved to the end
-    "    of "blah «" which is not the beginning of a marker.
-    " }}}
-    if searchpair('\V'.emo, '', '\V'.substitute(emc, '.$', '\\zs\0', ''), 'b')
-      echo '1-'.string(getpos('.'))
-      if ! searchpair('\V'.emo, '', '\V'.emc, 'n')
-        echo '2-'.string(getpos('.'))
-        " restore cursor position as we are not within a marker.
-        call winrestview(position)
-      endif
-    endif
-  endif
-  " if within a marker, and going forward, {{{3
-  if (direction == '') && s:Option('marker_select_current_fwd', 1)
-    " This option must be reserved to
-    " echomsg 'F, C'
-    " then: go to the start of the marker.
-    if searchpair('\V'.emo, '', '\V'.emc, 'w')
-      " echomsg '1-'.string(getpos('.'))
-      if ! searchpair('\V'.emo, '', '\V'.emc, 'b')
-        " echomsg '2-'.string(getpos('.'))
-        " restore cursor position as we are not within a marker.
-        call winrestview(position)
-        " echomsg position
-      else
-        " echomsg "premature found"
-        return s:DoSelect(emo, emc, delete, position, mode)
-      endif
-    endif
-  endif
-  " }}}3
-  " "&ws?'w':'W'" is implicit with search()
-  if !search('\V'.emo.'\.\{-}'.emc, direction) " {{{3
-    " Case:             No more marker
-    " Treatment:        None
-    return ""
-  else " found! {{{3
-    return s:DoSelect(emo, emc, delete, position, mode)
-  endif
+  return lh#marker#_jump(a:param)
 endfunction " }}}2
 
-
-function! s:DoSelect(emo, emc, delete, position, mode)
-  " In insert mode, now the mapping is using <c-r>=, we need to move the cursor
-  " one character right
-  let mode_prefix = a:mode == 'i' ? "\<c-\>\<c-n>l" : ''
-
-  silent! foldopen!
-  if s:Option('marker_center', 1)
-    exe "normal! zz"
-  endif
-  let mark_start = virtcol('.')
-  let select = 'v'.mark_start.'|o'
-  if &selection == 'exclusive' | let select .= 'l' | endif
-  let c = col('.')
-  " search for the last character of the closing string.
-  call search('\V'.substitute(a:emc, '.$', '\\zs\0', ''))
-  " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
-  if s:Select_or_Echo() " select! {{{4
-    if !a:delete &&
-          \ (s:Select_Empty_Mark() ||
-          \ (matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''))
-      " Case:           Marker containing a tag, e.g.: «tag»
-      " Treatment:      The marker is selected, going into SELECT-mode
-      return mode_prefix.select."\<c-g>"
-    else
-      " Case:           Empty marker, i.e. not containing a tag, e.g.: «»
-      " Treatment:      The marker is deleted, going into INSERT-mode.
-      if a:position.lnum == line('.') && a:mode == 'i'
-        " Then we can move the cursor instead
-        let mark_end   = virtcol('.')
-        let offset = mark_start - a:position.curswant - 1
-        let action
-              \ = lh#map#_move_cursor_on_the_current_line(offset)
-              \ . repeat("\<del>", mark_end-mark_start+1)
-
-        " let g:debug = {'act':action, 'pos':a:position, 'mark_end':mark_end, 'mark_start':mark_start, 'offset':offset}
-        call winrestview(a:position)
-        return action
-      endif
-      return mode_prefix.select.'"_c'
-    endif
-  else " Echo! {{{4
-    " Case:             g:marker_prefers_select == 0
-    " Treatment:        Echo the tag within the marker
-    return mode_prefix.select."v:echo lh#visual#selection()\<cr>gv\"_c"
-  endif
-endfunction
 
 " }}}1
 " ------------------------------------------------------------------------
@@ -418,55 +286,20 @@ function! Marker_Close()           " {{{3
 endfunction
 
 function! Marker_Txt(...)          " {{{3
-  return Marker_Open() . ((a:0>0) ? a:1 : '') . Marker_Close()
+  return call('lh#marker#txt', a:000)
 endfunction
 
-function! LHMoveWithinMarker()     " {{{3
-  " function! s:MoveWithinMarker()
-  " Purpose: move the cursor within the marker just inserted.
-  " Here, b:marker_close exists
-  return "\<esc>" . strlen(lh#encoding#iconv(lh#marker#close(),&enc, 'latin1')) . 'ha'
+function! LHMoveWithinMarker()     abort " {{{3
+  call lh#notify#deprecated('LHMoveWithinMarker', 'lh#marker#_move_within_marker')
+  return lh#marker#_move_within_marker()
 endfunction
 
 function! LHToggleMarkerInVisual() " {{{3
-  " function! s:ToggleMarkerInVisual()
-  " Purpose: Toggle the marker characters around a visual zone.
-  " 1- Check wheither we areselecting a marker
-  if line("'<") == line("'>") " I suppose markers don't spread over several lines
-    " Extract the selected text
-    let a_save = @a
-    normal! gv"ay
-    let a = @a
-    let @a = a_save
-
-    " Check whether the selected text is strictly a marker (and only one)
-    if (a =~ '^'.lh#marker#txt('.\{-}').'$')
-          \ && (a !~ '\%(.*'.lh#marker#close().'\)\{2}')
-      " 2- If so, strip the marker characters
-      let a = substitute(a, lh#marker#txt('\(.\{-}\)'), '\1', '')
-      let unnamed_save=@"
-      exe "normal! gvs".a."\<esc>"
-      " escape(a, '\') must not be used.
-      " exe "normal! gvs".a."\<esc>v".(strlen(a)-1)."ho\<c-g>"
-      let @"=unnamed_save
-      return 'a'
-    endif
-  endif
-
-  " 3- Else insert the pair of marker characters around the visual selection
-  call InsertAroundVisual(lh#marker#open(),lh#marker#close(),0,0)
-  return '`>'.lh#encoding#strlen(lh#marker#txt()).'l'
+  call lh#notify#deprecated('LHToggleMarkerInVisual', 'lh#marker#_toggle_marker_in_visual')
+  return lh#marker#_toggle_marker_in_visual()
 endfunction
 
 " Other options:                    {{{2
-
-function! s:Select_or_Echo()    "                  {{{3
-  return exists("g:marker_prefers_select") ? g:marker_prefers_select : 1
-endfunction
-
-function! s:Select_Empty_Mark() " or delete them ? {{{3
-  return exists("g:marker_select_empty_marks") ? g:marker_select_empty_marks : 1
-endfunction
 
 function! s:Highlight()
   let default = (&bg == 'dark')
