@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
-" Version:      3.5.0
-let s:version = 350
+" Version:      3.6.0
+let s:version = 360
 " Purpose:      {{{1
 "               This file defines a command (:Brackets) that simplifies
 "               the definition of mappings that insert pairs of caracters when
@@ -21,6 +21,8 @@ let s:version = 350
 "               BTW, they can be activated or desactivated by pressing <F9>
 "
 " History:      {{{1
+" Version 3.6.0:
+"               * Move functions to autoload plugin
 " Version 3.5.0:
 "               * Default :Brackets definitions can be disabled with
 "                 g:cb_disable_default/g:cb_enable_default
@@ -259,12 +261,11 @@ endif
 
 "# Bindings for the Bracket Macros {{{2
 if !exists('g:cb_want_mode ') | let g:cb_want_mode = 1 | endif
-if g:cb_want_mode " {{{
+if g:cb_want_mode " {{{3
   if !hasmapto('BracketsManipMode')
-    nnoremap <silent> <M-b>     :call BracketsManipMode("\<M-b>")<cr>
+    nnoremap <silent> <M-b>     :<c-u>call lh#brackets#_manip_mode("\<M-b>")<cr>
   endif
-  " }}}
-else " {{{
+else " {{{3
   if !hasmapto('<Plug>DeleteBrackets')
     nmap <M-b>x         <Plug>DeleteBrackets
     nmap <M-b><Del>     <Plug>DeleteBrackets
@@ -289,144 +290,17 @@ else " {{{
   if !hasmapto('<Plug>ToggleBackslash')
     nmap <M-b>\         <Plug>ToggleBackslash
   endif
-endif " }}}
+endif " }}}3
 
-noremap <silent> <Plug>DeleteBrackets         :call <SID>DeleteBrackets()<CR>
+noremap <silent> <Plug>DeleteBrackets         :call lh#brackets#_delete_brackets()<CR>
 noremap <silent> <Plug>ChangeToRoundBrackets  :call <SID>ChangeRound()<CR>
 noremap <silent> <Plug>ChangeToSquareBrackets :call <SID>ChangeSquare()<CR>
 noremap <silent> <Plug>ChangeToCurlyBrackets  :call <SID>ChangeCurly()<CR>
 noremap <silent> <Plug>ChangeToAngleBrackets  :call <SID>ChangeAngle()<CR>
-nnoremap <silent> <Plug>ToggleBackslash       :call <SID>ToggleBackslash()<CR>
-
-" Bindings for the Bracket Macros
+nnoremap <silent> <Plug>ToggleBackslash       :<c-u>call <SID>ToggleBackslash()<CR>
 
 "inoremap <C-Del> :call <SID>DeleteBrackets()<CR>
 "inoremap <C-BS> <Left><C-O>:call <SID>DeleteBrackets()<CR>
-
-"# Then the procedures. {{{2
-function! s:DeleteBrackets() " {{{
-  let s:b = getline(line("."))[col(".") - 2]
-  let s:c = getline(line("."))[col(".") - 1]
-  if s:b == '\' && (s:c == '{' || s:c == '}')
-    normal! X%X%
-  endif
-  if s:c == '{' || s:c == '[' || s:c == '('
-    normal! %x``x
-  elseif s:c == '}' || s:c == ']' || s:c == ')'
-    normal! %%x``x``
-  endif
-endfunction " }}}
-
-function! s:ChangeTo(open_close) abort " {{{
-  let line = getline(line("."))
-  let off = col(".") - 1
-  let c = line[off]
-  " matchpairs only accept different pair characters
-  if c =~ '[''/"`]'
-    " let's suppose everything is on the same line
-    " let's ignore vim comments
-    " let's ignore embedded stuff like "'"
-
-    " need to detect to which pair the character belongs to
-    let m = len(lh#string#matches(line[:off], c))
-    let lline = split(line, '\zs')
-    if m % 2 == 0
-      let c2 = matchend(line[:off-1], '.*'.c)
-      if c2 >= 0
-        let lline[c2-1] = a:open_close[0]
-        let lline[off]  = a:open_close[1]
-        let line = join(lline, '')
-        call setline(line('.'), line)
-      endif
-    else
-      let c2 = stridx(line, c, off+1 )
-      if c2 >= 0
-        let lline[c2] = a:open_close[1]
-        let lline[off]  = a:open_close[0]
-        let line = join(lline, '')
-        call setline(line('.'), line)
-      endif
-    endif
-
-    return
-  endif
-  let cleanup = lh#on#exit()
-        \.restore('&matchpairs')
-  try
-    set matchpairs+=<:>,(:),{:},[:]
-    if has_key(s:k_pairs, c) | exe 'normal! %r'.(a:open_close[1]).'``r'.(a:open_close[0])
-    elseif c =~ '[)>}\]]'    | exe 'normal! %%r'.(a:open_close[1]).'``r'.(a:open_close[0])
-    endif
-  finally
-    call cleanup.finalize()
-  endtry
-endfunction " }}}
-
-
-function! s:ToggleBackslash() " {{{
-  let s:b = getline(line("."))[col(".") - 2]
-  let s:c = getline(line("."))[col(".") - 1]
-  if s:b == '\'
-    if s:c =~ '(\|{\|['     | normal! %X``X
-    elseif s:c =~ ')\|}\|]' | normal! %%X``X%
-    endif
-  else
-    if s:c =~ '(\|{\|['     | exe "normal! %i\\\<esc>``i\\\<esc>"
-    elseif s:c =~ ')\|}\|]' | exe "normal! %%i\\\<esc>``i\\\<esc>%"
-    endif
-  endif
-endfunction " }}}
-
-" TODO: get the current pairs from the one registered in lh#brackets
-let s:k_pairs = {
-      \ '(' : [ '(', ')' ],
-      \ '[' : [ '[', ']' ],
-      \ '{' : [ '{', '}' ],
-      \ '<' : [ '<', '>' ],
-      \ '"' : [ '"', '"' ],
-      \ '`' : [ '`', '`' ],
-      \ '/' : [ '/', '/' ],
-      \ "'" : [ "'", "'" ]
-      \ }
-function! BracketsManipMode(starting_key) " {{{
-  redraw! " clear the msg line
-  echohl StatusLineNC
-  echo "\r-- brackets manipulation mode (x ( [ { < ' \" ` \\ <F1> q)"
-  echohl None
-  let key = getchar()
-  let bracketsManip=nr2char(key)
-  if (-1 != stridx("x".join(keys(s:k_pairs), '')."\\q",bracketsManip)) ||
-        \ (key =~ "\\(\<F1>\\|\<Del>\\)")
-    if     bracketsManip == "x"      || key == "\<Del>"
-      call s:DeleteBrackets()    | redraw! | return ''
-    elseif bracketsManip == "\\" | call s:ToggleBackslash()
-    elseif has_key(s:k_pairs, bracketsManip)
-      call s:ChangeTo(s:k_pairs[bracketsManip])
-    elseif key == "\<F1>"
-      redraw! " clear the msg line
-      echo "\r *x* -- delete the current brackets pair\n"
-      echo " *(* -- change the current brackets pair to round brackets ()\n"
-      echo " *[* -- change the current brackets pair to square brackets []\n"
-      echo " *{* -- change the current brackets pair to curly brackets {}\n"
-      echo " *<* -- change the current brackets pair to angle brackets <>\n"
-      echo " *'* -- change the current brackets pair to single quotes ''\n"
-      echo " *\"* -- change the current brackets pair to double quotes \"\"\n"
-      echo " *`* -- change the current brackets pair to back quotes ''\n"
-      echo " *\\* -- toggle a backslash before the current brackets pair\n"
-      echo " *q* -- quit the mode\n"
-      continue
-    elseif bracketsManip == "q"
-      redraw! " clear the msg line
-      return ''
-      " else
-    endif
-    redraw! " clear the msg line
-  else
-    redraw! " clear the msg line
-    return a:starting_key.bracketsManip
-  endif
-endfunction " }}}
-" Then the procedures.
 
 " Matching Brackets Macros, From AuCTeX.vim (due to Saul Lubkin).   }}}1
 " ===========================================================================

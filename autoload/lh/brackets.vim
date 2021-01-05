@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  05th Jan 2021
+" Last Update:  06th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -30,6 +30,7 @@
 "               * Fix g:cb_disable_default/g:cb_enable_default
 "               * Support enriching non-<expr> imaps
 "               * Moving `s:DefineMap()` function to lh-vim-lib
+"               * Move bracket manipulation functions to autoload plugin
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -870,6 +871,136 @@ function! lh#brackets#_split_line(line, c, tw) abort
   return [head, before, after]
 endfunction
 
+"------------------------------------------------------------------------
+" ## Brackets changing functions {{{1
+" TODO: get the current pairs from the one registered in lh#brackets
+let s:k_pairs = {
+      \ '(' : [ '(', ')' ],
+      \ '[' : [ '[', ']' ],
+      \ '{' : [ '{', '}' ],
+      \ '<' : [ '<', '>' ],
+      \ '"' : [ '"', '"' ],
+      \ '`' : [ '`', '`' ],
+      \ '/' : [ '/', '/' ],
+      \ "'" : [ "'", "'" ]
+      \ }
+
+" Function: lh#brackets#_delete_brackets() {{{2
+function! lh#brackets#_delete_brackets() abort
+  let b = getline(line("."))[col(".") - 2]
+  let c = getline(line("."))[col(".") - 1]
+  if b == '\' && (c == '{' || c == '}')
+    normal! X%X%
+  endif
+  if c == '{' || c == '[' || c == '('
+    normal! %x``x
+  elseif c == '}' || c == ']' || c == ')'
+    normal! %%x``x``
+  endif
+endfunction
+
+" Function: lh#brackets#_toggle_backslash() {{{2
+function! lh#brackets#_toggle_backslash() abort
+  let b = getline(line("."))[col(".") - 2]
+  let c = getline(line("."))[col(".") - 1]
+  if b == '\'
+    if     c =~ '(\|{\|[' | normal! %X``X
+    elseif c =~ ')\|}\|]' | normal! %%X``X%
+    endif
+  else
+    if     c =~ '(\|{\|[' | exe "normal! %i\\\<esc>``i\\\<esc>"
+    elseif c =~ ')\|}\|]' | exe "normal! %%i\\\<esc>``i\\\<esc>%"
+    endif
+  endif
+endfunction
+
+" Function: lh#brackets#_change_to(open_close) {{{2
+function! lh#brackets#_change_to(open_close) abort
+  let line = getline(line("."))
+  let off = col(".") - 1
+  let c = line[off]
+  " matchpairs only accept different pair characters
+  if c =~ '[''/"`]'
+    " let's suppose everything is on the same line
+    " let's ignore vim comments
+    " let's ignore embedded stuff like "'"
+
+    " need to detect to which pair the character belongs to
+    let m = len(lh#string#matches(line[:off], c))
+    let lline = split(line, '\zs')
+    if m % 2 == 0
+      let c2 = matchend(line[:off-1], '.*'.c)
+      if c2 >= 0
+        let lline[c2-1] = a:open_close[0]
+        let lline[off]  = a:open_close[1]
+        let line = join(lline, '')
+        call setline(line('.'), line)
+      endif
+    else
+      let c2 = stridx(line, c, off+1 )
+      if c2 >= 0
+        let lline[c2] = a:open_close[1]
+        let lline[off]  = a:open_close[0]
+        let line = join(lline, '')
+        call setline(line('.'), line)
+      endif
+    endif
+
+    return
+  endif
+  let cleanup = lh#on#exit()
+        \.restore('&matchpairs')
+  try
+    set matchpairs+=<:>,(:),{:},[:]
+    if has_key(s:k_pairs, c) | exe 'normal! %r'.(a:open_close[1]).'``r'.(a:open_close[0])
+    elseif c =~ '[)>}\]]'    | exe 'normal! %%r'.(a:open_close[1]).'``r'.(a:open_close[0])
+    endif
+  finally
+    call cleanup.finalize()
+  endtry
+endfunction
+
+" Function: lh#brackets#_manip_mode(starting_key) {{{3
+function! lh#brackets#_manip_mode(starting_key) abort
+  redraw! " clear the msg line
+  echohl StatusLineNC
+  echo "\r-- brackets manipulation mode (x ( [ { < ' \" ` \\ <F1> q)"
+  echohl None
+  let key = getchar()
+  let bracketsManip=nr2char(key)
+  if (-1 != stridx("x".join(keys(s:k_pairs), '')."\\q",bracketsManip)) ||
+        \ (key =~ "\\(\<F1>\\|\<Del>\\)")
+    if     bracketsManip == "x"      || key == "\<Del>"
+      call lh#brackets#_delete_brackets() | redraw! | return ''
+    elseif bracketsManip == "\\"          | call lh#brackets#_toggle_backslash()
+    elseif has_key(s:k_pairs, bracketsManip)
+      call lh#brackets#_change_to(s:k_pairs[bracketsManip])
+    elseif key == "\<F1>"
+      redraw! " clear the msg line
+      echo "\r *x* -- delete the current brackets pair\n"
+      echo " *(* -- change the current brackets pair to round brackets ()\n"
+      echo " *[* -- change the current brackets pair to square brackets []\n"
+      echo " *{* -- change the current brackets pair to curly brackets {}\n"
+      echo " *<* -- change the current brackets pair to angle brackets <>\n"
+      echo " *'* -- change the current brackets pair to single quotes ''\n"
+      echo " *\"* -- change the current brackets pair to double quotes \"\"\n"
+      echo " *`* -- change the current brackets pair to back quotes ''\n"
+      echo " *\\* -- toggle a backslash before the current brackets pair\n"
+      echo " *q* -- quit the mode\n"
+      continue
+    elseif bracketsManip == "q"
+      redraw! " clear the msg line
+      return ''
+      " else
+    endif
+    redraw! " clear the msg line
+  else
+    redraw! " clear the msg line
+    return a:starting_key.bracketsManip
+  endif
+endfunction
+
+"------------------------------------------------------------------------
 " }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
