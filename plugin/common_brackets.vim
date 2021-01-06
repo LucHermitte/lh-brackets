@@ -292,11 +292,11 @@ else " {{{3
   endif
 endif " }}}3
 
-noremap <silent> <Plug>DeleteBrackets         :call lh#brackets#_delete_brackets()<CR>
-noremap <silent> <Plug>ChangeToRoundBrackets  :call <SID>ChangeRound()<CR>
-noremap <silent> <Plug>ChangeToSquareBrackets :call <SID>ChangeSquare()<CR>
-noremap <silent> <Plug>ChangeToCurlyBrackets  :call <SID>ChangeCurly()<CR>
-noremap <silent> <Plug>ChangeToAngleBrackets  :call <SID>ChangeAngle()<CR>
+nnoremap <silent> <Plug>DeleteBrackets         :<c-u>call lh#brackets#_delete_brackets()<CR>
+nnoremap <silent> <Plug>ChangeToRoundBrackets  :<c-u>call <SID>ChangeRound()<CR>
+nnoremap <silent> <Plug>ChangeToSquareBrackets :<c-u>call <SID>ChangeSquare()<CR>
+nnoremap <silent> <Plug>ChangeToCurlyBrackets  :<c-u>call <SID>ChangeCurly()<CR>
+nnoremap <silent> <Plug>ChangeToAngleBrackets  :<c-u>call <SID>ChangeAngle()<CR>
 nnoremap <silent> <Plug>ToggleBackslash       :<c-u>call <SID>ToggleBackslash()<CR>
 
 "inoremap <C-Del> :call <SID>DeleteBrackets()<CR>
