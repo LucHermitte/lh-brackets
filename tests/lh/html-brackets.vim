@@ -7,7 +7,7 @@
 " Version:      3.6.0.
 let s:k_version = '360'
 " Created:      17th May 2020
-" Last Update:  03rd Jun 2020
+" Last Update:  06th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "       Tests of vim specific bracket mappings
@@ -61,6 +61,7 @@ function! s:Test_lt_gt_with_usemark()
   normal o<<
   normal o<>
   normal o<toto
+  " normal o<toto>ti
   exe "normal o<toto\<esc>a>ti"
 
   AssertBufferMatches trim << EOF

@@ -35,7 +35,7 @@ Vimrunner::RSpec.configure do |config|
 
     # pp vim_flavor_path
     # lh-vim-lib
-    vim_lib_path      = File.expand_path('../lh-vim-lib', __FILE__)
+    vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
     vim.prepend_runtimepath(vim_lib_path)
     vim.command('runtime plugin/let.vim') # LetIfUndef
 
