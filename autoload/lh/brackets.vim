@@ -31,6 +31,7 @@
 "               * Support enriching non-<expr> imaps
 "               * Moving `s:DefineMap()` function to lh-vim-lib
 "               * Move bracket manipulation functions to autoload plugin
+"               * Use registered brackets in bracket manipulation functions
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -222,6 +223,13 @@ function! s:GetPairs(isLocal) abort
     let s:pairs[bid] = []
   endif
   let crt_pairs = s:pairs[bid]
+  return crt_pairs
+endfunction
+
+" Function: s:GetAllPairs() {{{3
+function! s:GetAllPairs() abort
+  let crt_pairs = copy(s:GetPairs(0))
+  call extend(crt_pairs, s:GetPairs(1))
   return crt_pairs
 endfunction
 
@@ -467,8 +475,7 @@ endfunction
 "------------------------------------------------------------------------
 " Function: s:outer_blocks()                                                                                 {{{2
 function! s:outer_blocks() abort
-  let crt_pairs = copy(s:GetPairs(0))
-  call extend(crt_pairs, s:GetPairs(1))
+  let crt_pairs = s:GetAllPairs()
   let matches = {}
   for p in crt_pairs
     if p[0] != p[1] " searchpos doesn't work in that case
@@ -806,8 +813,7 @@ endfunction
 "------------------------------------------------------------------------
 " Function: lh#brackets#_match_any_bracket_pair()                                                            {{{2
 function! lh#brackets#_match_any_bracket_pair() abort
-  let crt_pairs = copy(s:GetPairs(0))
-  call extend(crt_pairs, s:GetPairs(1))
+  let crt_pairs = s:GetAllPairs()
   if empty(crt_pairs)
     return 0
   endif
@@ -819,8 +825,7 @@ endfunction
 "------------------------------------------------------------------------
 " Function: lh#brackets#_delete_empty_bracket_pair()                                                         {{{2
 function! lh#brackets#_delete_empty_bracket_pair() abort
-  let crt_pairs = copy(s:GetPairs(0))
-  call extend(crt_pairs, s:GetPairs(1))
+  let crt_pairs = s:GetAllPairs()
   let regex = '\V\('.join(map(crt_pairs, 'join(v:val,"\\%'.col('.').'c")'), '\|').'\)'
         \ . '\('.lh#marker#txt('\.\{-}').'\)\='
   let line = getline('.')
@@ -873,30 +878,59 @@ endfunction
 
 "------------------------------------------------------------------------
 " ## Brackets changing functions {{{1
-" TODO: get the current pairs from the one registered in lh#brackets
-let s:k_pairs = {
-      \ '(' : [ '(', ')' ],
-      \ '[' : [ '[', ']' ],
-      \ '{' : [ '{', '}' ],
-      \ '<' : [ '<', '>' ],
-      \ '"' : [ '"', '"' ],
-      \ '`' : [ '`', '`' ],
-      \ '/' : [ '/', '/' ],
-      \ "'" : [ "'", "'" ]
-      \ }
 
 " Function: lh#brackets#_delete_brackets() {{{2
 function! lh#brackets#_delete_brackets() abort
-  let b = getline(line("."))[col(".") - 2]
-  let c = getline(line("."))[col(".") - 1]
+  let line = getline(line("."))
+  let off = col(".") - 1
+  let b = line[off - 1]
+  let c = line[off]
   if b == '\' && (c == '{' || c == '}')
     normal! X%X%
   endif
-  if c == '{' || c == '[' || c == '('
-    normal! %x``x
-  elseif c == '}' || c == ']' || c == ')'
-    normal! %%x``x``
+  let crt_pairs = filter(s:GetAllPairs(), 'strlen(v:val[0]) == 1')
+  let iso_pairs = map(filter(copy(crt_pairs), 'v:val[0] == v:val[1]'), 'v:val[0]')
+  if index(iso_pairs, c) >= 0
+    " let's suppose everything is on the same line
+    " let's ignore vim comments
+    " let's ignore embedded stuff like "'"
+
+    " need to detect to which pair the character belongs to
+    let m = len(lh#string#matches(line[:off], c))
+    let lline = split(line, '\zs')
+    if m % 2 == 0
+      let c2 = matchend(line[:off-1], '.*'.c)
+      if c2 >= 0
+        unlet lline[off]
+        unlet lline[c2-1]
+        let line = join(lline, '')
+        call setline(line('.'), line)
+      endif
+    else
+      let c2 = stridx(line, c, off+1 )
+      if c2 >= 0
+        unlet lline[c2]
+        unlet lline[off]
+        let line = join(lline, '')
+        call setline(line('.'), line)
+      endif
+    endif
+
+    return
   endif
+  let cleanup = lh#on#exit()
+        \.restore('&matchpairs')
+  try
+    call filter(crt_pairs, 'v:val[0] != v:val[1]')
+    exe 'set matchpairs='.join(map(copy(crt_pairs), 'join(v:val,":")'),',')
+    let openings = map(copy(crt_pairs), 'v:val[0]')
+    let closings = map(copy(crt_pairs), 'v:val[1]')
+    if     index(openings, c) >= 0 | normal! %x``x
+    elseif index(closings, c) >= 0 | normal! %%x``x``
+    endif
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 " Function: lh#brackets#_toggle_backslash() {{{2
@@ -916,11 +950,13 @@ endfunction
 
 " Function: lh#brackets#_change_to(open_close) {{{2
 function! lh#brackets#_change_to(open_close) abort
+  let crt_pairs = filter(s:GetAllPairs(), 'strlen(v:val[0]) == 1')
+  let iso_pairs = map(filter(copy(crt_pairs), 'v:val[0] == v:val[1]'), 'v:val[0]')
   let line = getline(line("."))
   let off = col(".") - 1
   let c = line[off]
   " matchpairs only accept different pair characters
-  if c =~ '[''/"`]'
+  if index(iso_pairs, c) >= 0
     " let's suppose everything is on the same line
     " let's ignore vim comments
     " let's ignore embedded stuff like "'"
@@ -951,9 +987,12 @@ function! lh#brackets#_change_to(open_close) abort
   let cleanup = lh#on#exit()
         \.restore('&matchpairs')
   try
-    set matchpairs+=<:>,(:),{:},[:]
-    if has_key(s:k_pairs, c) | exe 'normal! %r'.(a:open_close[1]).'``r'.(a:open_close[0])
-    elseif c =~ '[)>}\]]'    | exe 'normal! %%r'.(a:open_close[1]).'``r'.(a:open_close[0])
+    call filter(crt_pairs, 'v:val[0] != v:val[1]')
+    exe 'set matchpairs='.join(map(copy(crt_pairs), 'join(v:val,":")'),',')
+    let openings = map(copy(crt_pairs), 'v:val[0]')
+    let closings = map(copy(crt_pairs), 'v:val[1]')
+    if     index(openings, c) >= 0 | exe 'normal! %r'.(a:open_close[1]).'``r'.(a:open_close[0])
+    elseif index(closings, c) >= 0 | exe 'normal! %%r'.(a:open_close[1]).'``r'.(a:open_close[0])
     endif
   finally
     call cleanup.finalize()
@@ -962,42 +1001,52 @@ endfunction
 
 " Function: lh#brackets#_manip_mode(starting_key) {{{3
 function! lh#brackets#_manip_mode(starting_key) abort
+  let crt_pairs    = filter(s:GetAllPairs(), 'strlen(v:val[0]) == 1')
+  let openings     = map(copy(crt_pairs), 'v:val[0]')
+  let openings_str = join(openings, '')
+  let msg          = "\r-- brackets manipulation mode (x ".join(openings, ' ')." \\ <F1> q)"
   redraw! " clear the msg line
-  echohl StatusLineNC
-  echo "\r-- brackets manipulation mode (x ( [ { < ' \" ` \\ <F1> q)"
-  echohl None
-  let key = getchar()
-  let bracketsManip=nr2char(key)
-  if (-1 != stridx("x".join(keys(s:k_pairs), '')."\\q",bracketsManip)) ||
-        \ (key =~ "\\(\<F1>\\|\<Del>\\)")
-    if     bracketsManip == "x"      || key == "\<Del>"
-      call lh#brackets#_delete_brackets() | redraw! | return ''
-    elseif bracketsManip == "\\"          | call lh#brackets#_toggle_backslash()
-    elseif has_key(s:k_pairs, bracketsManip)
-      call lh#brackets#_change_to(s:k_pairs[bracketsManip])
-    elseif key == "\<F1>"
+  while 1
+    echohl StatusLineNC
+    echo msg
+    echohl None
+    let key = getchar()
+    let bracketsManip=nr2char(key)
+    if (-1 != stridx("x".openings_str."\\q",bracketsManip)) ||
+          \ (key =~ "\\(\<F1>\\|\<Del>\\)")
+      if     bracketsManip == "x"      || key == "\<Del>"
+        call lh#brackets#_delete_brackets() | redraw! | return ''
+      elseif bracketsManip == "\\"          | call lh#brackets#_toggle_backslash()
+      elseif stridx(openings_str, bracketsManip) >= 0
+        let idx = stridx(openings_str, bracketsManip)
+        call s:Verbose('Changing to #%1: %2', idx, openings[idx])
+        call lh#brackets#_change_to(crt_pairs[idx])
+        redraw!
+        return
+      elseif key == "\<F1>"
+        redraw! " clear the msg line
+        echo "\r *x* -- delete the current brackets pair\n"
+        echo " *(* -- change the current brackets pair to round brackets ()\n"
+        echo " *[* -- change the current brackets pair to square brackets []\n"
+        echo " *{* -- change the current brackets pair to curly brackets {}\n"
+        echo " *<* -- change the current brackets pair to angle brackets <>\n"
+        echo " *'* -- change the current brackets pair to single quotes ''\n"
+        echo " *\"* -- change the current brackets pair to double quotes \"\"\n"
+        echo " *`* -- change the current brackets pair to back quotes ''\n"
+        echo " *\\* -- toggle a backslash before the current brackets pair\n"
+        echo " *q* -- quit the mode\n"
+        continue
+      elseif bracketsManip == "q"
+        redraw! " clear the msg line
+        return ''
+        " else
+      endif
       redraw! " clear the msg line
-      echo "\r *x* -- delete the current brackets pair\n"
-      echo " *(* -- change the current brackets pair to round brackets ()\n"
-      echo " *[* -- change the current brackets pair to square brackets []\n"
-      echo " *{* -- change the current brackets pair to curly brackets {}\n"
-      echo " *<* -- change the current brackets pair to angle brackets <>\n"
-      echo " *'* -- change the current brackets pair to single quotes ''\n"
-      echo " *\"* -- change the current brackets pair to double quotes \"\"\n"
-      echo " *`* -- change the current brackets pair to back quotes ''\n"
-      echo " *\\* -- toggle a backslash before the current brackets pair\n"
-      echo " *q* -- quit the mode\n"
-      continue
-    elseif bracketsManip == "q"
+    else
       redraw! " clear the msg line
-      return ''
-      " else
+      return a:starting_key.bracketsManip
     endif
-    redraw! " clear the msg line
-  else
-    redraw! " clear the msg line
-    return a:starting_key.bracketsManip
-  endif
+  endwhile
 endfunction
 
 "------------------------------------------------------------------------

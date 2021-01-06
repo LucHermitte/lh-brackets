@@ -262,7 +262,7 @@ endif
 "# Bindings for the Bracket Macros {{{2
 if !exists('g:cb_want_mode ') | let g:cb_want_mode = 1 | endif
 if g:cb_want_mode " {{{3
-  if !hasmapto('BracketsManipMode')
+  if !hasmapto('lh#brackets#_manip_mode')
     nnoremap <silent> <M-b>     :<c-u>call lh#brackets#_manip_mode("\<M-b>")<cr>
   endif
 else " {{{3
