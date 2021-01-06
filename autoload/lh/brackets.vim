@@ -621,7 +621,7 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   " - Double "string(" because those chars are correctly interpreted with
   " lh#mapping#reinterpret_escaped_char(eval()), which requires nested strings...
   call s:Verbose('Enriching imaping on %1', strtrans(a:trigger))
-  call s:Verbose('...previously %1', strtrans(execute('verbose imap <cr>')))
+  call s:Verbose('...previously %1', strtrans(join(lh#askvim#execute('verbose imap <cr>'), "\n")))
   let nore = 1
   if a:0 == 0
     let previous = maparg(a:trigger, 'i', 0, 1)
