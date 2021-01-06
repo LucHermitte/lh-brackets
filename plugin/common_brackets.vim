@@ -271,33 +271,23 @@ else " {{{3
     nmap <M-b><Del>     <Plug>DeleteBrackets
   endif
 
-  if !hasmapto('<Plug>ChangeToRoundBrackets')
-    nmap <M-b>(         <Plug>ChangeToRoundBrackets
-  endif
-
-  if !hasmapto('<Plug>ChangeToSquareBrackets')
-    nmap <M-b>[         <Plug>ChangeToSquareBrackets
-  endif
-
-  if !hasmapto('<Plug>ChangeToCurlyBrackets')
-    nmap <M-b>{         <Plug>ChangeToCurlyBrackets
-  endif
-
-  if !hasmapto('<Plug>ChangeToAngleBrackets')
-    nmap <M-b>{         <Plug>ChangeToAngleBrackets
-  endif
-
-  if !hasmapto('<Plug>ToggleBackslash')
-    nmap <M-b>\         <Plug>ToggleBackslash
-  endif
+  call lh#mapping#plug('<M-b>(', '<Plug>ChangeToRoundBrackets',  'n')
+  call lh#mapping#plug('<M-b>[', '<Plug>ChangeToSquareBrackets', 'n')
+  call lh#mapping#plug('<M-b>{', '<Plug>ChangeToCurlyBrackets',  'n')
+  call lh#mapping#plug('<M-b><', '<Plug>ChangeToAngleBrackets',  'n')
+  call lh#mapping#plug('<M-b>"', '<Plug>ChangeToDoubleQuotes',   'n')
+  call lh#mapping#plug("<M-b>'", '<Plug>ChangeToSingleQuotes',   'n')
+  call lh#mapping#plug('<M-b>\', '<Plug>ToggleBackslash',        'n')
 endif " }}}3
 
 nnoremap <silent> <Plug>DeleteBrackets         :<c-u>call lh#brackets#_delete_brackets()<CR>
-nnoremap <silent> <Plug>ChangeToRoundBrackets  :<c-u>call <SID>ChangeRound()<CR>
-nnoremap <silent> <Plug>ChangeToSquareBrackets :<c-u>call <SID>ChangeSquare()<CR>
-nnoremap <silent> <Plug>ChangeToCurlyBrackets  :<c-u>call <SID>ChangeCurly()<CR>
-nnoremap <silent> <Plug>ChangeToAngleBrackets  :<c-u>call <SID>ChangeAngle()<CR>
-nnoremap <silent> <Plug>ToggleBackslash       :<c-u>call <SID>ToggleBackslash()<CR>
+nnoremap <silent> <Plug>ChangeToRoundBrackets  :<c-u>call lh#brackets#_change_to(['(', ')'])<CR>
+nnoremap <silent> <Plug>ChangeToSquareBrackets :<c-u>call lh#brackets#_change_to(['[', ']'])<CR>
+nnoremap <silent> <Plug>ChangeToCurlyBrackets  :<c-u>call lh#brackets#_change_to(['{', '}'])<CR>
+nnoremap <silent> <Plug>ChangeToAngleBrackets  :<c-u>call lh#brackets#_change_to(['<', '>'])<CR>
+nnoremap <silent> <Plug>ChangeToDoubleQuotes   :<c-u>call lh#brackets#_change_to(['"', '"'])<CR>
+nnoremap <silent> <Plug>ChangeToSingleQuotes   :<c-u>call lh#brackets#_change_to(["'", "'"])<CR>
+nnoremap <silent> <Plug>ToggleBackslash        :<c-u>call lh#brackets#_toggle_backslash()<CR>
 
 "inoremap <C-Del> :call <SID>DeleteBrackets()<CR>
 "inoremap <C-BS> <Left><C-O>:call <SID>DeleteBrackets()<CR>
@@ -307,14 +297,14 @@ nnoremap <silent> <Plug>ToggleBackslash       :<c-u>call <SID>ToggleBackslash()<
 let &cpo = s:cpo_save
 " ===========================================================================
 " Implementation and other remarks : {{{
-" (*) Whithin the vnoremaps, `>ll at the end put the cursor at the
+" (*) Whithin the vnoremaps, `)ll at the end put the cursor at the
 "     previously last character of the selected area and slide left twice
 "     (ll) to compensate the addition of the surrounding characters.
 " (*) The <M-xxx> key-binding used in insert mode apply on the word
 "     currently under the cursor. There also exist the normal mode version
 "     of these macros.
 "     Unfortunately several of these are not accessible from the french
-"     keyboard layout -> <M-{>, <M-[>, <M-`>, etc
+"     keyboard layout -" <M-{>, <M-[>, <M-`>, etc
 " (*) nmap <buffer> " ... is a very bad idea, hence nmap ""
 " (*) !mark! and !jump! can't be called yet from MapNoContext().
 "     but <c-r>=lh#marker#txt()<cr> can.
