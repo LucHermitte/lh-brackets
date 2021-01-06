@@ -934,18 +934,27 @@ function! lh#brackets#_delete_brackets() abort
 endfunction
 
 " Function: lh#brackets#_toggle_backslash() {{{2
+" TODO: support identical characters for opening/closing
 function! lh#brackets#_toggle_backslash() abort
   let b = getline(line("."))[col(".") - 2]
   let c = getline(line("."))[col(".") - 1]
-  if b == '\'
-    if     c =~ '(\|{\|[' | normal! %X``X
-    elseif c =~ ')\|}\|]' | normal! %%X``X%
+  let cleanup = lh#on#exit()
+        \.restore('&matchpairs')
+  try
+    let crt_pairs = filter(s:GetAllPairs(), '(strlen(v:val[0]) == 1) && (v:val[0] != v:val[1])')
+    exe 'set matchpairs='.join(map(copy(crt_pairs), 'join(v:val,":")'),',')
+    if b == '\'
+      if     c =~ '[[({<$]' | normal! %X``X
+      elseif c =~ '[\])}>$]' | normal! %%X``X%
+      endif
+    else
+      if     c =~ '[[({<$]' | exe "normal! %i\\\<esc>``i\\\<esc>l"
+      elseif c =~ '[\])}>$]' | exe "normal! %%i\\\<esc>``i\\\<esc>%"
+      endif
     endif
-  else
-    if     c =~ '(\|{\|[' | exe "normal! %i\\\<esc>``i\\\<esc>"
-    elseif c =~ ')\|}\|]' | exe "normal! %%i\\\<esc>``i\\\<esc>%"
-    endif
-  endif
+  finally
+    call cleanup.finalize()
+  endtry
 endfunction
 
 " Function: lh#brackets#_change_to(open_close) {{{2
