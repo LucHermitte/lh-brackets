@@ -640,7 +640,7 @@ function! lh#brackets#enrich_imap(trigger, case, isLocal, ...) abort
   endif
   let sCase='lh#mapping#_switch('.string(default).', '.string([a:case]).')'
   call s:toggable_mappings.define_imap(a:trigger, sCase, a:isLocal, nore)
-  call s:Verbose('New i-mapping on %1 is %2', strtrans(a:trigger), strtrans(execute('verbose imap <cr>')))
+  call s:Verbose('New i-mapping on %1 is %2', strtrans(a:trigger), strtrans(join(lh#askvim#execute('verbose imap <cr>'), "\n")))
 endfunction
 
 "------------------------------------------------------------------------
