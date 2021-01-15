@@ -87,16 +87,16 @@ The main differences from the global table are:
 ### Markdown mappings
 New mappings are avaible.
 
-| in mode                 | insert                          | visual                                        | normal                    |
-|:------------------------|:--------------------------------|:----------------------------------------------|:--------------------------|
-| **keys**                | expands into ..                 | surrounds the selection with ... <sup>2</sup> | surrounds the current ... |
-| `_`                     | `_<cursor>_<++>` <sup>3</sup>   | `_<selection>_`                               | word                      |
-| `_` after a `_`         | `__<cursor>__<++>`              | n/a                                           | n/a                       |
-| `*`                     | `*<cursor>*<++>` <sup>3,4</sup> | `*<selection>*`                               | word                      |
-| `*` after a `*`         | `**<cursor>**<++>`              | n/a                                           | n/a                       |
-| `` ` ``                 | `` `<cursor>`<++>``             | `` `<selection>` ``                           | word                      |
-| `~`                     | `<del><cursor></del>«»`         | <sup>1</sup>                                  | <sup>1</sup>              |
-| `<localleader>~`        |                                 | `<del><cursor></del>`                         | word                      |
+| in mode                 | insert                           | visual                                        | normal                    |
+|:------------------------|:---------------------------------|:----------------------------------------------|:--------------------------|
+| **keys**                | expands into ..                  | surrounds the selection with ... <sup>2</sup> | surrounds the current ... |
+| `_`                     | `_<cursor>_<++>` <sup>3</sup>    | `_<selection>_`                               | word                      |
+| `_` after a `_`         | `__<cursor>__<++>`               | n/a                                           | n/a                       |
+| `*`                     | `*<cursor>*<++>` <sup>3,4</sup>  | `*<selection>*`                               | word                      |
+| `*` after a `*`         | `**<cursor>**<++>`               | n/a                                           | n/a                       |
+| `` ` ``                 | `` `<cursor>`<++>`` <sup>5</sup> | `` `<selection>` ``                           | word                      |
+| `~`                     | `<del><cursor></del>«»`          | <sup>1</sup>                                  | <sup>1</sup>              |
+| `<localleader>~`        |                                  | `<del><cursor></del>`                         | word                      |
 
 #### Notes:
   * <sup>1</sup> Not defined to avoid hijacking default vim key bindings.
@@ -105,7 +105,7 @@ New mappings are avaible.
     are not expanded
   * <sup>4</sup> Right after spaces at the beginning of the line, `*` is not
     expanded: it will serve to start a new point in a bullet-list.
-  * `<bs>` has been updated to handle the new pairs of brackets.
+  * <sup>5</sup> When type after a dollar sign, backtick will get expanded into `` $`<cursor>`$<++>``, and `$` will move the cursor and consume any placeholder if typed between and backtick and an existing dollar.
 
 ### Perl mappings
 The main differences from the global table are:

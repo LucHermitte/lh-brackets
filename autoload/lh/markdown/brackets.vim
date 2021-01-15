@@ -117,6 +117,15 @@ function! lh#markdown#brackets#match_pair() abort
   return getline(".")[col(".")-2:]=~'^\(\*\*\|__\|``\)'
 endfunction
 
+" Function: lh#markdown#brackets#close_math() {{{3
+function! lh#markdown#brackets#close_math() abort
+  let col = col(".")
+  let lig = getline(line("."))
+
+  let nb = 1
+  return lh#map#_move_cursor_on_the_current_line(nb).lh#brackets#_jump_text(lig[(col+nb-1) :])
+endfunction
+
 "------------------------------------------------------------------------
 " ## Internal functions {{{1
 function! s:Mark() abort
