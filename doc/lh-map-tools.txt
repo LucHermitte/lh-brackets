@@ -1,5 +1,5 @@
 *lh-map-tools.txt*      Tools for helping mappings-definitions (v3.6.0)
-*lh-brackets*           For Vim version 7.+     Last change: 02nd Feb 2020
+*lh-brackets*           For Vim version 7.+     Last change: 15th Jan 2021
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -774,6 +774,20 @@ The options are:
     The forced value can be any {text} other than {open} (/resp {close}, or
     even a |function()| that can return one string or another depending on the
     context.
+
+(*) `-pair=`(/{p1}/{p2})                                  *:Brackets-pair*
+    By default lh-brackets register pairs of brackets that be deleted
+    automatically on `<BS>` when empty, or replaced with any other pair.
+    The pairs are automatically identified from the two first options given to
+    `:Brackets`. Yet sometimes, there is actually a mismatch between
+    these two first options, the trigger, or the open/close function and we
+    need to be explicit. E.g. from markdown default definitions: >
+        :Brackets ~ ~  -open=function('lh#markdown#brackets#strike') -visual=0 -pair=,<del>,</del>
+<    Note: the first parameter to `pair=` is a separator that can be anything like
+    in `:substitute` to avoid struggling with backspaces. BTW,
+    backspaces+separator will not be analysed. And don't use the separator
+    more than twice.
+    Also, if only a single pair is detected, then none will be registered.
 
 (*) `-but=`({text}|"function({function-name})")           *:Brackets-but*
     This option permits to specify a filetype context for which the expansion

@@ -4,8 +4,8 @@
 "               <URL:http://github.com/LucHermitte>
 " License:      GPLv3 with exceptions
 "               <URL:http://github.com/LucHermitte/lh-brackets/License.md>
-" Version:	2.3.0
-let s:k_version = 230
+" Version:	3.6.0
+let s:k_version = 360
 " Created:      14th Mar 2014
 "------------------------------------------------------------------------
 " Description:
@@ -46,12 +46,12 @@ endfunction
 " # Pairs of markdown chars {{{2
 
 " Function: lh#markdown#brackets#underscore() {{{3
-function! lh#markdown#brackets#underscore()
+function! lh#markdown#brackets#underscore() abort
   return s:Pair('_')
 endfunction
 
 " Function: lh#markdown#brackets#star() {{{3
-function! lh#markdown#brackets#star()
+function! lh#markdown#brackets#star() abort
   if getline('.')[:col('.')-1] =~ '\s\+$'
     " Enumerations
     return '* '
@@ -61,7 +61,7 @@ function! lh#markdown#brackets#star()
 endfunction
 
 " Function: s:Pair() {{{3
-function! s:Pair(char)
+function! s:Pair(char) abort
   let col = col(".")
   let lig = getline(line("."))
 
@@ -79,8 +79,22 @@ function! s:Pair(char)
   endif
 endfunction
 
+" Function: lh#markdown#brackets#backtick() {{{3
+function! lh#markdown#brackets#backtick() abort
+  let col = col(".")
+  let lig = getline(line("."))
+  if lig[col-2] == '$'
+    return '`!cursorhere!`$'.s:Mark()
+  elseif lig[col-1] == '`'
+    let nb = matchend(lig[(col-1) :], '`\+')
+    return lh#map#_move_cursor_on_the_current_line(nb).lh#brackets#_jump_text(lig[(col+nb-1) :])
+  else
+    return '`!cursorhere!`'.s:Mark()
+  endif
+endfunction
+
 " Function: lh#markdown#brackets#strike() {{{3
-function! lh#markdown#brackets#strike()
+function! lh#markdown#brackets#strike() abort
   let col = col(".")
   let lig = getline(line("."))
   let lig = lig[(col-1) :]
@@ -98,21 +112,21 @@ function! lh#markdown#brackets#strike()
   endif
 endfunction
 
-function! s:Mark()
+" Function: lh#markdown#brackets#match_pair() {{{3
+function! lh#markdown#brackets#match_pair() abort
+  return getline(".")[col(".")-2:]=~'^\(\*\*\|__\|``\)'
+endfunction
+
+"------------------------------------------------------------------------
+" ## Internal functions {{{1
+function! s:Mark() abort
   return lh#brackets#usemarks()
         \ ?  "!mark!"
         \ : ""
   endif
 endfunction
 
-" Function: lh#markdown#brackets#match_pair() {{{3
-function! lh#markdown#brackets#match_pair()
-  return getline(".")[col(".")-2:]=~'^\(\*\*\|__\|``\)'
-endfunction
-
-"------------------------------------------------------------------------
-" ## Internal functions {{{1
-
+" }}}1
 "------------------------------------------------------------------------
 let &cpo=s:cpo_save
 "=============================================================================

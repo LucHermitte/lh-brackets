@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  06th Jan 2021
+" Last Update:  15th Jan 2021
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -32,6 +32,7 @@
 "               * Moving `s:DefineMap()` function to lh-vim-lib
 "               * Move bracket manipulation functions to autoload plugin
 "               * Use registered brackets in bracket manipulation functions
+"               * Improve pair registration for deleting, replacing...
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -682,11 +683,13 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
   let context    = {}
   let options    = []
   let default    = 0
+  let pair       = []
   for p in a:a000
     if     p =~ '-l\%[list]'        | call s:toggable_mappings.list_mappings(a:isLocal)  | return []
     elseif p =~ '-cle\%[ar]'        | call s:toggable_mappings.clear_mappings(a:isLocal) | return []
     elseif p =~ '-nl\|-ne\%[wline]' | let nl        = '\n'
     elseif p =~ '-e\%[scapable]'    | let escapable = 1
+    elseif p =~ '-p\%[air]='        | let pair      = matchstr(p, '-p\%[air]=\zs.*')
     elseif p =~ '-t\%[rigger]'      | let trigger   = matchstr(p, '-t\%[rigger]=\zs.*')
     elseif p =~ '-i\%[nsert]'       | let insert    = matchstr(p, '-i\%[nsert]=\zs.*')
     elseif p =~ '-v\%[isual]'       | let visual    = matchstr(p, '-v\%[isual]=\zs.*')
@@ -734,6 +737,12 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
   if !exists('l:Open')       | let l:Open       = options[0] | endif
   if !exists('l:Close')      | let l:Close      = options[1] | endif
   if !exists('l:Exceptions') | let l:Exceptions = ''         | endif
+  if empty(pair)
+    let pair_list = options
+  else
+    let sep = pair[0]
+    let pair_list = split(pair[1:], sep)
+  endif
 
   if default
     let insert = insert && s:ShallKeepDefaultMapping(trigger, 'i')
@@ -741,7 +750,7 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
     let normal = !s:IsFalse(normal) && s:ShallKeepDefaultMapping(trigger, 'n') ? normal : 0
   endif
 
-  return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context]
+  return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context, pair_list]
 endfunction
 
 " Function: lh#brackets#define(bang, ...)                                                                    {{{2
@@ -750,13 +759,14 @@ function! lh#brackets#define(bang, ...) abort
   let isLocal    = a:bang != "!"
   let res = s:DecodeDefineOptions(isLocal, a:000)
   if empty(res) | return | endif
-  let [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context]
+  let [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context, pair]
         \ = res
 
-  if type(l:Open) != type(function('has')) &&  type(l:Close) != type(function('has'))
-    call s:AddPair(isLocal, l:Open, l:Close)
+  if len(pair) == 2
+    " if type(l:Open) != type(function('has')) &&  type(l:Close) != type(function('has'))
+    call s:AddPair(isLocal, pair[0], pair[1])
     if escapable
-      call s:AddPair(isLocal, '\\'.l:Open, '\\'.l:Close)
+      call s:AddPair(isLocal, '\\'.pair[0], '\\'.pair[1])
     endif
   endif
 
