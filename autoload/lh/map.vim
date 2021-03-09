@@ -7,7 +7,7 @@
 " Version:      3.6.0
 let s:k_version = '360'
 " Created:      03rd Nov 2015
-" Last Update:  05th Jan 2021
+" Last Update:  08th Mar 2021
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
@@ -354,9 +354,9 @@ function! lh#map#surround_by_substitute(
     let goback = ''
 
     if a:mustInterpret
-      inoremap !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
+      inoremap <silent> !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
       " inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a
-      inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
+      inoremap <silent> !movecursor! <c-\><c-n>:call lh#map#_goto_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
 
       if ! lh#brackets#usemarks()
         let seq = substitute(seq, '!mark!', '', 'g')
@@ -391,15 +391,15 @@ function! lh#map#surround(begin, end, isLine, isIndented, goback, mustInterpret,
     " internal mappings
     " <c-o> should be better for !cursorhere! as it does not move the cursor
     " But only <c-\><c-n> works correctly.
-    inoremap !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
+    inoremap <silent> !cursorhere! <c-\><c-n>:call lh#map#_cursor_here()<cr>a
     " Weird: cursorpos1 & 2 require <c-o> an not <c-\><c-n>
-    inoremap !cursorpos1! <c-o>:call lh#map#_cursor_here(1)<cr>
-    inoremap !cursorpos2! <c-o>:call lh#map#_cursor_here(2)<cr>
+    inoremap <silent> !cursorpos1! <c-o>:call lh#map#_cursor_here(1)<cr>
+    inoremap <silent> !cursorpos2! <c-o>:call lh#map#_cursor_here(2)<cr>
     " <c-\><c-n>....a is better for !movecursor! as it leaves the cursor `in'
     " insert-mode... <c-o> does not; that's odd.
     " inoremap !movecursor! a<c-r>=lh#map#_goto_mark().lh#map#_fix_indent()<cr>
-    inoremap !movecursor! <c-\><c-n>:call lh#map#_goto_mark(1)<cr>a<c-r>=lh#map#_fix_indent()<cr>
-    inoremap !movecursor2! <c-\><c-n>:call lh#map#_goto_end_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
+    inoremap <silent> !movecursor! <c-\><c-n>:call lh#map#_goto_mark(1)<cr>a<c-r>=lh#map#_fix_indent()<cr>
+    inoremap <silent> !movecursor2! <c-\><c-n>:call lh#map#_goto_end_mark()<cr>a<c-r>=lh#map#_fix_indent()<cr>
 
     " Check whether markers must be used
     if !lh#brackets#usemarks()
