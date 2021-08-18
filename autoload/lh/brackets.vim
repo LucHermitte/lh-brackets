@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  15th Jan 2021
+" Last Update:  19th Aug 2021
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -33,6 +33,7 @@
 "               * Move bracket manipulation functions to autoload plugin
 "               * Use registered brackets in bracket manipulation functions
 "               * Improve pair registration for deleting, replacing...
+"               * Don't expand under normal text
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -216,7 +217,7 @@ endif
 
 "# Functions                                                                                                 {{{2
 
-" Function: s:GetPairs(isLocal) {{{3
+" Function: s:GetPairs(isLocal)                              {{{3
 " Fetch the brackets defined for the current buffer.
 function! s:GetPairs(isLocal) abort
   let bid = a:isLocal ? bufnr('%') : -1
@@ -227,14 +228,14 @@ function! s:GetPairs(isLocal) abort
   return crt_pairs
 endfunction
 
-" Function: s:GetAllPairs() {{{3
+" Function: s:GetAllPairs()                                  {{{3
 function! s:GetAllPairs() abort
   let crt_pairs = copy(s:GetPairs(0))
   call extend(crt_pairs, s:GetPairs(1))
   return crt_pairs
 endfunction
 
-" Function: s:AddPair(isLocal, open, close) {{{3
+" Function: s:AddPair(isLocal, open, close)                  {{{3
 function! s:AddPair(isLocal, open, close) abort
   let crt_pairs = s:GetPairs(a:isLocal)
   let new_pair = [a:open, a:close]
@@ -247,7 +248,7 @@ function! lh#brackets#toggle() abort
   call s:toggable_mappings.toggle_mappings()
 endfunction
 
-" Function: lh#brackets#toggle_usemarks() {{{3
+" Function: lh#brackets#toggle_usemarks()                    {{{3
 function! lh#brackets#toggle_usemarks() abort
   if exists('b:usemarks')
     let b:usemarks = 1 - b:usemarks
@@ -280,8 +281,8 @@ function! lh#brackets#_string(s) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: s:thereIsAnException(Ft_exceptions)                                                              {{{2
-function! s:thereIsAnException(Ft_exceptions) abort
+" Function: s:thereIsAFiletypeException(Ft_exceptions)                                                {{{2
+function! s:thereIsAFiletypeException(Ft_exceptions) abort
   if empty(a:Ft_exceptions)
     return 0
   elseif type(a:Ft_exceptions) == type(function('has'))
@@ -292,15 +293,15 @@ function! s:thereIsAnException(Ft_exceptions) abort
 endfunction
 
 "------------------------------------------------------------------------
-" Function: lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTriggers,Ft_exception [,context]) {{{2
-" NB: this function is made public because IMAPs.vim need it to not be private
+" Function: lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTriggers, Ft_exception, CanExpand [,context]) {{{2
+" NB: this function is made public because IMAPs.vim needs it to not be private
 " (s:)
 " Remarks:
 " - a:Close shall always be a string. Indeed:
 "   - When a:Open is a function, a:Close is ignored
 "   - Otherwise, a:Close is handled as if it was a string.
-function! lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTriggers, Ft_exceptions, ...) abort
-  if s:thereIsAnException(a:Ft_exceptions)
+function! lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTriggers, Ft_exceptions, CanExpand, ...) abort
+  if s:thereIsAFiletypeException(a:Ft_exceptions)
     return a:trigger
   endif
   let line = getline('.')
@@ -320,7 +321,18 @@ function! lh#brackets#opener(trigger, escapable, nl, Open, close, areSameTrigger
   elseif escaped
     return a:trigger
   elseif a:areSameTriggers && lh#option#get('cb_jump_on_close',1) && lh#position#char_at_mark('.') == a:trigger
+    " Same character used for opening and closing, and the cursor is
+    " under one => jump-over
     return lh#brackets#_jump()
+  elseif !a:CanExpand()
+    " Test whether the cursor is:
+    " - at the end of the line
+    " - before a space, a coma, a colon or a semi-colon
+    " - or before an closing pair character
+    " If so => abort the expansion
+    " (This is the default behaviour that could be overridden through
+    " CanExpand())
+    return a:trigger
   else
     let open = a:Open
     let close = a:close
@@ -377,7 +389,7 @@ endfunction
 "------------------------------------------------------------------------
 " Function: lh#brackets#closer(trigger, Action, Ft_exceptions)                                               {{{2
 function! lh#brackets#closer(trigger, Action, Ft_exceptions) abort
-  if s:thereIsAnException(a:Ft_exceptions)
+  if s:thereIsAFiletypeException(a:Ft_exceptions)
     return a:trigger
   endif
   if type(a:Action) == type(function('has'))
@@ -700,9 +712,9 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
     elseif p =~ '-b\%[ut]'
       let exceptions= matchstr(p, '-b\%[ut]=\zs.*')
       if exceptions =~ "^function"
-        exe 'let l:Exceptions='.exceptions
+        exe 'let l:FTExceptions='.exceptions
       else
-        let l:Exceptions = exceptions
+        let l:FTExceptions = exceptions
       endif
     elseif p =~ '-o\%[open]'
       let open = matchstr(p, '-o\%[pen]=\zs.*')
@@ -733,10 +745,11 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
     throw ":Brackets: incorrect number of arguments"
   endif
 
-  if !exists('trigger')      | let trigger      = options[0] | endif
-  if !exists('l:Open')       | let l:Open       = options[0] | endif
-  if !exists('l:Close')      | let l:Close      = options[1] | endif
-  if !exists('l:Exceptions') | let l:Exceptions = ''         | endif
+  if !exists('trigger')        | let trigger        = options[0] | endif
+  if !exists('l:Open')         | let l:Open         = options[0] | endif
+  if !exists('l:Close')        | let l:Close        = options[1] | endif
+  if !exists('l:FTExceptions') | let l:FTExceptions = ''         | endif
+  if !exists('l:CanExpand')    | let l:CanExpand    = function('lh#brackets#_only_before_closes') | endif
   if empty(pair)
     let pair_list = options
   else
@@ -750,7 +763,7 @@ function! s:DecodeDefineOptions(isLocal, a000) abort
     let normal = !s:IsFalse(normal) && s:ShallKeepDefaultMapping(trigger, 'n') ? normal : 0
   endif
 
-  return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context, pair_list]
+  return [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:FTExceptions, l:CanExpand, escapable, context, pair_list]
 endfunction
 
 " Function: lh#brackets#define(bang, ...)                                                                    {{{2
@@ -759,7 +772,7 @@ function! lh#brackets#define(bang, ...) abort
   let isLocal    = a:bang != "!"
   let res = s:DecodeDefineOptions(isLocal, a:000)
   if empty(res) | return | endif
-  let [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:Exceptions, escapable, context, pair]
+  let [nl, insert, visual, normal, options, trigger, l:Open, l:Close, l:FTExceptions, l:CanExpand, escapable, context, pair]
         \ = res
 
   if len(pair) == 2
@@ -776,10 +789,11 @@ function! lh#brackets#define(bang, ...) abort
     let areSameTriggers = options[0] == options[1]
     let map_ctx = empty(context) ? '' : ','.string(context)
     let inserter = 'lh#brackets#opener('.lh#brackets#_string(trigger).','. escapable.',"'.(nl).
-          \'",'. lh#brackets#_string(l:Open).','.lh#brackets#_string(options[1]).','.string(areSameTriggers).','.string(l:Exceptions).map_ctx.')'
+          \ '",'. lh#brackets#_string(l:Open).','.lh#brackets#_string(options[1]).','.string(areSameTriggers).','.string(l:FTExceptions).','.string(l:CanExpand)
+          \ .map_ctx.')'
     call s:toggable_mappings.define_imap(trigger, inserter, isLocal)
     if ! areSameTriggers
-      let inserter = 'lh#brackets#closer('.lh#brackets#_string(options[1]).','.lh#brackets#_string (l:Close).','.lh#brackets#_string(l:Exceptions).map_ctx.')'
+      let inserter = 'lh#brackets#closer('.lh#brackets#_string(options[1]).','.lh#brackets#_string (l:Close).','.lh#brackets#_string(l:FTExceptions).map_ctx.')'
       call s:toggable_mappings.define_imap(options[1], inserter, isLocal)
       if len(options[1])
         " TODO: enrich <bs> & <del> imaps for the close triggers
@@ -886,6 +900,25 @@ function! lh#brackets#_split_line(line, c, tw) abort
   return [head, before, after]
 endfunction
 
+" Function: lh#brackets#_only_before_closes()                                                                {{{2
+" Helps to tell when we can expand opening brackets. It's before:
+" - closing pair characters
+" - coma, colon, semi-colon, spaces, EOL, equal sign (hard-coded for C, C++...)
+function! lh#brackets#_only_before_closes() abort
+  if col('.') == col('$') | return 1 | endif
+  let trail = getline('.')[col('.')-1:]
+  " Ignore iso pairs like strings...
+  let non_iso_pairs = filter(copy(s:GetAllPairs()), 'v:val[0] != v:val[1]')
+  let closings      = map(non_iso_pairs, 'v:val[1]')
+  let uni_pairs     = lh#list#unique_sort(filter(copy(closings), 'lh#encoding#strlen(v:val) == 1 && v:val != "]"'))
+  let oth_pairs     = lh#list#unique_sort(filter(copy(closings), 'lh#encoding#strlen(v:val) > 1'))
+  let authorized_following_sequences
+        \ = ['[]'.join(map(uni_pairs, 'escape(v:val, "\\")'), '').',;:=]']
+        \ + map(oth_pairs, 'escape(v:val[1], "\\()[]{}|*+$.%")')
+        \ + ['\s+', '\s*$']
+  return trail =~ '\v^('.join(authorized_following_sequences, '|').')'
+endfunction
+
 "------------------------------------------------------------------------
 " ## Brackets changing functions {{{1
 
@@ -898,7 +931,7 @@ function! lh#brackets#_delete_brackets() abort
   if b == '\' && (c == '{' || c == '}')
     normal! X%X%
   endif
-  let crt_pairs = filter(s:GetAllPairs(), 'strlen(v:val[0]) == 1')
+  let crt_pairs = filter(s:GetAllPairs(), 'lh#encoding#strlen(v:val[0]) == 1')
   let iso_pairs = map(filter(copy(crt_pairs), 'v:val[0] == v:val[1]'), 'v:val[0]')
   if index(iso_pairs, c) >= 0
     " let's suppose everything is on the same line

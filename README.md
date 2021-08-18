@@ -32,7 +32,11 @@ It is possible to:
   * tune how the NORMAL-mode mapping select a current _anything_ (thanks to the `-normal` option),
   * toggle the definitions of all the brackets mappings by pressing `<F9>` (`:h <Plug>ToggleBrackets`) ;
   * make the mappings global with `:Brackets!`, or local to a buffer with `:Brackets`. ;
-  * neutralize the mapping for specific filetypes with `-but` option
+  * neutralize the INSERT-mode mappings:
+    * for specific filetypes with `-but` option
+    * when the cursor is not under a space, coma, (semi-)colon, a equal sign, a
+      closing pair character or at the end of line by default -- it will be
+      possible to tune this feature in a later version
   * specify exactly which is the canonical pair for deletion when it's not immediate from the context (thanks to the `-pair` option)
 
 

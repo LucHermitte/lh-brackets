@@ -29,7 +29,7 @@ RSpec.describe "C&C++ snippets", :c => true do
   specify "curly_bracket", :curly => true do
     expect(vim.echo('&ft')).to eq "c"
     expect(vim.echo('&sw')).to eq "2"
-    expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener("{",0,"",function(\'lh#cpp#brackets#curly_open\'),"}",0,' "'')"
+    expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener("{",0,"",function(\'lh#cpp#brackets#curly_open\'),"}",0,' "'',function('lh#brackets#_only_before_closes'))"
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
     vim.feedkeys('i{\<esc>')
     sleep 1

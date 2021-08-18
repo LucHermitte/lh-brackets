@@ -1,5 +1,5 @@
 *lh-map-tools.txt*      Tools for helping mappings-definitions (v3.6.0)
-*lh-brackets*           For Vim version 7.+     Last change: 15th Jan 2021
+*lh-brackets*           For Vim version 7.+     Last change: 19th Aug 2021
 
                         lh-brackets MANUAL     by Luc Hermitte
                         hermitte {at} free {dot} fr
@@ -697,6 +697,9 @@ Additional features~
  |:Brackets-insert|, |:Brackets-visual|, and also |:Brackets-normal|) ;
 * It is possible to tune how the NORMAL-mode mapping select a current anything
   (thanks to the |:Brackets-normal| option).
+* INSERT-mode mappings won't be expanded if the cursor is under a space, a coma,
+  a (semi-)colon, a equal sign, a closing pair character, or at the end of line.
+  It will be possible to tune this feature in a later version.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                                                 *:Brackets*

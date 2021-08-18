@@ -22,7 +22,7 @@ RSpec.describe "TeX snippets", :tex => true do
   specify "curly_bracket", :curly => true do
     expect(vim.echo('&ft')).to eq "tex"
     expect(vim.echo('&sw')).to eq "2"
-    expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener("{",1,"","{","}",0,' "'')"
+    expect(vim.echo('maparg("{", "i")')).to eq 'lh#brackets#opener("{",1,"","{","}",0,' "'',function(\'lh#brackets#_only_before_closes\'))"
     expect(vim.echo('maparg("\\\\", "i")')).to eq ''
     expect(vim.echo('&indentexpr')).to eq 'GetTeXIndent()'
     vim.feedkeys('i{\<esc>')
@@ -56,7 +56,7 @@ RSpec.describe "TeX snippets", :tex => true do
     expect(vim.echo('&sw')).to eq "2"
     # 4 needed, each must be doubled for rspec
     vim.command('Brackets \\\\\\\\Q{ } -trigger=µ')
-    expect(vim.echo('maparg("µ", "i")')).to eq 'lh#brackets#opener("µ",0,"","\\\\Q{","}",0,' "'')"
+    expect(vim.echo('maparg("µ", "i")')).to eq 'lh#brackets#opener("µ",0,"","\\\\Q{","}",0,' "'',function('lh#brackets#_only_before_closes'))"
     vim.feedkeys('iµ\<esc>')
     assert_buffer_contents <<-EOF
       \\Q{}<++>
