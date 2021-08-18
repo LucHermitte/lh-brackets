@@ -5,37 +5,9 @@
 lh-brackets (ex- map-tool) provides various commands and functions to help design smart and advanced mappings dedicated to text insertion.
 
 It is made of three sub-systems:
-  * [a placeholder subsystem](#the-placeholder-subsystem),
   * [the core bracketing-system](#the-bracketing-subsystem),
+  * [a placeholder subsystem](#the-placeholder-subsystem),
   * [various Vim functions to support ftplugin definitions](#the-vim-library).
-
-### The placeholder subsystem
-
-This subsystem provides functions and mappings to:
-  * mark places in the code where we could jump to later,  
-    See the help about `!mark!`, `lh#marker#txt()`, and `<Plug>MarkersMark`
-  * jump forward and backward to those places.  
-    See the help about `!jump!`, and `<Plug>MarkersJumpF`
-  * close all placeholders on the same line that are after closing bracket-like
-    characters and jump to the last one -- see
-    `<Plug>MarkersCloseAllAndJumpToLast` which is binded by default to `<M-End>` (or `<C-L>$` in terminal instancef of Vim).
-
-The marker/placeholder characters:
-  * default to the French quote characters («»),
-  * can be specified on a filetype basis,
-  * are converted to match the current encoding,
-  * can be shared with the ones from imaps.vim (`:h g:use_place_holders`).
-
-Jumping to the next/previous placeholder:
-  * is binded to `<M-Del>` (GUI) or `<C-J>` (terminal) by default (see `:h <Plug>MarkersJumpF`), or `<M-S-Del>`/`<C-L><S-Del>` to jump backward. Can be disabled by setting `g:marker_define_jump_mappings` to 0.
-  * can be tuned to delete or select the placeholder the cursor is jumping to (`:h g:marker_prefers_select`, `:h g:marker_select_empty_marks`),
-  * can select or ignore the placeholder where the cursor is currently within (if any) (`:h g:marker_select_current`, `:h g:marker_select_current_fwd`),
-  * may move the line of the placeholder (we jump to) to the middle of the window (`:h g:marker_center`),
-  * respects `'wrapscan'`,
-  * opens the folder where the placeholder, we jump to, is,
-  * doesn't break _redo_ (is the case of empty placeholders, when placeholders
-    are deleted instead of selected) ; this feature requires Vim 7.4-849.
-
 
 ### The bracketing subsystem
 
@@ -60,7 +32,7 @@ It is possible to:
   * tune how the NORMAL-mode mapping select a current _anything_ (thanks to the `-normal` option),
   * toggle the definitions of all the brackets mappings by pressing `<F9>` (`:h <Plug>ToggleBrackets`) ;
   * make the mappings global with `:Brackets!`, or local to a buffer with `:Brackets`. ;
-  * neutralize the mapping with `-but` option ; typically to neutralize the insertion of the brackets-pair for specified filetypes, or for more complex contexts.
+  * neutralize the mapping for specific filetypes with `-but` option
   * specify exactly which is the canonical pair for deletion when it's not immediate from the context (thanks to the `-pair` option)
 
 
@@ -90,7 +62,36 @@ By default, the [mappings are active for most filetypes](doc/default_brackets.md
 
 #### Brackets replacement
 
-map-tools provides mappings (originally from auctex.vim) to replace a pair of bracket-characters by another pair of bracket-characters. See `:h brackets_manipulations` for more information.
+lh-brackets provides mappings (originally from auctex.vim) to replace a pair of bracket-characters by another pair of bracket-characters. See `:h brackets_manipulations` for more information.
+
+
+### The placeholder subsystem
+
+This subsystem provides functions and mappings to:
+  * mark places in the code where we could jump to later,  
+    See the help about `!mark!`, `lh#marker#txt()`, and `<Plug>MarkersMark`
+  * jump forward and backward to those places.  
+    See the help about `!jump!`, and `<Plug>MarkersJumpF`
+  * close all placeholders on the same line that are after closing bracket-like
+    characters and jump to the last one -- see
+    `<Plug>MarkersCloseAllAndJumpToLast` which is binded by default to `<M-End>` (or `<C-L>$` in terminal instancef of Vim).
+
+The marker/placeholder characters:
+  * default to the French quote characters («»),
+  * can be specified on a filetype basis,
+  * are converted to match the current encoding,
+  * can be shared with the ones from imaps.vim (`:h g:use_place_holders`).
+
+Jumping to the next/previous placeholder:
+  * is binded to `<M-Del>` (GUI) or `<C-J>` (terminal) by default (see `:h <Plug>MarkersJumpF`), or `<M-S-Del>`/`<C-L><S-Del>` to jump backward. Can be disabled by setting `g:marker_define_jump_mappings` to 0.
+  * can be tuned to delete or select the placeholder the cursor is jumping to (`:h g:marker_prefers_select`, `:h g:marker_select_empty_marks`),
+  * can select or ignore the placeholder where the cursor is currently within (if any) (`:h g:marker_select_current`, `:h g:marker_select_current_fwd`),
+  * may move the line of the placeholder (we jump to) to the middle of the window (`:h g:marker_center`),
+  * respects `'wrapscan'`,
+  * opens the folder where the placeholder, we jump to, is,
+  * doesn't break _redo_ (is the case of empty placeholders, when placeholders
+    are deleted instead of selected) ; this feature requires Vim 7.4-849.
+
 
 ### The Vim library
 
