@@ -23,6 +23,7 @@ let s:version = 360
 " History:      {{{1
 " Version 3.6.0:
 "               * Move functions to autoload plugin
+"               * Fix has('patch-*') syntax
 " Version 3.5.0:
 "               * Default :Brackets definitions can be disabled with
 "                 g:cb_disable_default/g:cb_enable_default
@@ -231,7 +232,7 @@ endif
 if ! lh#option#get('cb_no_default_brackets', 0)
   " Older vim versions do not properly autoload `lh#ft#is_text` wrapped in
   " `function()`.
-  if !has('patch-7.2-061')
+  if !has('patch-7.2.061')
     call lh#ft#version()
   endif
   :Brackets! ( ) -default
