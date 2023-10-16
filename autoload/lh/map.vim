@@ -7,7 +7,7 @@
 " Version:      3.6.0
 let s:k_version = '360'
 " Created:      03rd Nov 2015
-" Last Update:  08th Mar 2021
+" Last Update:  16th Oct 2023
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
@@ -15,6 +15,7 @@ let s:k_version = '360'
 "------------------------------------------------------------------------
 " History:
 "       v3.6.0 Move functions into autoload plugin
+"              Fix line shifting when CoC Annotate suggestions...
 "       v3.5.2 Improve logs
 "       v3.2.1 Fix regression with `set et`
 "       v3.2.0 Add `lh#map#4_this_context()`
@@ -540,10 +541,12 @@ function! lh#map#_cursor_here(...) abort
   call s:Verbose('Using mark %1', mark)
   if a:0 > 0
     let s:goto_mark_{a:1} = mark
+    let res = s:goto_mark_{a:1}
   else
     let s:goto_mark = mark + [virtcol(mark[0])]
+    let res = s:goto_mark
   endif
-  call s:Verbose("Record cursor %1 with mark %2: @ %3 |   indent=%4", get(a:, 1, ''), mark[0], pos, s:old_indent)
+  call s:Verbose("Record cursor %1 with mark %2: @ %3 |   indent=%4 => %5", get(a:, 1, ''), mark[0], pos, s:old_indent, res)
   return ''
 endfunction
 
@@ -557,7 +560,7 @@ function! lh#map#_goto_mark(...) abort
   let goto_lin = markpos[1]
   let old_vcol = s:goto_mark[2]
   let goto_vcol = virtcol(s:goto_mark[0])
-  call s:Verbose('Returning to mark %1 @ %2', s:goto_mark[0], markpos+[goto_vcol])
+  call s:Verbose('Returning to mark %1 @ %2 v=%3 from v=%4', s:goto_mark[0], markpos, goto_vcol, virtcol('.'))
   " Bug: if line is empty, indent() value is 0 => expect old_indent to be the One
   let crt_indent = indent(goto_lin)
   let s:fix_indent = s:old_indent - crt_indent
@@ -572,7 +575,8 @@ function! lh#map#_goto_mark(...) abort
     if new_behaviour && goto_lin == line('.')
       " Same line -> eligible for moving the cursor
       " TODO: handle reindentation changes
-      let delta = goto_vcol - virtcol('.')
+      " let delta = goto_vcol - virtcol('.')  # Doesn't work with CoC type annotations for Python
+      let delta = old_vcol - virtcol('.')  " Works with CoC type annotations for Python
       let move = lh#map#_move_cursor_on_the_current_line(delta)
       return move
     else
