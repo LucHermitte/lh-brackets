@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  19th Aug 2021
+" Last Update:  08th Feb 2024
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -34,6 +34,12 @@
 "               * Use registered brackets in bracket manipulation functions
 "               * Improve pair registration for deleting, replacing...
 "               * Don't expand under normal text
+"               * Fix lh#brackets#close_all_and_jump_to_last_on_line() to not
+"                 ignore the character under the cursor.
+"               * Add option to lh#brackets#close_all_and_jump_to_last_on_line():
+"                 :inoremap <buffer> ; <C-R>=lh#brackets#close_all_and_jump_to_last_on_line(lh#brackets#closing_chars(), {'insert_otherwise': ';'})<CR>
+"                 could define `;` as the _close all_ in Python, bu still
+"                 insert `;` is there is nothing to close after the cursor.
 " Version 3.5.3:  21st Jan 2019
 "               * Fix <BS> when cb_no_default_brackets is true
 " Version 3.5.2:  12th Sep 2018
@@ -441,7 +447,7 @@ function! lh#brackets#close_all_and_jump_to_last_on_line(chars, opts) abort
       normal! `>
     endif
   endif
-  let p = col('.')
+  let p = col('.') - 1
   let ll .= matchstr(getline('.'), '\%>'.p.'c.*') " ignore char under cursor, look after (MB: compatible)
   let re_v_marker = lh#marker#very_magic('.{-}')
   let m   = matchstr(ll, '\v^(['.chars.']|'.re_v_marker.')'.get(a:opts, 'repeat', '+'))
@@ -468,7 +474,7 @@ function! lh#brackets#close_all_and_jump_to_last_on_line(chars, opts) abort
   endif
   call s:Verbose("-> %1", strtrans(del_mark))
 
-  return s:k_move_prefix."\<right>".del_mark
+  return empty(del_mark) ? get(a:opts, 'insert_otherwise', '') : del_mark
 endfunction
 
 "------------------------------------------------------------------------
