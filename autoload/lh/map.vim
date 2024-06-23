@@ -7,7 +7,7 @@
 " Version:      3.6.0
 let s:k_version = '360'
 " Created:      03rd Nov 2015
-" Last Update:  16th Oct 2023
+" Last Update:  23rd Jun 2024
 "------------------------------------------------------------------------
 " Description:
 "       API plugin: Several mapping-oriented functions
@@ -575,8 +575,8 @@ function! lh#map#_goto_mark(...) abort
     if new_behaviour && goto_lin == line('.')
       " Same line -> eligible for moving the cursor
       " TODO: handle reindentation changes
-      " let delta = goto_vcol - virtcol('.')  # Doesn't work with CoC type annotations for Python
-      let delta = old_vcol - virtcol('.')  " Works with CoC type annotations for Python
+      let delta = goto_vcol - virtcol('.')  " Doesn't work with CoC type annotations for Python
+      " let delta = old_vcol - virtcol('.')  " Works with CoC type annotations for Python
       let move = lh#map#_move_cursor_on_the_current_line(delta)
       return move
     else
