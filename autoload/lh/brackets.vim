@@ -6,7 +6,7 @@
 "               <URL:http://github.com/LucHermitte/lh-brackets/tree/master/License.md>
 " Version:      3.6.0
 " Created:      28th Feb 2008
-" Last Update:  08th Feb 2024
+" Last Update:  18th Jun 2024
 "------------------------------------------------------------------------
 " Description:
 "               This autoload plugin defines the functions behind the command
@@ -1081,7 +1081,7 @@ function! lh#brackets#_manip_mode(starting_key) abort
         call lh#brackets#_change_to(crt_pairs[idx])
         redraw!
         return
-      elseif key == "\<F1>"
+      elseif key == "\<F1>" || key == "h"
         redraw! " clear the msg line
         echo "\r *x* -- delete the current brackets pair\n"
         echo " *(* -- change the current brackets pair to round brackets ()\n"
