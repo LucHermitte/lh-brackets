@@ -17,16 +17,16 @@ module Vimrunner
 
   module Platform
     # For tests use in order of priority:
-    # 1. neovim -- when installed
-    # 2. gvim   -- when available
-    # 3. vim    -- if possible
+    # 1. gvim   -- when available
+    # 2. vim    -- if possible
+    # nvim is not compatible with vimrunner, let's ignore it now
     def best_vim
       prefered_vims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
     end
     private 
 
     def prefered_vims
-      %w( nvim ) + gvims + %w( vim )
+      gvims + %w( vim )
     end
   end
 
