@@ -56,6 +56,7 @@ Vimrunner::RSpec.configure do |config|
     vim_brackets_path = File.expand_path('../../../lh-brackets', __FILE__)
     vim.prepend_runtimepath(vim_brackets_path)
     pp vim.echo('"RTP -> " . &rtp')
+    pp vim.echo('"packages -> " . &pp')
     pp vim.echo('execute("scriptnames")')
     vim.command('runtime plugin/misc_map.vim') # Inoreab
     vim.command('runtime plugin/common_brackets.vim') # Brackets
