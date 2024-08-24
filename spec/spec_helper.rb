@@ -14,6 +14,22 @@ module Vimrunner
         command("runtime #{script_path}")
     end
   end
+
+  module Platform
+    # For tests use in order of priority:
+    # 1. neovim -- when installed
+    # 2. gvim   -- when available
+    # 3. vim    -- if possible
+    def best_vim
+      prefered_vims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
+    end
+    private 
+
+    def prefered_vims
+      %w( nvim ) + gvims + %w( vim )
+    end
+  end
+
 end
 
 Vimrunner::RSpec.configure do |config|
@@ -32,7 +48,7 @@ Vimrunner::RSpec.configure do |config|
   config.start_vim do
     # vim = Vimrunner.start_gvim
     # vim = Vimrunner.start
-    vim = Vimrunner::Server.new(:executable => Vimrunner::Platform.gvim, :vimrc => vimrc).start
+    vim = Vimrunner::Server.new(:executable => Vimrunner::Platform.best_vim, :vimrc => vimrc).start
     vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
     vim.prepend_runtimepath(vim_plugin_path)
 
@@ -55,9 +71,9 @@ Vimrunner::RSpec.configure do |config|
     # lh-brackets
     vim_brackets_path = File.expand_path('../../../lh-brackets', __FILE__)
     vim.prepend_runtimepath(vim_brackets_path)
-    pp vim.echo('"RTP -> " . &rtp')
-    pp vim.echo('"packages -> " . &pp')
-    pp vim.echo('execute("scriptnames")')
+    # pp vim.echo('"RTP -> " . &rtp')
+    # pp vim.echo('"packages -> " . &pp')
+    # pp vim.echo('execute("scriptnames")')
     vim.command('runtime plugin/misc_map.vim') # Inoreab
     vim.command('runtime plugin/common_brackets.vim') # Brackets
     pp vim.echo('execute("scriptnames")')
