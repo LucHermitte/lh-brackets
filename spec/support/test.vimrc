@@ -7,3 +7,4 @@ filetype indent on
 syntax on
 
 set noswapfile nobackup
+set loadplugins
