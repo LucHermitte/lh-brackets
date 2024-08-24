@@ -24,7 +24,7 @@ Vimrunner::RSpec.configure do |config|
 
   config.start_vim do
     vim = Vimrunner.start_gvim
-    # vim = Vimrunner.start_vim
+    # vim = Vimrunner.start
     vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
     vim.prepend_runtimepath(vim_plugin_path)
 
@@ -47,14 +47,17 @@ Vimrunner::RSpec.configure do |config|
     # lh-brackets
     vim_brackets_path = File.expand_path('../../../lh-brackets', __FILE__)
     vim.prepend_runtimepath(vim_brackets_path)
+    pp vim.echo('"RTP -> " . &rtp')
+    pp vim.echo('execute("scriptnames")')
     vim.command('runtime plugin/misc_map.vim') # Inoreab
     vim.command('runtime plugin/common_brackets.vim') # Brackets
+    pp vim.echo('execute("scriptnames")')
     vim.command('runtime plugin/bracketing.base.vim') # !jump!
     vim.command('vmap <silent> !jump!  <Plug>MarkersJumpF')
     vim.command('imap <silent> !jump!  <Plug>MarkersJumpF')
     vim.command('nmap <silent> !jump!  <Plug>MarkersJumpF')
 
-    pp vim.echo('&rtp')
+    pp vim.echo('"RTP -> " . &rtp')
 
     has_redo = vim.echo('has("patch-7.4.849")')
     if has_redo != "1"
