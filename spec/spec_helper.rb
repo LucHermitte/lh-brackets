@@ -17,14 +17,22 @@ module Vimrunner
 end
 
 Vimrunner::RSpec.configure do |config|
+  # Use a single Vim instance for the test suite. Set to false to use an
+  # instance per test (slower, but can be easier to manage).
   config.reuse_server = true
 
   vim_plugin_path = File.expand_path('.')
   vim_flavor_path   = ENV['HOME']+'/.vim/flavors'
 
+  # Use different vimrc in order to see packages installed by vim-flavor
+  vimrc = File.expand_path('../support/test.vimrc', __FILE__)
+
+  # Decide how to start a Vim instance. In this block, an instance
+  # should be spawned and set up with anything project-specific.
   config.start_vim do
-    vim = Vimrunner.start_gvim
+    # vim = Vimrunner.start_gvim
     # vim = Vimrunner.start
+    vim = Vimrunner::Server.new(:executable => Vimrunner::Platform.gvim, :vimrc => vimrc).start
     vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
     vim.prepend_runtimepath(vim_plugin_path)
 
@@ -63,6 +71,7 @@ Vimrunner::RSpec.configure do |config|
     if has_redo != "1"
       puts "WARNING: this flavor of vim won't permit lh-brackets to support redo"
     end
+    # The returned value is the Client available in the tests.
     vim
   end
 end
