@@ -23,7 +23,7 @@ module Vimrunner
     def best_vim
       prefered_vims.find { |vim| suitable?(vim) } or raise NoSuitableVimError
     end
-    private 
+    private
 
     def prefered_vims
       gvims + %w( vim )
@@ -46,8 +46,6 @@ Vimrunner::RSpec.configure do |config|
   # Decide how to start a Vim instance. In this block, an instance
   # should be spawned and set up with anything project-specific.
   config.start_vim do
-    # vim = Vimrunner.start_gvim
-    # vim = Vimrunner.start
     vim = Vimrunner::Server.new(:executable => Vimrunner::Platform.best_vim, :vimrc => vimrc).start
     vim.add_plugin(vim_flavor_path, 'bootstrap.vim')
     vim.prepend_runtimepath(vim_plugin_path)
