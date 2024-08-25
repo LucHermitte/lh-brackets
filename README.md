@@ -1,4 +1,11 @@
-# lh-brackets [![Last release](https://img.shields.io/github/tag/LucHermitte/lh-brackets.svg)](https://github.com/LucHermitte/lh-brackets/releases) [![Build Status](https://secure.travis-ci.org/LucHermitte/lh-brackets.png?branch=master)](http://travis-ci.org/LucHermitte/lh-brackets) [![Project Stats](https://www.openhub.net/p/21020/widgets/project_thin_badge.gif)](https://www.openhub.net/p/21020)
+# lh-brackets [![Last release][Releases-badge]][Releases-url] [![Build Status][gh-action-badge]][gh-action-result] [![Project Stats][openhub-badge]][openhub-url]
+
+[Releases-badge]:   https://img.shields.io/github/tag/LucHermitte/lh-brackets.svg
+[Releases-url]:     https://github.com/LucHermitte/lh-brackets/tags
+[gh-action-badge]:  ./../../actions/workflows/tests.yml/badge.svg?branch=master "Test"
+[gh-action-result]: ./../../actions/workflows/tests.yml?query=branch%3Amaster
+[openhub-badge]:    https://www.openhub.net/p/21020/widgets/project_thin_badge.gif
+[openhub-url]:      https://www.openhub.net/p/21020
 
 ## Features
 
@@ -111,27 +118,33 @@ As [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib), map-tools provides a 
 | `lh#map#eat_char()`, `:I(nore)abbr`           | Permits to define abbreviations that do not insert a whitespace when the `<space>` key is used to trigger the abbreviation |
 | `lh#map#insert_seq()`                         | High level function that interprets `!.*!` mappings, and take the context into account                                     |
 
-
 # Installation
   * Requirements: Vim 7.+ (7.4-849 in order to support redo), [lh-vim-lib](http://github.com/LucHermitte/lh-vim-lib) v5.3.0+, [lh-style](http://github.com/LucHermitte/lh-style) v1.0.0+ for unit testing.
   * With [vim-addon-manager](https://github.com/MarcWeber/vim-addon-manager), install lh-brackets (this is the preferred method because of the dependencies)
-```vim
-ActivateAddons lh-brackets
-```
+
+    ```vim
+    ActivateAddons lh-brackets
+    ```
+
   * or with [vim-flavor](https://github.com/kana/vim-flavor) (which also support dependencies)
-```
-flavor 'LucHermitte/lh-brackets'
-```
+
+    ```
+    flavor 'LucHermitte/lh-brackets'
+    ```
+
   * or you can clone the git repositories
-```bash
-git clone git@github.com:LucHermitte/lh-vim-lib.git
-git clone git@github.com:LucHermitte/lh-brackets.git
-```
+
+    ```bash
+    git clone git@github.com:LucHermitte/lh-vim-lib.git
+    git clone git@github.com:LucHermitte/lh-brackets.git
+    ```
+
   * or with Vundle/NeoBundle:
-```vim
-Bundle 'LucHermitte/lh-vim-lib'
-Bundle 'LucHermitte/lh-brackets'
-```
+
+    ```vim
+    Bundle 'LucHermitte/lh-vim-lib'
+    Bundle 'LucHermitte/lh-brackets'
+    ```
 
 ## Credits
   * This bracketing system is actually a variation on [Stephen Riehm's original bracketing system](http://mywebpage.netscape.com/bbenjif/vim/Riehm/doc/) ;

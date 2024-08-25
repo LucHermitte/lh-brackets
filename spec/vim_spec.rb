@@ -41,7 +41,7 @@ function! lh#map#_goto_mark(...) abort
   if foo
     let s:fix_indent = s:old_indent - crt_indent
     call s:Verbose('fix indent <- %1 (old_indent:%2 - crt_indent:%3)', s:fix_indent, s:old_indent, crt_indent)
-  endif<++>
+  endif
 endfunction
     EOF
   end
@@ -66,7 +66,7 @@ function! lh#map#_goto_mark(...) abort
   let crt_indent = indent(s:goto_lin)
   if foo
     let s:fix_indent = s:old_indent - crt_indent
-  endif<++>
+  endif
   call s:Verbose('fix indent <- %1 (old_indent:%2 - crt_indent:%3)', s:fix_indent, s:old_indent, crt_indent)
 endfunction
     EOF
