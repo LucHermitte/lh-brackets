@@ -53,13 +53,13 @@ Vimrunner::RSpec.configure do |config|
     # lh-UT
     vim_UT_path      = File.expand_path('../../../vim-UT', __FILE__)
     vim.prepend_runtimepath(vim_UT_path)
-    vim.command('runtime plugin/UT.vim')
+    vim.runtime('plugin/UT.vim')
 
     # pp vim_flavor_path
     # lh-vim-lib
     vim_lib_path      = File.expand_path('../../../lh-vim-lib', __FILE__)
     vim.prepend_runtimepath(vim_lib_path)
-    vim.command('runtime plugin/let.vim') # LetIfUndef
+    vim.runtime('plugin/let.vim') # LetIfUndef
 
     # lh-style
     vim_style_path = File.expand_path('../../../lh-style', __FILE__)
@@ -72,10 +72,10 @@ Vimrunner::RSpec.configure do |config|
     # pp vim.echo('"RTP -> " . &rtp')
     # pp vim.echo('"packages -> " . &pp')
     # pp vim.echo('execute("scriptnames")')
-    vim.command('runtime plugin/misc_map.vim') # Inoreab
-    vim.command('runtime plugin/common_brackets.vim') # Brackets
+    vim.runtime('plugin/misc_map.vim') # Inoreab
+    vim.runtime('plugin/common_brackets.vim') # Brackets
+    vim.runtime('plugin/bracketing.base.vim') # !mark!, !jump!
     pp vim.echo('execute("scriptnames")')
-    vim.command('runtime plugin/bracketing.base.vim') # !jump!
     vim.command('vmap <silent> !jump!  <Plug>MarkersJumpF')
     vim.command('imap <silent> !jump!  <Plug>MarkersJumpF')
     vim.command('nmap <silent> !jump!  <Plug>MarkersJumpF')
