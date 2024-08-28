@@ -298,9 +298,9 @@ function! s:DoSelect(emo, emc, delete, position, mode) abort " {{{2
   call search('\V'.substitute(a:emc, '.$', '\\zs\0', ''))
   " call confirm(matchstr(getline('.'), se). "\n".se, "&Ok", 1 )
   if s:Select_or_Echo() " select! {{{4
+    let is_not_empty = matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''
     if !a:delete &&
-          \ (s:Select_Empty_Mark() ||
-          \ (matchstr(getline('.'),'\V\%'.c.'c'.a:emo.'\zs\.\{-}\ze'.a:emc)!= ''))
+          \ (s:Select_Empty_Mark() || is_not_empty)
       " Case:           Marker containing a tag, e.g.: «tag»
       " Treatment:      The marker is selected, going into SELECT-mode
       return mode_prefix.select."\<c-g>"
