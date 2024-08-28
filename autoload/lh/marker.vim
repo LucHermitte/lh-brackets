@@ -148,8 +148,7 @@ endfunction
 " # Options {{{2
 function! s:Option(name, default) " {{{3
   if     exists('b:'.a:name) | return b:{a:name}
-  elseif exists('g:'.a:name) | return g:{a:name}
-  else                       | return a:default
+  else                       | return get(g:, a:name, a:default)
   endif
 endfunction
 
@@ -277,6 +276,7 @@ function! lh#marker#_jump(param) abort " {{{2
   else " found! {{{3
     return s:DoSelect(emo, emc, delete, position, mode)
   endif
+  " }}}3
 endfunction
 
 function! s:DoSelect(emo, emc, delete, position, mode) abort " {{{2
