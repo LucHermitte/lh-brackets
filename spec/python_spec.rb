@@ -38,6 +38,7 @@ RSpec.describe "python snippets", :python => true do
     expect(vim.echo('&sw')).to eq "2"
     vim.feedkeys 'iif test1\<m-del>action1\<cr>action2\<cr>'
     vim.feedkeys 'elif test2\<m-del>action3\<cr>else action4\<esc>'
+    vim.feedkeys('a\<esc>') # pause
     assert_buffer_contents <<-EOF
       if test1:
         action1
