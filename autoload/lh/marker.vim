@@ -284,7 +284,9 @@ function! s:DoSelect(emo, emc, delete, position, mode) abort " {{{2
   " one character right
   let mode_prefix = a:mode == 'i' ? "\<c-\>\<c-n>l" : ''
 
-  silent! foldopen!
+  if foldclosed('.') >= 0
+    silent! foldopen!
+  endif
   if s:Option('marker_center', 1)
     exe "normal! zz"
   endif
