@@ -7,7 +7,7 @@
 " Version:      3.6.0.
 let s:k_version = '360'
 " Created:      16th May 2020
-" Last Update:  03rd Jun 2020
+" Last Update:  29th Aug 2024
 "------------------------------------------------------------------------
 " Description:
 "       Tests of vim specific bracket mappings
@@ -27,11 +27,18 @@ set cpo&vim
 
 "------------------------------------------------------------------------
 function! s:BeforeAll() abort
+  " Vim tests need "syntax on", they cannot succeed without them
+  Assert! has('syntax')
+  let s:syn = get(g:, 'syntax_on', 0)
+  syntax on
   call lh#window#create_window_with('sp vim-test-buffer.vim')
 endfunction
 
 function! s:AfterAll() abort
   silent bw! vim-test-buffer.vim
+  if !s:syn
+    syntax off
+  endif
 endfunction
 
 "------------------------------------------------------------------------
